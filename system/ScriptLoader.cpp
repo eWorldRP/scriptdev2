@@ -10,6 +10,11 @@ extern void AddSC_battlegroundSA();
 
 // custom
 extern void AddSC_mob_teleguy();
+extern void AddSC_alterac_valley();
+//extern void AddSC_npc_small_pet_handler();
+extern void AddSC_npc_companion_handler();
+
+// Events
 extern void AddSC_npc_arena_honor();
 
 // OutdoorPvP zone scripts
@@ -39,7 +44,6 @@ extern void AddSC_npc_professions();
 extern void AddSC_npcs_special();
 extern void AddSC_spell_scripts();
 extern void AddSC_pet_scripts();
-
 extern void AddSC_world_map_scripts();
 
 // eastern kingdoms
@@ -275,6 +279,7 @@ extern void AddSC_bloodmyst_isle();
 extern void AddSC_boss_azuregos();
 extern void AddSC_darkshore();
 extern void AddSC_desolace();
+extern void AddSC_durotar();
 extern void AddSC_dustwallow_marsh();
 extern void AddSC_felwood();
 extern void AddSC_feralas();
@@ -358,6 +363,7 @@ extern void AddSC_boss_anubrekhan();                        // naxxramas
 extern void AddSC_boss_four_horsemen();
 extern void AddSC_boss_faerlina();
 extern void AddSC_boss_gluth();
+extern void AddSC_boss_thaddius();
 extern void AddSC_boss_gothik();
 extern void AddSC_boss_grobbulus();
 extern void AddSC_boss_kelthuzad();
@@ -377,8 +383,13 @@ extern void AddSC_boss_keristrasza();
 extern void AddSC_boss_ormorok();
 extern void AddSC_boss_telestra();
 extern void AddSC_instance_nexus();
+extern void AddSC_instance_eye_of_eternity();
+
+extern void AddSC_oculus();                                 //Oculus
+extern void AddSC_instance_oculus();
 extern void AddSC_boss_drakos();                            // nexus, oculus
 extern void AddSC_boss_eregos();
+
 extern void AddSC_boss_varos();
 extern void AddSC_boss_urom();
 extern void AddSC_instance_oculus();
@@ -520,6 +531,7 @@ extern void AddSC_boss_kaelthas();
 extern void AddSC_boss_void_reaver();
 extern void AddSC_instance_the_eye();
 extern void AddSC_the_eye();
+extern void AddSC_boss_alar();
 extern void AddSC_boss_gatewatcher_iron_hand();             // TK, the_mechanar
 extern void AddSC_boss_nethermancer_sepethrea();
 extern void AddSC_boss_pathaleon_the_calculator();
@@ -544,6 +556,10 @@ void AddScripts()
 
     // custom
     AddSC_mob_teleguy();
+    AddSC_npc_companion_handler();
+
+    // OutdoorPvP zone scripts
+    // Must be _before_ map scripts call!
     AddSC_npc_arena_honor();
     AddSC_outdoor_pvp_eastern_plaguelands();                // OutdoorPvP zone scripts. Must be _before_ map scripts call!
     AddSC_outdoor_pvp_silithus();
@@ -887,6 +903,7 @@ void AddScripts()
     AddSC_boss_four_horsemen();
     AddSC_boss_faerlina();
     AddSC_boss_gluth();
+    AddSC_boss_thaddius();
     AddSC_boss_gothik();
     AddSC_boss_grobbulus();
     AddSC_boss_kelthuzad();
@@ -906,8 +923,13 @@ void AddScripts()
     AddSC_boss_ormorok();
     AddSC_boss_telestra();
     AddSC_instance_nexus();
+    AddSC_instance_eye_of_eternity();
+
+    AddSC_oculus();                                         //Oculus
+    AddSC_instance_oculus();
     AddSC_boss_drakos();                                    // nexus, oculus
     AddSC_boss_eregos();
+
     AddSC_boss_varos();
     AddSC_boss_urom();
     AddSC_instance_oculus();
@@ -1049,6 +1071,7 @@ void AddScripts()
     AddSC_boss_void_reaver();
     AddSC_instance_the_eye();
     AddSC_the_eye();
+    AddSC_boss_alar();
     AddSC_boss_gatewatcher_iron_hand();                     // TK, the_mechanar
     AddSC_boss_nethermancer_sepethrea();
     AddSC_boss_pathaleon_the_calculator();
