@@ -206,7 +206,7 @@ struct MANGOS_DLL_DECL boss_halazziAI : public ScriptedAI
 
                 DoScriptText(SAY_MERGE, m_creature);
 
-                uint32 uiSpellId = 0;
+                uint32 uiSpellId;
 
                 switch(m_uiPhaseCounter)
                 {

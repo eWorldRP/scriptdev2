@@ -263,30 +263,34 @@ struct MANGOS_DLL_DECL mobs_spitelashesAI : public ScriptedAI
         if (!spellhit &&
             Hitter->GetTypeId() == TYPEID_PLAYER &&
             ((Player*)Hitter)->GetQuestStatus(9364) == QUEST_STATUS_INCOMPLETE &&
-            (Spellkind->Id==118 || Spellkind->Id== 12824 || Spellkind->Id== 12825 || Spellkind->Id== 12826))
+            (Spellkind->Id == 118 || Spellkind->Id == 12824 || Spellkind->Id == 12825 || Spellkind->Id == 12826))
         {
             spellhit=true;
-            DoCastSpellIfCan(m_creature,29124);                       //become a sheep
+            DoCastSpellIfCan(m_creature, 29124);                       //become a sheep
         }
     }
 
     void UpdateAI(const uint32 diff)
     {
         // we mustn't remove the creature in the same round in which we cast the summon spell, otherwise there will be no summons
-        if (spellhit && morphtimer>=5000)
+        if (spellhit && morphtimer >= 5000)
         {
             m_creature->ForcedDespawn();
             return;
         }
 
         // walk 5 seconds before summoning
-        if (spellhit && morphtimer<5000)
+        if (spellhit && morphtimer < 5000)
         {
-            morphtimer+=diff;
-            if (morphtimer>=5000)
+            morphtimer += diff;
+            if (morphtimer >= 5000)
             {
-                DoCastSpellIfCan(m_creature,28406);                   //summon copies
-                DoCastSpellIfCan(m_creature,6924);                    //visual explosion
+                //DoCastSpellIfCan(m_creature, 28406);                 //summon copies, doesn't work
+                uint8 ui_clones = (uint8) urand(2, 5);                 //summon 2-5 clones
+                for (uint8 i = 0 ; i < ui_clones ; i++)
+                    m_creature->SummonCreature(16479, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 60000);
+
+                DoCastSpellIfCan(m_creature, 6924);                    //visual explosion
             }
         }
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())

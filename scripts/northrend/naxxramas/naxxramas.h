@@ -71,6 +71,8 @@ enum
     NPC_FEUGEN                  = 15930,
     NPC_TESLA_COIL              = 16218,
 
+    NPC_RAZUVIOUS               = 16061,
+
     NPC_ZELIEK                  = 16063,
     NPC_THANE                   = 16064,
     NPC_BLAUMEUX                = 16065,
@@ -154,6 +156,8 @@ enum
     AREATRIGGER_KELTHUZAD       = 4112,
     AREATRIGGER_GOTHIK          = 4116,
     AREATRIGGER_THADDIUS_DOOR   = 4113,
+    AREATRIGGER_SAPPHIRON       = 4156,
+
 
     // Achievement-related
     ACHIEV_CRIT_SAFETY_DANCE_N  = 7264,                     // Heigan, achievs 1996, 2139

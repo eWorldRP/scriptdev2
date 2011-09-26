@@ -50,8 +50,9 @@ enum
 
     SPELL_SELF_SPAWN_5          = 29105,                    //This spawns 5 corpse scarabs ontop of us (most likely the pPlayer casts this on death)
     SPELL_SELF_SPAWN_10         = 28864,                    //This is used by the crypt guards when they die
-
-    NPC_CRYPT_GUARD             = 16573
+    
+    NPC_CRYPT_GUARD             = 16573,
+    CORPSE_SCARAB               = 16698
 };
 
 struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
@@ -83,7 +84,8 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
     {
         //Force the player to spawn corpse scarabs via spell
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            pVictim->CastSpell(pVictim, SPELL_SELF_SPAWN_5, true);
+            for(uint8 t=0 ; t<5 ;  t++)
+                m_creature->SummonCreature(CORPSE_SCARAB, pVictim->GetPositionX(), pVictim->GetPositionY(), pVictim->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000);
 
         if (urand(0, 4))
             return;
@@ -98,6 +100,11 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
             case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
             case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
+        }
+        
+        for(uint8 i = 0; i < (m_bIsRegularMode ? 1 : 2); i++)
+        {
+            DoSpawnCreature(NPC_CRYPT_GUARD, 0, 5, 0, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000);
         }
 
         if (m_pInstance)
@@ -114,6 +121,15 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ANUB_REKHAN, FAIL);
+    }
+    
+    void SummonedCreatureDespawn(Creature* pSummoned)
+    {
+        if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
+        {
+            for(uint8 t=0 ; t<5 ;  t++)
+                m_creature->SummonCreature(CORPSE_SCARAB, pSummoned->GetPositionX()+urand(0,5), pSummoned->GetPositionY()+urand(0,5), pSummoned->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000);
+        }
     }
 
     void MoveInLineOfSight(Unit* pWho)
@@ -146,7 +162,7 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
             // Do NOT cast it when we are afflicted by locust swarm
             if (!m_creature->HasAura(SPELL_LOCUSTSWARM) && !m_creature->HasAura(SPELL_LOCUSTSWARM_H))
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
                     DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H);
             }
 
@@ -159,6 +175,7 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
         if (m_uiLocustSwarmTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LOCUSTSWARM :SPELL_LOCUSTSWARM_H);
+            DoSpawnCreature(NPC_CRYPT_GUARD, 0, 5, 0, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000);
             m_uiLocustSwarmTimer = 90000;
         }
         else

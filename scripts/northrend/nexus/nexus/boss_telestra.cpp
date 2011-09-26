@@ -87,9 +87,6 @@ struct MANGOS_DLL_DECL boss_telestraAI : public ScriptedAI
     uint32 m_uiIceNovaTimer;
     uint32 m_uiFirebombTimer;
     uint32 m_uiGravityWellTimer;
-    ObjectGuid m_pFireMagusGuid;
-    ObjectGuid m_pFrostMagusGuid;
-    ObjectGuid m_pArcaneMagusGuid;
 
     void Reset()
     {
@@ -106,9 +103,6 @@ struct MANGOS_DLL_DECL boss_telestraAI : public ScriptedAI
         m_uiIceNovaTimer = 7*IN_MILLISECONDS;
         m_uiFirebombTimer = 0;
         m_uiGravityWellTimer = 15*IN_MILLISECONDS;
-        m_pFireMagusGuid.Clear();
-        m_pFrostMagusGuid.Clear();
-        m_pArcaneMagusGuid.Clear();
 
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->SetVisibility(VISIBILITY_ON);
@@ -120,6 +114,9 @@ struct MANGOS_DLL_DECL boss_telestraAI : public ScriptedAI
     void EnterCombat(Unit* who)
     {
         DoScriptText(SAY_AGGRO, m_creature);
+
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_TELESTRA, IN_PROGRESS);
     }
 
     void JustDied(Unit* killer)
@@ -172,8 +169,6 @@ struct MANGOS_DLL_DECL boss_telestraAI : public ScriptedAI
                     pSummoned->CastSpell(pSummoned, SPELL_ARCANE_MAGUS_VISUAL, false);
                     break;
                 }
-                default:
-                    break;
            }
 
            if (Unit *pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
@@ -183,6 +178,29 @@ struct MANGOS_DLL_DECL boss_telestraAI : public ScriptedAI
         }
 
         return ObjectGuid();
+    }
+
+    void SummonedCreatureJustDied(Creature* pCreature)
+    {
+		switch(pCreature->GetEntry())
+        {
+                case NPC_FIRE_MAGUS:
+                    m_bFireMagusDead = true;
+                    if (!m_bIsAchievementTimerRunning)
+                        m_bIsAchievementTimerRunning = true;
+                    break;
+                case NPC_FROST_MAGUS:
+                    m_bFrostMagusDead = true;
+                    if (!m_bIsAchievementTimerRunning)
+                        m_bIsAchievementTimerRunning = true;
+                    break;
+                case NPC_ARCANE_MAGUS:
+                    m_bArcaneMagusDead = true;
+                    if (!m_bIsAchievementTimerRunning)
+                        m_bIsAchievementTimerRunning = true;
+                    break;
+		}
+
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -208,40 +226,6 @@ struct MANGOS_DLL_DECL boss_telestraAI : public ScriptedAI
 
         if ((m_uiPhase == 1) || (m_uiPhase == 3))
         {
-            Unit* pFireMagus;
-            Unit* pFrostMagus;
-            Unit* pArcaneMagus;
-
-            if (!m_pFireMagusGuid.IsEmpty())
-                pFireMagus = m_creature->GetMap()->GetUnit(m_pFireMagusGuid);
-
-            if (!m_pFrostMagusGuid.IsEmpty())
-                pFrostMagus = m_creature->GetMap()->GetUnit(m_pFrostMagusGuid);
-
-            if (!m_pArcaneMagusGuid.IsEmpty())
-                pArcaneMagus = m_creature->GetMap()->GetUnit(m_pArcaneMagusGuid);
-
-            if (pFireMagus && pFireMagus->isDead())
-            {
-                m_bFireMagusDead = true;
-                if (!m_bIsAchievementTimerRunning)
-                    m_bIsAchievementTimerRunning = true;
-            }
-
-            if (pFrostMagus && pFrostMagus->isDead())
-            {
-                m_bFrostMagusDead = true;
-                if (!m_bIsAchievementTimerRunning)
-                    m_bIsAchievementTimerRunning = true;
-            }
-
-            if (pArcaneMagus && pArcaneMagus->isDead())
-            {
-                m_bArcaneMagusDead = true;
-                if (!m_bIsAchievementTimerRunning)
-                    m_bIsAchievementTimerRunning = true;
-            }
-
             if (m_bIsAchievementTimerRunning)
                 m_uiAchievementTimer += uiDiff;
 
@@ -265,9 +249,6 @@ struct MANGOS_DLL_DECL boss_telestraAI : public ScriptedAI
                 m_bIsAchievementTimerRunning = false;
                 m_uiAppearDelayTimer = 4*IN_MILLISECONDS;
                 m_uiAchievementTimer = 0;
-                m_pFireMagusGuid.Clear();
-                m_pFrostMagusGuid.Clear();
-                m_pArcaneMagusGuid.Clear();
             }
             else
                 return;
@@ -276,7 +257,11 @@ struct MANGOS_DLL_DECL boss_telestraAI : public ScriptedAI
         if (((m_uiPhase == 0) && (m_creature->GetHealth() <= (m_creature->GetMaxHealth() * 0.5)))
            || (!m_bIsRegularMode && (m_uiPhase == 2) && (m_creature->GetHealth() <= (m_creature->GetMaxHealth() * 0.1))))
         {
-            DoScriptText(urand(SAY_SPLIT_1,SAY_SPLIT_2), m_creature);
+            uint32 textrnd =urand(0,1);
+            if( textrnd == 1 )
+			    DoScriptText(SAY_SPLIT_1, m_creature);
+			else
+                DoScriptText(SAY_SPLIT_2, m_creature);
             m_creature->CastStop();
             m_creature->RemoveAllAuras();
             m_creature->SetVisibility(VISIBILITY_OFF);
@@ -286,9 +271,9 @@ struct MANGOS_DLL_DECL boss_telestraAI : public ScriptedAI
             m_bFrostMagusDead = false;
             m_bArcaneMagusDead = false;
             m_uiPhase++;
-            m_pFireMagusGuid = SplitPersonality(NPC_FIRE_MAGUS);
-            m_pFrostMagusGuid = SplitPersonality(NPC_FROST_MAGUS);
-            m_pArcaneMagusGuid = SplitPersonality(NPC_ARCANE_MAGUS);
+            SplitPersonality(NPC_FIRE_MAGUS);
+            SplitPersonality(NPC_FROST_MAGUS);
+            SplitPersonality(NPC_ARCANE_MAGUS);
             return;
         }
 

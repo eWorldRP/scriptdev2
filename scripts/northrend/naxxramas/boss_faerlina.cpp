@@ -47,6 +47,8 @@ enum
     SPELL_RAIN_OF_FIRE_H        = 54099,
     SPELL_WIDOWS_EMBRACE        = 28732,
     SPELL_WIDOWS_EMBRACE_H      = 54097,
+    SPELL_FIREBALL              = 54095,
+    SPELL_FIREBALL_H            = 54096,
 };
 
 struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
@@ -133,6 +135,7 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
                 m_uiEnrageTimer = 60000;
                 m_creature->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H);
 
+                pCaster->DealDamage(pCaster, pCaster->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                 bIsFrenzyRemove = true;
             }
 
@@ -194,6 +197,64 @@ CreatureAI* GetAI_boss_faerlina(Creature* pCreature)
     return new boss_faerlinaAI(pCreature);
 }
 
+struct MANGOS_DLL_DECL mob_worshipperAI : public ScriptedAI
+{
+    mob_worshipperAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        Reset();
+    }
+
+    instance_naxxramas* m_pInstance;
+    bool m_bIsRegularMode;
+
+    uint32 m_uiFireballTimer;
+    bool   m_bHasTaunted;
+
+    void Reset()
+    {
+        m_uiFireballTimer = 5000;
+    }
+
+    void JustDied(Unit* pKiller)
+    {
+        if(m_pInstance && m_bIsRegularMode)
+        {
+			if (Creature* pFaerlina = m_pInstance->GetSingleCreatureFromStorage(NPC_FAERLINA))
+            {
+                pFaerlina->RemoveAurasDueToSpell(SPELL_ENRAGE);
+                pFaerlina->CastSpell(pFaerlina, m_bIsRegularMode ? SPELL_WIDOWS_EMBRACE : SPELL_WIDOWS_EMBRACE_H, true);
+            }    
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        // Only if not charmed
+        if(!m_creature->isCharmed())
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+        
+            if (m_uiFireballTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H);
+                m_uiFireballTimer = 4000 + urand(0,1000);
+            }
+            else
+                m_uiFireballTimer -= uiDiff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_mob_worshipper(Creature* pCreature)
+{
+    return new mob_worshipperAI(pCreature);
+}
+
 void AddSC_boss_faerlina()
 {
     Script* pNewScript;
@@ -201,5 +262,10 @@ void AddSC_boss_faerlina()
     pNewScript = new Script;
     pNewScript->Name = "boss_faerlina";
     pNewScript->GetAI = &GetAI_boss_faerlina;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "mob_worshipper";
+    pNewScript->GetAI = &GetAI_mob_worshipper;
     pNewScript->RegisterSelf();
 }

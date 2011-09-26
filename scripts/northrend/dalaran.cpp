@@ -108,6 +108,62 @@ bool GossipSelect_npc_zidormi(Player* pPlayer, Creature* pCreature, uint32 uiSen
     return true;
 }
 
+
+/***************/
+/* npc_maloric */
+/***************/
+
+enum
+{
+    SPELL_INCAPACITATE_MALORIC  = 63124
+};
+
+struct MANGOS_DLL_DECL npc_maloricAI : public ScriptedAI
+{
+    npc_maloricAI(Creature* pCreature) : ScriptedAI(pCreature) 
+    { 
+        Reset();
+    }
+
+    uint32 m_uiCheckTimer;
+
+    void Reset()
+    {
+        m_uiCheckTimer = 0;
+        m_creature->RemoveAurasDueToSpell(SPELL_INCAPACITATE_MALORIC);
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+    }
+
+    void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
+    {
+        if (pSpell->Id == SPELL_INCAPACITATE_MALORIC)
+        {
+            if(!m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
+                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) 
+    {
+        if(m_uiCheckTimer < uiDiff)
+        {
+            if(!m_creature->HasAura(SPELL_INCAPACITATE_MALORIC))
+            {
+                if(m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
+                    m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+            }
+            m_uiCheckTimer = 1000;
+        }
+        else 
+            m_uiCheckTimer -= uiDiff;
+    }
+};
+
+CreatureAI* GetAI_npc_maloric(Creature* pCreature)
+{
+    return new npc_maloricAI(pCreature);
+}
+
 void AddSC_dalaran()
 {
     Script *newscript;
@@ -121,5 +177,10 @@ void AddSC_dalaran()
     newscript->Name = "npc_zidormi";
     newscript->pGossipHello = &GossipHello_npc_zidormi;
     newscript->pGossipSelect = &GossipSelect_npc_zidormi;
+    newscript->RegisterSelf();
+    
+    newscript = new Script;
+    newscript->Name = "npc_maloric";
+    newscript->GetAI = &GetAI_npc_maloric;
     newscript->RegisterSelf();
 }

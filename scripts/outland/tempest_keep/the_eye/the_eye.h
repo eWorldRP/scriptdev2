@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 3,
+    MAX_ENCOUNTER               = 4,
 
     TYPE_ALAR                   = 0,
     TYPE_SOLARIAN               = 1,
@@ -22,6 +22,7 @@ enum
     NPC_SANGUINAR               = 20060,
     NPC_TELONICUS               = 20063,
     NPC_THALADRED               = 20064,
+    NPC_ALAR                    = 19514,
 };
 
 enum KaelPhases

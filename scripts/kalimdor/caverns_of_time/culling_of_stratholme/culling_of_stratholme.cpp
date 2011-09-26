@@ -136,18 +136,20 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
     ScriptedInstance* m_pInstance;
     bool m_bIsHeroic;
 
-    ObjectGuid m_uiPeople01GUID;
-    ObjectGuid m_uiPeople02GUID;
-    ObjectGuid m_uiMalganisGUID;
-    ObjectGuid m_uiMarine01GUID;
-    ObjectGuid m_uiMarine02GUID;
-    ObjectGuid m_uiMarine03GUID;
-    ObjectGuid m_uiMarine04GUID;
-    ObjectGuid m_uiPriest01GUID;
-    ObjectGuid m_uiPriest02GUID;
-    ObjectGuid m_uiHuman01GUID;
-    ObjectGuid m_uiHuman02GUID;
-    ObjectGuid m_uiHuman03GUID;
+    uint64 m_uiUtherGUID;
+    uint64 m_uiJainaGUID;
+    uint64 m_uiPeople01GUID;
+    uint64 m_uiPeople02GUID;
+    uint64 m_uiMalganisGUID;
+    uint64 m_uiMarine01GUID;
+    uint64 m_uiMarine02GUID;
+    uint64 m_uiMarine03GUID;
+    uint64 m_uiMarine04GUID;
+    uint64 m_uiPriest01GUID;
+    uint64 m_uiPriest02GUID;
+    uint64 m_uiHuman01GUID;
+    uint64 m_uiHuman02GUID;
+    uint64 m_uiHuman03GUID;
 
     uint32 culling_faction;
     uint32 m_uiStep;
@@ -400,7 +402,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
               DoScriptText(SAY_PHASE514, m_creature);
               break;
            case 37:
-              if(GameObject* pGate = m_pInstance->GetSingleGameObjectFromStorage(GO_SHKAF_GATE))
+              if(GameObject* pGate = m_pInstance->instance->GetGameObject(m_pInstance->GetData64(GO_SHKAF_GATE)))
                  pGate->SetGoState(GO_STATE_ACTIVE);
               SetRun(true);
               DoScriptText(SAY_PHASE515, m_creature);
@@ -424,7 +426,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
               m_creature->GetMotionMaster()->MovementExpired(false);
               m_creature->setFaction(FACTION);
               DoScriptText(SAY_PHASE605, m_creature);
-              if(Creature* Malganis = m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS))
+              if(Creature* Malganis = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_MALGANIS)))
               {
                  m_pInstance->SetData(TYPE_MALGANIS, IN_PROGRESS);
                  Malganis->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -446,20 +448,20 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
         //Marine Close Left
         if(Creature* pEscort01 = GetClosestCreatureWithEntry(m_creature, NPC_MARINE, 50.0f))
         {
-           m_uiMarine01GUID = pEscort01->GetObjectGuid();
+           m_uiMarine01GUID = pEscort01->GetGUID();
            pEscort01->UpdateEntry(NPC_CITYMAN);
            if(Creature* pEscort02 = GetClosestCreatureWithEntry(m_creature, NPC_MARINE, 50.0f))
            {
-              m_uiMarine02GUID = pEscort02->GetObjectGuid();
+              m_uiMarine02GUID = pEscort02->GetGUID();
               pEscort02->UpdateEntry(NPC_CITYMAN);
               // Right marine 2
               if(Creature* pEscort03 = GetClosestCreatureWithEntry(m_creature, NPC_MARINE, 50.0f))
               {
-                 m_uiMarine03GUID = pEscort03->GetObjectGuid();
+                 m_uiMarine03GUID = pEscort03->GetGUID();
                  pEscort03->UpdateEntry(NPC_CITYMAN);
                  if(Creature* pEscort04 = GetClosestCreatureWithEntry(m_creature, NPC_MARINE, 50.0f))
                  {
-                    m_uiMarine04GUID = pEscort04->GetObjectGuid();
+                    m_uiMarine04GUID = pEscort04->GetGUID();
                     pEscort01->UpdateEntry(NPC_MARINE);
                     pEscort02->UpdateEntry(NPC_MARINE);
                     pEscort03->UpdateEntry(NPC_MARINE);
@@ -470,11 +472,11 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
 
         if(Creature* pEscort05 = GetClosestCreatureWithEntry(m_creature, NPC_PRIEST, 50.0f))
         {
-           m_uiPriest01GUID = pEscort05->GetObjectGuid();
+           m_uiPriest01GUID = pEscort05->GetGUID();
            pEscort05->UpdateEntry(NPC_CITYMAN);
            if(Creature* pEscort06 = GetClosestCreatureWithEntry(m_creature, NPC_PRIEST, 50.0f))
            {
-              m_uiPriest02GUID = pEscort06->GetObjectGuid();
+              m_uiPriest02GUID = pEscort06->GetGUID();
               pEscort05->UpdateEntry(NPC_PRIEST);
            }
         }
@@ -495,7 +497,9 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
              JumpNextStep(2000);
              break;
           case 1:
-             if(Creature* pUther = m_pInstance->GetSingleCreatureFromStorage(NPC_UTHER))
+             m_uiUtherGUID = m_pInstance->GetData64(NPC_UTHER);
+             m_uiJainaGUID = m_pInstance->GetData64(NPC_JAINA);
+             if(Creature* pUther = m_pInstance->instance->GetCreature(m_uiUtherGUID))
                 DoScriptText(SAY_INTRO02, pUther);
              JumpNextStep(8000);
              break;
@@ -504,12 +508,12 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
              DoScriptText(SAY_INTRO03, m_creature);
              m_creature->SetGuidValue(UNIT_FIELD_TARGET, 0);
              m_creature->GetMotionMaster()->MovePoint(0, 1908.334f, 1315.354f, 149.551f);
-             if(Creature* pUther = m_pInstance->instance->GetCreature(NPC_UTHER))
+             if(Creature* pUther = m_pInstance->instance->GetCreature(m_uiUtherGUID))
                 pUther->GetMotionMaster()->MovePoint(0, 1903.600f, 1296.678f, 143.383f);
              JumpNextStep(2000);
              break;
           case 3:
-             if(Creature* pJaina = m_pInstance->instance->GetCreature(NPC_JAINA))
+             if(Creature* pJaina = m_pInstance->instance->GetCreature(m_uiJainaGUID))
                 pJaina->GetMotionMaster()->MovePoint(0, 1899.641f, 1298.684f, 143.831f);
              JumpNextStep(7000);
              break;
@@ -523,18 +527,18 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
              JumpNextStep(10000);
              break;
           case 6:
-             if(Creature* pUther = m_pInstance->instance->GetCreature(NPC_UTHER))
+             if(Creature* pUther = m_pInstance->instance->GetCreature(m_uiUtherGUID))
                 DoScriptText(SAY_INTRO05, pUther);
              JumpNextStep(1000);
              break;
           case 7:
-             if(Creature* pUther = m_pInstance->instance->GetCreature(NPC_UTHER))
-                m_creature->SetGuidValue(UNIT_FIELD_TARGET, pUther->GetObjectGuid());
+             if(Creature* pUther = m_pInstance->instance->GetCreature(m_uiUtherGUID))
+                m_creature->SetUInt64Value(UNIT_FIELD_TARGET, pUther->GetGUID());
              DoScriptText(SAY_INTRO06, m_creature);
              JumpNextStep(4000);
              break;
           case 8:
-             if(Creature* pUther = m_pInstance->instance->GetCreature(NPC_UTHER))
+             if(Creature* pUther = m_pInstance->instance->GetCreature(m_uiUtherGUID))
                 DoScriptText(SAY_INTRO07, pUther);
              JumpNextStep(6000);
              break;
@@ -543,7 +547,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
              JumpNextStep(4000);
              break;
           case 10:
-             if(Creature* pUther = m_pInstance->instance->GetCreature(NPC_UTHER))
+             if(Creature* pUther = m_pInstance->instance->GetCreature(m_uiUtherGUID))
                 DoScriptText(SAY_INTRO09, pUther);
              JumpNextStep(8000);
              break;
@@ -552,7 +556,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
              JumpNextStep(4000);
              break;
           case 12:
-             if(Creature* pUther = m_pInstance->instance->GetCreature(NPC_UTHER))
+             if(Creature* pUther = m_pInstance->instance->GetCreature(m_uiUtherGUID))
                 DoScriptText(SAY_INTRO11, pUther);
              JumpNextStep(4000);
              break;
@@ -561,7 +565,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
              JumpNextStep(11000);
              break;
           case 14:
-             if(Creature* pJaina = m_pInstance->instance->GetCreature(NPC_JAINA))
+             if(Creature* pJaina = m_pInstance->instance->GetCreature(m_uiJainaGUID))
                 DoScriptText(SAY_INTRO13, pJaina);
              JumpNextStep(3000);
              break;
@@ -570,14 +574,14 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
              JumpNextStep(9000);
              break;
           case 16:
-             if(Creature* pUther = m_pInstance->instance->GetCreature(NPC_UTHER))
+             if(Creature* pUther = m_pInstance->instance->GetCreature(m_uiUtherGUID))
                 DoScriptText(SAY_INTRO15, pUther);
              JumpNextStep(5000);
              break;
           case 17:
-             if(Creature* pJaina = m_pInstance->instance->GetCreature(NPC_JAINA))
+             if(Creature* pJaina = m_pInstance->instance->GetCreature(m_uiJainaGUID))
              {
-                m_creature->SetGuidValue(UNIT_FIELD_TARGET, pJaina->GetObjectGuid());
+                m_creature->SetUInt64Value(UNIT_FIELD_TARGET, pJaina->GetGUID());
                 pJaina->GetMotionMaster()->MovePoint(0, 1794.357f,1272.183f,140.558f);
              }
              JumpNextStep(1000);
@@ -587,7 +591,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
              JumpNextStep(1000);
              break;
           case 19:
-             if(Creature* pJaina = m_pInstance->instance->GetCreature(NPC_JAINA))
+             if(Creature* pJaina = m_pInstance->instance->GetCreature(m_uiJainaGUID))
                 DoScriptText(SAY_INTRO17, pJaina);
              JumpNextStep(3000);
              break;
@@ -625,8 +629,8 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
               if(Unit* Crazyman = m_creature->GetMap()->GetUnit( m_uiPeople02GUID))
               {
                  DoScriptText(SAY_ENTER05, Crazyman);
-                 Crazyman->SetGuidValue(UNIT_FIELD_TARGET, m_creature->GetObjectGuid());
-                 m_creature->SetGuidValue(UNIT_FIELD_TARGET, Crazyman->GetObjectGuid());
+                 Crazyman->SetUInt64Value(UNIT_FIELD_TARGET, m_creature->GetGUID());
+                 m_creature->SetUInt64Value(UNIT_FIELD_TARGET, Crazyman->GetGUID());
                  m_creature->GetMotionMaster()->MovePoint(0, 2092.154f,1276.645f,140.52f);
               }
               JumpNextStep(3000);
@@ -641,7 +645,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
               JumpNextStep(1000);
               break;
           case 6:
-              m_creature->SetGuidValue(UNIT_FIELD_TARGET, 0);
+              m_creature->SetUInt64Value(UNIT_FIELD_TARGET, 0);
               m_creature->GetMotionMaster()->MovePoint(0, 2091.179f,1278.065f,140.476f);
               DoScriptText(SAY_ENTER06, m_creature);
               JumpNextStep(3000);
@@ -655,10 +659,10 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
               m_pInstance->SetData(TYPE_ENCOUNTER, IN_PROGRESS);
               if(Creature* TempMalganis = m_creature->SummonCreature(NPC_MALGANIS_INTRO,2117.349f,1288.624f,136.271f,1.37f,TEMPSUMMON_TIMED_DESPAWN,29000))
               {
-                m_uiMalganisGUID = TempMalganis->GetObjectGuid();
+                m_uiMalganisGUID = TempMalganis->GetGUID();
                 DoScriptText(SAY_ENTER07, TempMalganis);
-                m_creature->SetGuidValue(UNIT_FIELD_TARGET, TempMalganis->GetObjectGuid());
-                TempMalganis->SetGuidValue(UNIT_FIELD_TARGET, m_creature->GetObjectGuid());
+                m_creature->SetUInt64Value(UNIT_FIELD_TARGET, TempMalganis->GetGUID());
+                TempMalganis->SetUInt64Value(UNIT_FIELD_TARGET, m_creature->GetGUID());
                 TempMalganis->setFaction(35);
               }
               JumpNextStep(11000);
@@ -673,7 +677,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
               JumpNextStep(7000);
               break;
           case 11:
-              m_creature->SetGuidValue(UNIT_FIELD_TARGET, 0);
+              m_creature->SetUInt64Value(UNIT_FIELD_TARGET, 0);
               DoScriptText(SAY_ENTER10, m_creature);
               JumpNextStep(12000);
               break;
@@ -792,8 +796,8 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
           case 0:
              if(Creature* Human = m_pInstance->instance->GetCreature(m_uiHuman01GUID))
              {
-                m_creature->SetGuidValue(UNIT_FIELD_TARGET, Human->GetObjectGuid());
-                Human->SetGuidValue(UNIT_FIELD_TARGET, m_creature->GetObjectGuid());
+                m_creature->SetUInt64Value(UNIT_FIELD_TARGET, Human->GetGUID());
+                Human->SetUInt64Value(UNIT_FIELD_TARGET, m_creature->GetGUID());
                 DoScriptText(SAY_PHASE503, Human);
              }
              JumpNextStep(4000);
@@ -820,7 +824,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
              m_creature->SetGuidValue(UNIT_FIELD_TARGET, 0);
              if(Creature* Human = m_pInstance->instance->GetCreature(m_uiHuman01GUID))
              {
-                Human->SetGuidValue(UNIT_FIELD_TARGET, 0);
+                Human->SetUInt64Value(UNIT_FIELD_TARGET, 0);
                 Human->UpdateEntry(NPC_INFINITE_ADVERSARY);
              }
              if(Creature* Human2 = m_pInstance->instance->GetCreature(m_uiHuman02GUID))
@@ -858,7 +862,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
              {
                 pEpoch->setFaction(35);
                 DoScriptText(SAY_EPOCH_INTRO, pEpoch);
-                m_creature->SetGuidValue(UNIT_FIELD_TARGET, pEpoch->GetObjectGuid());
+                m_creature->SetUInt64Value(UNIT_FIELD_TARGET, pEpoch->GetGUID());
              }
              JumpNextStep(20000);
              break;
@@ -891,18 +895,18 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
              case 0:
                 m_creature->setFaction(35);
                 m_creature->GetMotionMaster()->MovePoint(0, 2302.326f, 1491.386f, 128.362f);
-                if(Creature* Malganis = m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS))
+                if(Creature* Malganis = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_MALGANIS)))
                 {
                   DoScriptText(SAY_MALGANIS_ESCAPE01, Malganis);
                   Malganis->InterruptNonMeleeSpells(false);
                   Malganis->GetMotionMaster()->MovePoint(0, 2296.665f,1502.362f,128.362f);
-                  m_creature->SetGuidValue(UNIT_FIELD_TARGET, Malganis->GetObjectGuid());
-                  Malganis->SetGuidValue(UNIT_FIELD_TARGET, m_creature->GetObjectGuid());
+                  m_creature->SetUInt64Value(UNIT_FIELD_TARGET, Malganis->GetGUID());
+                  Malganis->SetUInt64Value(UNIT_FIELD_TARGET, m_creature->GetGUID());
                 }
                 JumpNextStep(10000);
                 break;
              case 1:
-                if(Creature* Malganis = m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS))
+                if(Creature* Malganis = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_MALGANIS)))
                    DoScriptText(SAY_MALGANIS_ESCAPE02, Malganis);
                 JumpNextStep(10000);
                 break;
@@ -911,17 +915,17 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
                 JumpNextStep(5000);
                 break;
              case 3:
-                if(Creature* Malganis = m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS))
+                if(Creature* Malganis = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_MALGANIS)))
                    DoScriptText(SAY_MALGANIS_OUTRO, Malganis);
                 JumpNextStep(20000);
                 break;
              case 4:
-                if(Creature* Malganis = m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS))
+                if(Creature* Malganis = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_MALGANIS)))
                 {
                    Malganis->SetVisibility(VISIBILITY_OFF);
                    m_creature->GetMotionMaster()->MovePoint(0, Malganis->GetPositionX(), Malganis->GetPositionY(), Malganis->GetPositionZ());
                 }
-                m_creature->SetGuidValue(UNIT_FIELD_TARGET, 0);
+                m_creature->SetUInt64Value(UNIT_FIELD_TARGET, 0);
                 m_creature->SetWalk(false);
                 JumpNextStep(3000);
                 break;
@@ -1028,8 +1032,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
             }
             else m_uiStepTimer -= uiDiff;
          }
-
-         } //close event!
+	   } //close event!
 
          if(m_pInstance->GetData(TYPE_PHASE) == 10)
          {
@@ -1091,13 +1094,14 @@ struct MANGOS_DLL_DECL npc_utherAI : public npc_escortAI
 
     ScriptedInstance* m_pInstance;
 
+    uint64 m_uiArthasGUID;
     uint32 m_uiStep;
     uint32 m_uiStepTimer;
     bool StartEvent;
 
-    ObjectGuid m_uiKnightGUID01;
-    ObjectGuid m_uiKnightGUID02;
-    ObjectGuid m_uiKnightGUID03;
+    uint64 m_uiKnightGUID01;
+    uint64 m_uiKnightGUID02;
+    uint64 m_uiKnightGUID03;
 
     void Reset()
     {
@@ -1115,21 +1119,21 @@ struct MANGOS_DLL_DECL npc_utherAI : public npc_escortAI
 
            if(Creature* Knight01 = m_creature->SummonCreature(NPC_KNIGHT,m_creature->GetPositionX(),m_creature->GetPositionY(),m_creature->GetPositionZ(),m_creature->GetOrientation(),TEMPSUMMON_TIMED_DESPAWN,110000))
            {
-              m_uiKnightGUID01 = Knight01->GetObjectGuid();
+              m_uiKnightGUID01 = Knight01->GetGUID();
               Knight01->SetWalk(false);
               Knight01->GetMotionMaster()->MoveFollow(m_creature,PET_FOLLOW_DIST,M_PI_F/2);
            }
 
            if(Creature* Knight02 = m_creature->SummonCreature(NPC_KNIGHT,m_creature->GetPositionX(),m_creature->GetPositionY(),m_creature->GetPositionZ(),m_creature->GetOrientation(),TEMPSUMMON_TIMED_DESPAWN,110000))
            {
-              m_uiKnightGUID02 = Knight02->GetObjectGuid();
+              m_uiKnightGUID02 = Knight02->GetGUID();
               Knight02->SetWalk(false);
               Knight02->GetMotionMaster()->MoveFollow(m_creature,PET_FOLLOW_DIST,M_PI_F/4);
            }
 
            if(Creature* Knight03 = m_creature->SummonCreature(NPC_KNIGHT,m_creature->GetPositionX(),m_creature->GetPositionY(),m_creature->GetPositionZ(),m_creature->GetOrientation(),TEMPSUMMON_TIMED_DESPAWN,110000))
            {
-              m_uiKnightGUID03 = Knight03->GetObjectGuid();
+              m_uiKnightGUID03 = Knight03->GetGUID();
               Knight03->SetWalk(false);
               Knight03->GetMotionMaster()->MoveFollow(m_creature,PET_FOLLOW_DIST,M_PI_F/3);
            }
@@ -1140,21 +1144,23 @@ struct MANGOS_DLL_DECL npc_utherAI : public npc_escortAI
         switch(uiPointId)
         {
             case 3:
-               if(Creature* pArthas = m_pInstance->GetSingleCreatureFromStorage(NPC_ARTHAS))
+               m_uiArthasGUID = m_pInstance->GetData64(NPC_ARTHAS);
+               if(Creature* pArthas = m_pInstance->instance->GetCreature(m_uiArthasGUID))
                {
                  pArthas->SetWalk(false);
-                 pArthas->SetGuidValue(UNIT_FIELD_TARGET, m_creature->GetObjectGuid());
+                 pArthas->SetUInt64Value(UNIT_FIELD_TARGET, m_creature->GetGUID());
                  pArthas->GetMotionMaster()->MovePoint(0, 1902.974f, 1291.635f, 143.337f);
                }
                break;
             case 4:
                SetRun(false);
-               if(Creature *pArthas = m_pInstance->GetSingleCreatureFromStorage(NPC_ARTHAS))
+               if(Creature* pArthas = m_pInstance->instance->GetCreature(m_uiArthasGUID))
                   ((npc_arthasAI*)pArthas->AI())->StartAI();
                break;
             case 6:
                m_creature->SetVisibility(VISIBILITY_OFF);
-               if(Creature* pJaina = m_pInstance->GetSingleCreatureFromStorage(NPC_JAINA))
+               uint64 m_uiJainaGUID = m_pInstance->GetData64(NPC_JAINA);
+               if(Creature* pJaina = m_pInstance->instance->GetCreature(m_uiJainaGUID))
                   pJaina->SetVisibility(VISIBILITY_OFF);
                break;
         }
@@ -1228,7 +1234,7 @@ bool GossipSelect_npc_chromi_middle(Player* pPlayer, Creature* pCreature, uint32
         {
             m_pInstance->DoUpdateWorldState(WORLD_STATE_COS_CRATE_ON, 0);
             m_pInstance->SetData(TYPE_INTRO, IN_PROGRESS);
-            if (Creature *pUther = m_pInstance->GetSingleCreatureFromStorage(NPC_UTHER))
+            if (Creature *pUther = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_UTHER)))
                 ((npc_utherAI*)pUther->AI())->StartAI();
         }
 
@@ -1263,7 +1269,7 @@ struct MANGOS_DLL_DECL npc_chromi_middleAI : public ScriptedAI
         {
             m_pInstance->DoUpdateWorldState(WORLD_STATE_COS_CRATE_ON, 0);
             m_pInstance->SetData(TYPE_INTRO, IN_PROGRESS);
-            if (Creature *pUther = m_pInstance->GetSingleCreatureFromStorage(NPC_UTHER))
+            if (Creature *pUther = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_UTHER)))
                 ((npc_utherAI*)pUther->AI())->StartAI();
             m_bUtherHere = true;
         }
@@ -1658,7 +1664,8 @@ uint32 m_uiStepTimer;
         m_creature->UpdateEntry(NPC_ZOMBIE);
         if(Move == true)
         {
-           if(Creature* pArthas = m_pInstance->GetSingleCreatureFromStorage(NPC_ARTHAS))
+           uint64 m_uiArthasGUID = m_pInstance->GetData64(NPC_ARTHAS);
+           if(Creature* pArthas = m_pInstance->instance->GetCreature(m_uiArthasGUID))
               m_creature->GetMotionMaster()->MovePoint(0, pArthas->GetPositionX(), pArthas->GetPositionY(), pArthas->GetPositionZ());
         }
    }

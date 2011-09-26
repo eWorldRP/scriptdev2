@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -73,13 +73,12 @@ struct MANGOS_DLL_DECL boss_ionarAI : public ScriptedAI
     bool m_bIsRegularMode;
 
     bool m_bIsSplitPhase;
+    bool m_bHasSplitted;
     uint32 m_uiSplit_Timer;
     uint32 m_uiSparkAtHomeCount;
 
     uint32 m_uiStaticOverload_Timer;
     uint32 m_uiBallLightning_Timer;
-
-    uint32 m_uiHealthAmountModifier;
 
     void Reset()
     {
@@ -92,7 +91,7 @@ struct MANGOS_DLL_DECL boss_ionarAI : public ScriptedAI
         m_uiStaticOverload_Timer = urand(5000, 6000);
         m_uiBallLightning_Timer = urand(10000, 11000);
 
-        m_uiHealthAmountModifier = 1;
+        m_bHasSplitted = false;
 
         if (m_creature->GetVisibility() == VISIBILITY_OFF)
             m_creature->SetVisibility(VISIBILITY_ON);
@@ -109,7 +108,7 @@ struct MANGOS_DLL_DECL boss_ionarAI : public ScriptedAI
         AttackStart(pAttacker);
     }
 
-    void Aggro(Unit* who)
+    void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
@@ -136,7 +135,7 @@ struct MANGOS_DLL_DECL boss_ionarAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* killer)
+    void JustDied(Unit* pKiller)
     {
         DoScriptText(SAY_DEATH, m_creature);
         DespawnSpark();
@@ -145,7 +144,7 @@ struct MANGOS_DLL_DECL boss_ionarAI : public ScriptedAI
             m_pInstance->SetData(TYPE_IONAR, DONE);
     }
 
-    void KilledUnit(Unit *victim)
+    void KilledUnit(Unit *pVictim)
     {
         switch(urand(0, 2))
         {
@@ -188,8 +187,6 @@ struct MANGOS_DLL_DECL boss_ionarAI : public ScriptedAI
                     // Required to prevent combat movement, elsewise they might switch movement on aggro-change
                     if (ScriptedAI* pSparkAI = dynamic_cast<ScriptedAI*>(pSpark->AI()))
                         pSparkAI->SetCombatMovement(false);
-
-                    pSpark->SetSpeedRate(MOVE_RUN,2);
 
                     pSpark->GetMotionMaster()->MovePoint(POINT_CALLBACK, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
                 }
@@ -237,7 +234,7 @@ struct MANGOS_DLL_DECL boss_ionarAI : public ScriptedAI
                     m_bIsSplitPhase = false;
                 }
                 // Lightning effect and restore Ionar
-                else 
+                else if (m_uiSparkAtHomeCount == MAX_SPARKS)
                 {
                     m_creature->SetVisibility(VISIBILITY_ON);
                     m_creature->CastSpell(m_creature, SPELL_SPARK_DESPAWN, false);
@@ -284,9 +281,9 @@ struct MANGOS_DLL_DECL boss_ionarAI : public ScriptedAI
             m_uiBallLightning_Timer -= uiDiff;
 
         // Health check
-        if (m_creature->GetHealthPercent() < float(100 - 20*m_uiHealthAmountModifier))
+        if (m_creature->GetHealthPercent() < 50.0f && !m_bHasSplitted)
         {
-            ++m_uiHealthAmountModifier;
+            m_bHasSplitted = true;
 
             DoScriptText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
 
@@ -371,6 +368,8 @@ struct MANGOS_DLL_DECL mob_spark_of_ionarAI : public ScriptedAI
                 m_creature->ForcedDespawn();
         }
     }
+
+    void UpdateAI(const uint32 uiDiff) {}
 };
 
 CreatureAI* GetAI_mob_spark_of_ionar(Creature* pCreature)
@@ -393,3 +392,4 @@ void AddSC_boss_ionar()
     newscript->GetAI = &GetAI_mob_spark_of_ionar;
     newscript->RegisterSelf();
 }
+

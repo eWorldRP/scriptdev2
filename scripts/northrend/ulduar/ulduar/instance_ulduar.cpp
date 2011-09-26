@@ -739,6 +739,10 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
             break;
         case TYPE_ASSEMBLY:
             m_auiEncounter[4] = uiData;
+            if (uiData == FAIL)
+            {
+                OpenDoor(m_uiIronCouncilDoorGUID);
+            }
             if (uiData == DONE)
             {
                 OpenDoor(m_uiIronCouncilDoorGUID);
@@ -749,6 +753,12 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
             break;
         case TYPE_KOLOGARN:
             m_auiEncounter[5] = uiData;
+
+            if (uiData == IN_PROGRESS)
+                CloseDoor(m_uiShatteredHallsDoorGUID);
+            else
+                OpenDoor(m_uiShatteredHallsDoorGUID);
+
             if (uiData == DONE)
             {
                 DoRespawnGameObject(m_uiKologarnLootGUID, 30*MINUTE);
@@ -807,9 +817,16 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
             break;
         case TYPE_THORIM:
             m_auiEncounter[9] = uiData;
-            DoUseDoorOrButton(m_uiArenaEnterDoorGUID);
             if (uiData == IN_PROGRESS)
-                DoUseDoorOrButton(m_uiArenaExitDoorGUID);
+            {
+                OpenDoor(m_uiArenaExitDoorGUID);
+                CloseDoor(m_uiArenaEnterDoorGUID);
+            }
+            else if (uiData == NOT_STARTED)
+            {
+                CloseDoor(m_uiArenaExitDoorGUID);
+                OpenDoor(m_uiArenaEnterDoorGUID);
+            }
             if (uiData == DONE)
             {
                 if(m_auiHardBoss[5] != DONE)

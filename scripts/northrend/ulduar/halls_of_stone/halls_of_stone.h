@@ -33,6 +33,7 @@ enum
     NPC_GRIEF               = 27975,
     NPC_BRANN               = 28070,
     NPC_SJONNIR             = 27978,
+    NPC_TRIBUNAL_OF_THE_AGES = 28234,
 
     NPC_KADDRAK             = 30898, // left
     NPC_ABEDNEUM            = 30899, // middle

@@ -26,6 +26,8 @@ item_arcane_charges                 Prevent use if player is not flying (cannot 
 item_flying_machine(i34060,i34061)  Engineering crafted flying machines
 item_gor_dreks_ointment(i30175)     Protecting Our Own(q10488)
 Item_jungle_punch_offer
+item_complimentary_brewfest_sampler Brewfest event
+item_ram_racing_reins               Brewfest event
 EndContentData */
 
 #include "precompiled.h"
@@ -152,6 +154,98 @@ bool ItemUse_item_jungle_punch_sample(Player* pPlayer, Item* pItem, const SpellC
     }
 }
 
+/*#####
+# item_complimentary_brewfest_sampler
+#####*/
+
+enum
+{
+    NPC_SCOUT  = 24108,
+    QUEST_CHUG_AND_CHUCK_A = 12022,
+    QUEST_CHUG_AND_CHUCK_H = 12191
+};
+
+bool ItemUse_item_complimentary_brewfest_sampler(Player* pPlayer, Item* pItem, const SpellCastTargets &pTargets)
+{
+	Map* pMap = pPlayer->GetMap();
+    if (pMap)
+    {
+		Unit* pTarget = pMap->GetUnit(pPlayer->GetTargetGuid());
+        if (pTarget)
+        {
+            if ((pTarget->GetEntry() == NPC_SCOUT) && ((pPlayer->GetQuestStatus(QUEST_CHUG_AND_CHUCK_A) == QUEST_STATUS_INCOMPLETE) || (pPlayer->GetQuestStatus(QUEST_CHUG_AND_CHUCK_H) == QUEST_STATUS_INCOMPLETE)))
+                pPlayer->KilledMonsterCredit(NPC_SCOUT,0);
+        }
+    }
+    pPlayer->CastSpell(pPlayer, 42436, false);
+
+    return true;
+}
+
+/*#####
+# item_ram_racing_reins
+#####*/
+
+enum
+{
+    SPELL_RAMSTEIN_SWIFT_WORK_RAM = 43880,
+    SPELL_RENTAL_RAM              = 43883,
+    SPELL_RAM_FATIGUE             = 43052,
+    SPELL_SPEED_RAM_GALLOP        = 42994,
+    SPELL_SPEED_RAM_CANTER        = 42993,
+    SPELL_SPEED_RAM_TROT          = 42992,
+    SPELL_SPEED_RAM_NORMAL        = 43310,
+    SPELL_SPEED_RAM_EXHAUSED      = 43332,
+};
+
+bool ItemUse_item_ram_racing_reins(Player* pPlayer, Item* pItem, const SpellCastTargets &pTargets)
+{
+    if ((pPlayer->HasAura(SPELL_RENTAL_RAM) || pPlayer->HasAura(SPELL_RAMSTEIN_SWIFT_WORK_RAM)) && !pPlayer->HasAura(SPELL_SPEED_RAM_EXHAUSED))
+    {
+        if (pPlayer->HasAura(SPELL_SPEED_RAM_NORMAL))
+        {
+            pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_NORMAL);
+            pPlayer->CastSpell(pPlayer, SPELL_SPEED_RAM_TROT, false);
+            return true;
+        }
+        if (pPlayer->HasAura(SPELL_SPEED_RAM_TROT))
+        {
+			if (SpellAuraHolder* pAura = pPlayer->GetSpellAuraHolder(SPELL_SPEED_RAM_TROT))
+            {
+                if (pAura->GetAuraDuration() >= (pAura->GetAuraMaxDuration() - 2000))
+                {
+                    pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_TROT);
+                    pPlayer->CastSpell(pPlayer, SPELL_SPEED_RAM_CANTER, true);
+                    return true;
+                }
+                pAura->SetAuraDuration(pAura->GetAuraMaxDuration());
+            }
+        }
+        if (pPlayer->HasAura(SPELL_SPEED_RAM_CANTER))
+        {
+            if (SpellAuraHolder* pAura = pPlayer->GetSpellAuraHolder(SPELL_SPEED_RAM_CANTER))
+            {
+                if (pAura->GetAuraDuration() >= (pAura->GetAuraMaxDuration() - 1000))
+                {
+                    pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_CANTER);
+                    pPlayer->CastSpell(pPlayer, SPELL_SPEED_RAM_GALLOP, false);
+                    return true;
+                }
+                pAura->SetAuraDuration(pAura->GetAuraMaxDuration());
+            }
+        }
+        if (pPlayer->HasAura(SPELL_SPEED_RAM_GALLOP))
+        {
+            if (SpellAuraHolder* pAura = pPlayer->GetSpellAuraHolder(SPELL_SPEED_RAM_GALLOP, pPlayer->GetObjectGuid()))
+                pAura->SetAuraDuration(pAura->GetAuraMaxDuration());
+        }
+    }
+    else
+        pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW ,pItem, NULL);
+
+
+    return true;
+}
 void AddSC_item_scripts()
 {
     Script *newscript;
@@ -179,5 +273,15 @@ void AddSC_item_scripts()
     newscript = new Script;
     newscript->Name = "item_jungle_punch_sample";
     newscript->pItemUse = &ItemUse_item_jungle_punch_sample;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "item_complimentary_brewfest_sampler";
+    newscript->pItemUse = &ItemUse_item_complimentary_brewfest_sampler;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "item_ram_racing_reins";
+    newscript->pItemUse = &ItemUse_item_ram_racing_reins;
     newscript->RegisterSelf();
 }

@@ -40,6 +40,8 @@ enum
     SAY_MALGANIS_Sleep       = -1594178,
     SAY_MALGANIS_15HP        = -1594179,
 
+    SPELL_MALGANIS_CREDIT    = 58630,
+
     SPELL_SWAMP_N                          = 52720,
     SPELL_SWAMP_H                          = 58852,
     SPELL_MIND_BLAST_N                     = 52722,
@@ -87,28 +89,33 @@ struct MANGOS_DLL_DECL boss_malganisAI : public ScriptedAI
 
    void AttackStart(Unit* who)
    {
-        if(m_pInstance->GetData(TYPE_PHASE) > 9) return;
+       if(m_pInstance->GetData(TYPE_PHASE) > 9) return;
 
-        if(m_pInstance->GetData(TYPE_MALGANIS) != IN_PROGRESS) return;
+       if(m_pInstance->GetData(TYPE_MALGANIS) != IN_PROGRESS) return;
 
-        if(!who || who == m_creature)
-            return;
+       if(!who || who == m_creature)
+           return;
 
-        ScriptedAI::AttackStart(who);
+       ScriptedAI::AttackStart(who);
    }
 
    void KillCreditMalganis()
    {
-         Map *map = m_creature->GetMap();
-         Map::PlayerList const& players = map->GetPlayers();
-         if (!players.isEmpty() && map->IsDungeon())
-         {
+       Map *map = m_creature->GetMap();
+       Map::PlayerList const& players = map->GetPlayers();
+       if (!players.isEmpty() && map->IsDungeon())
+       {         
            for(Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
            {
-             if(Player* pPlayer = itr->getSource()) 
-               pPlayer->KilledMonsterCredit(31006, m_creature->GetGUID());
+               if(Player* pPlayer = itr->getSource())
+               {
+                   pPlayer->KilledMonsterCredit(31006, m_creature->GetGUID());
+#ifndef WIN32
+                   pPlayer->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_MALGANIS_CREDIT);
+#endif
+               }
            }
-         }
+       }
    }
 
    void EnterEvadeMode()
@@ -123,7 +130,7 @@ struct MANGOS_DLL_DECL boss_malganisAI : public ScriptedAI
       {
         KillCreditMalganis();
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        if (Creature* pArthas = m_pInstance->GetSingleCreatureFromStorage(NPC_ARTHAS))
+        if (Creature* pArthas = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_ARTHAS)))
            m_creature->SetInCombatWith(pArthas);
       }
       else

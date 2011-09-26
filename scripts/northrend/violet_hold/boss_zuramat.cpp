@@ -70,6 +70,7 @@ struct MANGOS_DLL_DECL boss_zuramatAI : public ScriptedAI
 
     void Reset()
     {
+        DespawnSentry();
         m_uiShroudDarkness_Timer = urand(8000, 9000);
         m_uiSummonVoidSentry_Timer = 10000;
         m_uiVoidShift_Timer = 10000;

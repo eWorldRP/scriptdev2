@@ -164,7 +164,7 @@ struct MANGOS_DLL_DECL mob_iron_constructAI : public ScriptedAI
             {
                 if (pTemp->HasAura(BUFF_STRENGHT_OF_CREATOR))
                 {
-                     if(SpellAuraHolderPtr strenght = pTemp->GetSpellAuraHolder(BUFF_STRENGHT_OF_CREATOR))
+                     if(SpellAuraHolder* strenght = pTemp->GetSpellAuraHolder(BUFF_STRENGHT_OF_CREATOR))
                      {
                          if(strenght->ModStackAmount(-1))
                               pTemp->RemoveAurasDueToSpell(BUFF_STRENGHT_OF_CREATOR);
@@ -437,6 +437,8 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
             {
                 DoCast(target, m_bIsRegularMode ? SPELL_SLAG_POT : SPELL_SLAG_POT_H);
                 m_uiPotTargetGUID = target->GetGUID();
+                if(m_creature->GetVehicleKit())
+                    target->EnterVehicle(m_creature->GetVehicleKit(), 0);
             }
             m_uiSlag_Pot_Timer      = 30000;
             m_uiSlag_Pot_Dmg_Timer  = 1000;
@@ -454,7 +456,10 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                 else if (m_uiPotDmgCount == 10)
                 {
                     if(pPotTarget->isAlive())
+                    {
                         pPotTarget->CastSpell(pPotTarget, SPELL_HASTE, false);
+                        pPotTarget->ExitVehicle();
+                    }
                     m_bHasSlagPotCasted = false;
                 }
             }

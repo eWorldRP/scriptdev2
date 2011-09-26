@@ -100,10 +100,7 @@ struct MANGOS_DLL_DECL instance_trial_of_the_champion : public ScriptedInstance
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             m_auiEncounter[i] = NOT_STARTED;
     }
-
-    void OnPlayerEnter(Player *pPlayer)
-    {
-
+    
     enum PhaseControl
     {
         HORDE_CONTROL_PHASE_SHIFT_1    = 55773,
@@ -111,7 +108,12 @@ struct MANGOS_DLL_DECL instance_trial_of_the_champion : public ScriptedInstance
         ALLIANCE_CONTROL_PHASE_SHIFT_1 = 55774,
         ALLIANCE_CONTROL_PHASE_SHIFT_2 = 60027,
     };
-        if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP)) return;
+
+    void OnPlayerEnter(Player *pPlayer)
+    {
+        // ENTURION errore di compilazione su windows, mettiamo return perchè da noi il bool è 0
+        //if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP)) return;
+        return;
 
         switch (pPlayer->GetTeam())
         {

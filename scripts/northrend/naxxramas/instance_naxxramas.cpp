@@ -68,6 +68,7 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_BLAUMEUX:
         case NPC_RIVENDARE:
         case NPC_GOTHIK:
+        case NPC_RAZUVIOUS:
         case NPC_KELTHUZAD:
         case NPC_THE_LICHKING:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
@@ -220,15 +221,9 @@ void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
 
 bool instance_naxxramas::IsEncounterInProgress() const
 {
-    for (uint8 i = 0; i <= TYPE_KELTHUZAD; ++i)
-    {
-        if (m_auiEncounter[i] == IN_PROGRESS)
+    for (uint8 i = 0; i < TYPE_KELTHUZAD; ++i)
+        if (m_auiEncounter[i] == IN_PROGRESS || m_auiEncounter[i] == SPECIAL)
             return true;
-    }
-
-    // Some Encounters use SPECIAL while in progress
-    if (m_auiEncounter[TYPE_GOTHIK] == SPECIAL)
-        return true;
 
     return false;
 }
@@ -253,6 +248,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_ARAC_FAER_DOOR);
+                DoUseDoorOrButton(GO_ARAC_FAER_WEB);
                 DoUseDoorOrButton(GO_ARAC_MAEX_OUTER_DOOR);
             }
             if (uiData == FAIL)
@@ -335,7 +331,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_FOUR_HORSEMEN:
             m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_MILI_HORSEMEN_DOOR);
+            if (uiData != SPECIAL)
+                DoUseDoorOrButton(GO_MILI_HORSEMEN_DOOR);
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_MILI_EYE_RAMP);
@@ -686,6 +683,34 @@ bool AreaTrigger_at_naxxramas(Player* pPlayer, AreaTriggerEntry const* pAt)
                 }
             }
         }
+    }
+    
+    if (pAt->id == AREATRIGGER_SAPPHIRON)
+    {
+        instance_naxxramas* pInstance = (instance_naxxramas*)pPlayer->GetInstanceData();
+  
+        if (!pInstance)
+            return false;
+         
+        if (pPlayer->isGameMaster())
+            return false;
+  
+        uint8 uiWingsCleared = 0;
+  
+        if (pInstance->GetData(TYPE_MAEXXNA) == DONE)
+            ++uiWingsCleared;
+  
+        if (pInstance->GetData(TYPE_LOATHEB) == DONE)
+            ++uiWingsCleared;
+  
+//        if (pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
+        if (pInstance->GetData(TYPE_GOTHIK) == DONE)
+            ++uiWingsCleared;
+  
+        if (pInstance->GetData(TYPE_THADDIUS) == DONE)
+            ++uiWingsCleared;
+         
+        return !(uiWingsCleared == 4); // return true->stop
     }
 
     return false;

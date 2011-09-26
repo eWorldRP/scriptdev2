@@ -41,7 +41,11 @@ enum
     SPELL_DISRUPTING_SHOUT   = 55543,
     SPELL_DISRUPTING_SHOUT_H = 29107,
     SPELL_JAGGED_KNIFE       = 55550,
-    SPELL_HOPELESS           = 29125
+    SPELL_HOPELESS           = 29125,
+    // Cristalls
+    SPELL_FORCE_OBEDIENCE    = 55479,
+
+    NPC_DEATH_KNIGHT_UNDERSTUDY = 16803
 };
 
 struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
@@ -169,6 +173,105 @@ CreatureAI* GetAI_boss_razuvious(Creature* pCreature)
     return new boss_razuviousAI(pCreature);
 }
 
+struct MANGOS_DLL_DECL npc_death_knight_understudyAI : public ScriptedAI
+{
+    npc_death_knight_understudyAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_naxxramas* m_pInstance;
+
+    uint32 m_uiBoneArmorTimer;
+    uint32 m_uiBloodStrikeTimer;
+
+    void Reset()
+    {
+        m_uiBoneArmorTimer = 1000;
+        m_uiBloodStrikeTimer = 7000;
+    }
+
+    void Aggro(Unit* pWho)
+    {
+        m_creature->HandleEmote(0);
+        m_creature->CallForHelp(20.0f);            
+    }
+    
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiBoneArmorTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, 29061, CAST_AURA_NOT_PRESENT | CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                m_uiBoneArmorTimer = 30000;
+        }
+        else
+            m_uiBoneArmorTimer -= uiDiff;
+            
+        if (m_uiBloodStrikeTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), 61696) == CAST_OK)
+                m_uiBloodStrikeTimer = urand(4000, 6000);
+        }
+        else
+            m_uiBloodStrikeTimer -= uiDiff;
+            
+        DoMeleeAttackIfReady();                        
+    }    
+};  
+
+CreatureAI* GetAI_npc_death_knight_understudy(Creature* pCreature)
+{
+    return new npc_death_knight_understudyAI(pCreature);
+}
+
+bool GossipHello_npc_obedience_crystal(Player* pPlayer, Creature* pCreature)
+{
+    ScriptedInstance* pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
+
+    if (!pInstance || pInstance->GetData(TYPE_RAZUVIOUS) == DONE)
+        return true;
+
+    if (!pCreature->GetMap()->IsRegularDifficulty())
+        return true;
+
+	Creature* pRazuvious = pInstance->GetSingleCreatureFromStorage(NPC_RAZUVIOUS);
+    if (!pRazuvious)
+        return false;
+
+    pPlayer->RemoveAurasDueToSpell(55520);
+    pPlayer->CastSpell(pCreature, SPELL_FORCE_OBEDIENCE, true);
+    
+    if (!pRazuvious->isInCombat())
+        pRazuvious->SetInCombatWithZone();
+
+    std::list<Creature*> lUnitList;
+    GetCreatureListWithEntryInGrid(lUnitList, pCreature, NPC_DEATH_KNIGHT_UNDERSTUDY, 100.0f);
+    if (lUnitList.empty())
+        return true;
+
+    for(std::list<Creature*>::iterator itr = lUnitList.begin(); itr != lUnitList.end(); ++itr)
+    {
+        if ((*itr)->isAlive() && (*itr)->HasAura(SPELL_FORCE_OBEDIENCE))
+        {
+            if (!pRazuvious->isInCombat())
+            {
+                (*itr)->HandleEmote(0);
+                pRazuvious->AI()->AttackStart((*itr));
+            }
+            
+            pRazuvious->AddThreat((*itr), 5000.0f);                    
+
+            return true;            
+        }    
+    }
+
+    return true;
+}
+
 void AddSC_boss_razuvious()
 {
     Script* pNewScript;
@@ -177,4 +280,14 @@ void AddSC_boss_razuvious()
     pNewScript->Name = "boss_razuvious";
     pNewScript->GetAI = &GetAI_boss_razuvious;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_obedience_crystal";
+    pNewScript->pGossipHello =  &GossipHello_npc_obedience_crystal;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_death_knight_understudy";
+    pNewScript->GetAI = &GetAI_npc_death_knight_understudy;
+    pNewScript->RegisterSelf(); 
 }

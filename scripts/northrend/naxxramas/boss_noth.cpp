@@ -158,6 +158,12 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CRIPPLE : SPELL_CRIPPLE_H);
     }
 
+    void DamageTaken (Unit* pDoneBy, uint32 &uiDamage)
+    {
+        if (m_uiPhase == PHASE_BALCONY)
+            uiDamage = 0;
+    }
+
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())

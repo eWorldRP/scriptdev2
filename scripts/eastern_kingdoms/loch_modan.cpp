@@ -24,6 +24,7 @@ EndScriptData */
 /* ContentData
 npc_mountaineer_pebblebitty
 npc_miran
+npc_neill_ramstein
 EndContentData */
 
 #include "precompiled.h"
@@ -177,6 +178,25 @@ CreatureAI* GetAI_npc_miran(Creature* pCreature)
     return new npc_miranAI(pCreature);
 }
 
+/*#####
+# Neill Ramstein
+#####*/
+
+enum
+{
+    QUEST_NOW_RAM_RACING_A  = 11318,
+    SPELL_RENTAL_RAM        = 43883
+};
+
+bool QuestAccept_npc_neill_ramstein(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_NOW_RAM_RACING_A)
+    {
+		pPlayer->CastSpell(pPlayer, SPELL_RENTAL_RAM, false);
+    }
+    return true;
+}
+
 void AddSC_loch_modan()
 {
     Script* newscript;
@@ -191,5 +211,10 @@ void AddSC_loch_modan()
     newscript->Name = "npc_miran";
     newscript->GetAI = &GetAI_npc_miran;
     newscript->pQuestAcceptNPC = &QuestAccept_npc_miran;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_neill_ramstein";
+    newscript->pQuestAcceptNPC = &QuestAccept_npc_neill_ramstein;
     newscript->RegisterSelf();
 }

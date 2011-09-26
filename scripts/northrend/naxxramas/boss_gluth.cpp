@@ -32,6 +32,7 @@ enum
 
     SPELL_MORTALWOUND               = 25646,
     SPELL_DECIMATE                  = 28374,
+    SPELL_DECIMATE_EFFECT           = 28375,
     SPELL_ENRAGE                    = 28371,
     SPELL_ENRAGE_H                  = 54427,
     SPELL_BERSERK                   = 26662,
@@ -93,6 +94,9 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
     uint32 m_uiSummonTimer;
 
     uint32 m_uiBerserkTimer;
+    
+    std::list<ObjectGuid> m_lZombieGUIDList;
+    uint32 m_uiRangeCheck_Timer;
 
     void Reset()
     {
@@ -102,12 +106,31 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
         m_uiSummonTimer = 10000;
 
         m_uiBerserkTimer = MINUTE*8*IN_MILLISECONDS;
+
+        m_uiRangeCheck_Timer = 1000;
+        m_lZombieGUIDList.clear();
+        DespawnZombies();
     }
 
     void JustDied(Unit* pKiller)
     {
+        DespawnZombies();
         if (m_pInstance)
             m_pInstance->SetData(TYPE_GLUTH, DONE);
+    }
+
+    void DespawnZombies()
+    {
+        if (m_lZombieGUIDList.empty())
+            return;
+
+        for (std::list<ObjectGuid>::iterator itr = m_lZombieGUIDList.begin(); itr != m_lZombieGUIDList.end(); ++itr)
+        {
+            Creature* pZombie = m_creature->GetMap()->GetCreature(*itr);
+            if (pZombie && pZombie->isAlive())
+                pZombie->ForcedDespawn();
+        }
+        m_lZombieGUIDList.clear();
     }
 
     void Aggro(Unit* pWho)
@@ -130,7 +153,7 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
         // Mortal Wound
         if (m_uiMortalWoundTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTALWOUND);
+			DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTALWOUND);
             m_uiMortalWoundTimer = 10000;
         }
         else
@@ -139,7 +162,19 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
         // Decimate
         if (m_uiDecimateTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_DECIMATE);
+            DoCastSpellIfCan(m_creature, SPELL_DECIMATE); 
+            // Move Zombies
+            if (!m_lZombieGUIDList.empty())
+            {
+                for(std::list<ObjectGuid>::iterator itr = m_lZombieGUIDList.begin(); itr != m_lZombieGUIDList.end(); ++itr)
+                    if (Creature* pTemp = (Creature*)m_creature->GetMap()->GetUnit( *itr))
+                        if (pTemp->isAlive())
+                        {
+                            if (m_creature->GetHealth() > m_creature->GetMaxHealth() * 0.05) // remove when SPELL_DECIMATE is working
+                                pTemp->SetHealth(pTemp->GetMaxHealth() * 0.03);
+                            pTemp->AddThreat(m_creature, 1000000000.0f); // force move toward to Gluth
+                        }
+            }
             m_uiDecimateTimer = 100000;
         }
         else
@@ -161,6 +196,7 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     pZombie->AddThreat(pTarget);
+                m_lZombieGUIDList.push_back(pZombie->GetObjectGuid());
             }
 
             if (!m_bIsRegularMode)
@@ -169,6 +205,7 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                         pZombie->AddThreat(pTarget);
+					m_lZombieGUIDList.push_back(pZombie->GetObjectGuid());
                 }
             }
 
@@ -176,6 +213,22 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
         }
         else
             m_uiSummonTimer -= uiDiff;
+        
+        if (m_uiRangeCheck_Timer < uiDiff) // consume zombie check
+        {
+            if (!m_lZombieGUIDList.empty())
+            {
+                for(std::list<ObjectGuid>::iterator itr = m_lZombieGUIDList.begin(); itr != m_lZombieGUIDList.end(); ++itr)
+                    if (Creature* pTemp = (Creature*)m_creature->GetMap()->GetUnit( *itr))
+                        if (pTemp->isAlive() && m_creature->IsWithinDistInMap(pTemp, ATTACK_DISTANCE))
+                        {
+                            DoScriptText(EMOTE_ZOMBIE, m_creature);
+                            m_creature->SetHealth(m_creature->GetHealth() + m_creature->GetMaxHealth() * 0.05);
+                            pTemp->ForcedDespawn();
+                        }
+            }
+            m_uiRangeCheck_Timer = 1000;
+        }else m_uiRangeCheck_Timer -= uiDiff;
 
         // Berserk
         if (m_uiBerserkTimer < uiDiff)
@@ -195,11 +248,55 @@ CreatureAI* GetAI_boss_gluth(Creature* pCreature)
     return new boss_gluthAI(pCreature);
 }
 
+struct MANGOS_DLL_DECL mob_zombie_chowAI : public ScriptedAI
+{
+    mob_zombie_chowAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {Reset();}
+
+    void Reset() {}
+
+    void MoveInLineOfSight(Unit* pWho){}
+
+    void AttackStart(Unit *pWho)
+    {
+        ScriptedAI::AttackStart(pWho);
+		m_creature->SetSpeedRate(MOVE_WALK, 1.0f);
+    }
+
+    void SpellHit(Unit *pCaster, const SpellEntry *spellInfo)
+    {
+        if (!pCaster || !spellInfo)
+            return;
+
+        if (spellInfo->Id == SPELL_DECIMATE_EFFECT)
+        {
+			m_creature->SetSpeedRate(MOVE_RUN, 1.0f);
+            m_creature->GetMotionMaster()->Clear();
+            m_creature->GetMotionMaster()->MoveFollow(pCaster, 0.0f, 0.0f);
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_mob_zombie_chow(Creature* pCreature)
+{
+    return new mob_zombie_chowAI(pCreature);
+}
+
 void AddSC_boss_gluth()
 {
     Script* NewScript;
     NewScript = new Script;
     NewScript->Name = "boss_gluth";
     NewScript->GetAI = &GetAI_boss_gluth;
+    NewScript->RegisterSelf();
+
+    NewScript = new Script;
+    NewScript->Name = "mob_zombie_chow";
+    NewScript->GetAI = &GetAI_mob_zombie_chow;
     NewScript->RegisterSelf();
 }

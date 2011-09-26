@@ -16,31 +16,14 @@ enum
 
     GO_STASIS_GENERATOR             = 188593,
     GO_DOOR_SKADI                   = 192173,
+    GO_DOOR_YMIRON                  = 192174,
 
-    NPC_FURBOLG                     = 26684,
+    NPC_GORTOK                      = 26687,
+    NPC_FURLBORG                    = 26684,
     NPC_WORGEN                      = 26683,
     NPC_JORMUNGAR                   = 26685,
-    NPC_RHINO                       = 26686
-};
-
-class MANGOS_DLL_DECL instance_pinnacle : public ScriptedInstance
-{
-    public:
-        instance_pinnacle(Map* pMap);
-
-        void Initialize();
-
-        void OnObjectCreate(GameObject* pGo);
-
-        void SetData(uint32 uiType, uint32 uiData);
-        uint32 GetData(uint32 uiType);
-
-        const char* Save() { return m_strInstData.c_str(); }
-        void Load(const char* chrIn);
-
-    private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
+    NPC_RHINO                       = 26686,
+    NPC_STASIS_CONTROLLER           = 26086,
 };
 
 #endif

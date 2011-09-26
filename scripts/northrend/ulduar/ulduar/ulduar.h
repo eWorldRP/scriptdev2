@@ -74,6 +74,7 @@ enum
     NPC_KOLOGARN                = 32930,
     NPC_RIGHT_ARM               = 32934,
     NPC_LEFT_ARM                = 32933,
+    NPC_KOLOGARN_BRIDGE_DUMMY   = 34297,
     NPC_AURIAYA                 = 33515,
     NPC_SANCTUM_SENTRY          = 34014,
     NPC_FERAL_DEFENDER          = 34035,

@@ -44,21 +44,24 @@ enum Summons
 
 enum BossSpells
 {
-SPELL_NETHER_POWER      = 67108,
-SPELL_INFERNAL          = 66258,
-SPELL_INFERNAL_ERUPTION = 66255,
-SPELL_FEL_FIREBALL      = 66532,
-SPELL_FEL_LIGHTING      = 66528,
-SPELL_INCINERATE_FLESH  = 66237,
-SPELL_BURNING_INFERNO   = 66242,
-SPELL_NETHER_PORTAL     = 66264,
-SPELL_LEGION_FLAME_0    = 66199,
-SPELL_LEGION_FLAME_1    = 66197,
-SPELL_SHIVAN_SLASH      = 67098,
-SPELL_SPINNING_STRIKE   = 66316,
-SPELL_FEL_INFERNO       = 67047,
-SPELL_FEL_STREAK        = 66494,
-SPELL_BERSERK           = 26662,
+    SPELL_JARAXXUS_TOUCH    = 66209,
+    SPELL_CURSE_OF_NETHER   = 66211,
+    SPELL_NETHER_POWER      = 67108,
+    SPELL_INFERNAL          = 66258,
+    SPELL_INFERNAL_ERUPTION = 66255,
+    SPELL_FEL_FIREBALL      = 66532,
+    SPELL_FEL_LIGHTING      = 66528,
+    SPELL_INCINERATE_FLESH  = 66237,
+    SPELL_BURNING_INFERNO   = 66242,
+    SPELL_NETHER_PORTAL     = 66264,
+    SPELL_LEGION_FLAME_0    = 66877,
+    SPELL_LEGION_FLAME_1    = 66197,
+    SPELL_SHIVAN_SLASH      = 67098,
+    SPELL_SPINNING_STRIKE   = 66316,
+    SPELL_FEL_INFERNO       = 67047,
+    SPELL_FEL_STREAK        = 66494,
+    SPELL_MISTRESS_KISS     = 67078,
+    SPELL_BERSERK           = 26662
 };
 
 /*######
@@ -70,92 +73,179 @@ struct MANGOS_DLL_DECL boss_jaraxxusAI : public BSWScriptedAI
     boss_jaraxxusAI(Creature* pCreature) : BSWScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        currentDifficulty = pCreature->GetMap()->GetDifficulty();
         Reset();
     }
 
     ScriptedInstance* m_pInstance;
     uint8 stage;
     uint8 substage;
-    uint8 m_portalsCount;
-    uint8 m_volcanoCount;
+    uint32 m_uiPowerTimer;
+    uint32 m_uiSummonTimer;
+    uint8 m_uiStackReply;
+    uint32 m_uiTouchTimer;
+    bool m_bVolcanoOrPortal;
+    bool m_bPowerCheck;
 
-    void Reset() {
-        if(!m_pInstance) return;
+    void Reset()
+    {
+        if(!m_pInstance)
+            return;
         m_pInstance->SetData(TYPE_JARAXXUS, NOT_STARTED);
 //        SetEquipmentSlots(false, EQUIP_MAIN, EQUIP_OFFHAND, EQUIP_RANGED);
-        m_portalsCount = 1;
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC) 
-        {
-            m_portalsCount = 2;
-            m_volcanoCount = 4;
-        } else {
-            m_portalsCount = 1;
-            m_volcanoCount = 4;
-        }
+        m_bVolcanoOrPortal = urand(0,1);
+        m_uiPowerTimer = 27000;
+        m_uiSummonTimer = 60000;
+        m_uiTouchTimer = urand(10000,15000);
+        m_bPowerCheck = false;
+
+        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+            m_uiStackReply = 4;
+        else
+            m_uiStackReply= 9;
+
         DoScriptText(-1713517,m_creature);
         m_creature->SetRespawnDelay(DAY);
     }
 
     void JustReachedHome()
     {
-        if (!m_pInstance) return;
-            m_pInstance->SetData(TYPE_JARAXXUS, FAIL);
-            m_creature->ForcedDespawn();
+        if (!m_pInstance)
+            return;
+
+        m_pInstance->SetData(TYPE_JARAXXUS, FAIL);
+        m_creature->ForcedDespawn();
     }
 
     void JustDied(Unit* pKiller)
     {
-        if (!m_pInstance) return;
-            DoScriptText(-1713525,m_creature);
-            m_pInstance->SetData(TYPE_JARAXXUS, DONE);
-            m_pInstance->SetData(TYPE_EVENT,2000);
-            m_pInstance->SetData(TYPE_STAGE,0);
+        if (!m_pInstance)
+            return;
+
+        DoScriptText(-1713525,m_creature);
+        m_pInstance->SetData(TYPE_JARAXXUS, DONE);
+        m_pInstance->SetData(TYPE_EVENT,2000);
+        m_pInstance->SetData(TYPE_STAGE,0);
     }
 
     void Aggro(Unit* pWho)
     {
-        if (!m_pInstance) return;
+        if (!m_pInstance)
+            return;
+
         m_creature->SetInCombatWithZone();
         m_pInstance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
         DoScriptText(-1713514,m_creature);
         doCast(SPELL_NETHER_POWER);
     }
 
+    //hacky workaround for interrupt Fel Fireball (need core fix)
+    void SpellHit(Unit* who, const SpellEntry* spell)
+    {
+        // don't self interrupt
+        if (!who->IsControlledByPlayer())
+            return;
+
+        if (spell->EffectMechanic[0] == MECHANIC_INTERRUPT || spell->EffectMechanic[1] == MECHANIC_INTERRUPT || spell->EffectMechanic[2] == MECHANIC_INTERRUPT)
+        {
+            m_creature->InterruptNonMeleeSpells(false, SPELL_FEL_FIREBALL);
+            m_creature->InterruptNonMeleeSpells(false, 66963); // 25 man
+            m_creature->InterruptNonMeleeSpells(false, 66964); // 10 man hero
+            m_creature->InterruptNonMeleeSpells(false, 66965); // 25 man hero
+        }
+    }
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
+        if (!m_bPowerCheck)
+        {
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_FIZZLEBANG))
+            {
+                if (!pTemp->isAlive())
+                {
+                    //little workaround to give initial stack amount of Nether Power
+                    doCast(SPELL_NETHER_POWER);
+                    m_uiStackReply--;
+                    if (m_uiStackReply <= 0)
+                        m_bPowerCheck = true;
+                }
+            }
+        }
+        
+        if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+        {
+            if (m_uiTouchTimer < uiDiff)
+            {
+                Unit* target = NULL;
+                for(uint8 i=0; i<10 ; i++)
+                {
+                    target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0);
+                    if(target->GetTypeId() == TYPEID_PLAYER)
+                        break;
+                }
+                if(target)
+                {
+                    DoCastSpellIfCan(target, SPELL_JARAXXUS_TOUCH, true);
+                    m_uiTouchTimer = urand(10000,15000);
+                }
+            }
+            else if(m_uiTouchTimer + uiDiff > 0)
+                m_uiTouchTimer -= uiDiff;
+        }
+
         timedCast(SPELL_FEL_FIREBALL, uiDiff);
 
         timedCast(SPELL_FEL_LIGHTING, uiDiff);
 
-        if (timedQuery(SPELL_INCINERATE_FLESH, uiDiff)) {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,1))
-                           {
-                           DoScriptText(-1713522,m_creature,pTarget);
-                           doCast(SPELL_INCINERATE_FLESH,pTarget);
-                           }
-                    }
+        if (timedQuery(SPELL_INCINERATE_FLESH, uiDiff))
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,1))
+            {
+                DoScriptText(-1713522,m_creature,pTarget);
+                doCast(SPELL_INCINERATE_FLESH,pTarget);
+             }
+        }
 
-        if (timedQuery(SPELL_LEGION_FLAME_1, uiDiff)) {
-                    DoScriptText(-1713518,m_creature);
-                    doCast(SPELL_LEGION_FLAME_1);
-                    };
+        if (timedQuery(SPELL_LEGION_FLAME_1, uiDiff))
+        {
+            DoScriptText(-1713518,m_creature);
+            doCast(SPELL_LEGION_FLAME_1);
+        }
 
-        if (timedQuery(SPELL_INFERNAL_ERUPTION, uiDiff)
-                             && m_volcanoCount > 0) {
-                DoScriptText(-1713520,m_creature);
-                if (doCast(NPC_INFERNAL_VOLCANO) == CAST_OK) --m_volcanoCount;
-                    };
+        if (m_uiSummonTimer < uiDiff)
+        {
+            float fPosX, fPosY, fPosZ;
+            fPosZ = m_creature->GetPositionZ();
+            double dOffset = urand(0, 17);
+            int i = urand(0, 19);
+            fPosX = SpawnLoc[1].x + 20 * cos(dOffset + i*18);
+            fPosY = SpawnLoc[1].y + 20 * sin(dOffset + i*18);
 
-        if (timedQuery(SPELL_NETHER_PORTAL, uiDiff)
-                             && m_portalsCount > 0
-                             &&  m_creature->GetHealthPercent() <= 90.0f)
-                             {
-                DoScriptText(-1713519,m_creature);
-                if (doCast(NPC_NETHER_PORTAL) == CAST_OK) --m_portalsCount;
-                };
+            if (m_bVolcanoOrPortal)
+            {
+                    DoScriptText(-1713520,m_creature);
+                    m_creature->SummonCreature(NPC_INFERNAL_VOLCANO, fPosX, fPosY, fPosZ, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+                    m_bVolcanoOrPortal = false;
+            }
+            else
+            {
+                    DoScriptText(-1713519,m_creature);
+                    m_creature->SummonCreature(NPC_NETHER_PORTAL, fPosX, fPosY, fPosZ, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+                    m_bVolcanoOrPortal=true;
+            }
+            m_uiSummonTimer = 60000;
+        }
+        else m_uiSummonTimer -= uiDiff;
+
+        if (m_uiPowerTimer < uiDiff)
+        {
+            doCast(SPELL_NETHER_POWER);
+            m_uiPowerTimer = 27000;
+        }
+        else
+            m_uiPowerTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
@@ -171,6 +261,7 @@ struct MANGOS_DLL_DECL mob_legion_flameAI : public BSWScriptedAI
     mob_legion_flameAI(Creature* pCreature) : BSWScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        currentDifficulty = pCreature->GetMap()->GetDifficulty();
         Reset();
     }
 
@@ -183,25 +274,27 @@ struct MANGOS_DLL_DECL mob_legion_flameAI : public BSWScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->SetInCombatWithZone();
         m_creature->SetRespawnDelay(DAY);
+        m_uiRangeCheck_Timer = 3000;
 
-        if (Unit* pTarget= m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0) ) {
-                m_creature->GetMotionMaster()->MoveChase(pTarget);
-                m_creature->SetSpeedRate(MOVE_RUN, 0.5);
-                }
+        if (Unit* pTarget= m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0) )
+        {
+            m_creature->GetMotionMaster()->MoveChase(pTarget);
+            m_creature->SetSpeedRate(MOVE_RUN, 0.5);
+        }
     }
 
     void KilledUnit(Unit* pVictim)
     {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER) return;
+        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            return;
     }
 
-    void JustDied(Unit* Killer)
-    {
-    }
+    void JustDied(Unit* Killer){}
 
     void Aggro(Unit *who)
     {
-        if (!m_pInstance) return;
+        if (!m_pInstance)
+            return;
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -218,14 +311,15 @@ struct MANGOS_DLL_DECL mob_legion_flameAI : public BSWScriptedAI
             {
                     if (m_creature->IsWithinDist(m_creature->getVictim(), 4.0f, false))
                     {
-                        DoCast(m_creature,SPELL_LEGION_FLAME_0);
+                        doCast(m_creature,SPELL_LEGION_FLAME_0);
                     }
             }
-            m_uiRangeCheck_Timer = 1000;
-            if (m_creature->getVictim()) {
-                                  m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-                                  m_creature->SetSpeedRate(MOVE_RUN, 0.5);
-                                  }
+            m_uiRangeCheck_Timer = 3000;
+            if (m_creature->getVictim())
+            {
+                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                m_creature->SetSpeedRate(MOVE_RUN, 0.5);
+            }
         }
         else m_uiRangeCheck_Timer -= uiDiff;
 
@@ -242,27 +336,28 @@ struct MANGOS_DLL_DECL mob_infernal_volcanoAI : public BSWScriptedAI
     mob_infernal_volcanoAI(Creature* pCreature) : BSWScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        currentDifficulty = pCreature->GetMap()->GetDifficulty();
         Reset();
     }
 
     ScriptedInstance* m_pInstance;
-    uint8 m_Count;
+    uint32 m_Count;
     uint32 m_Timer;
 
     void Reset()
     {
-        m_Timer = 15000;
+        m_Timer = 5000;
         m_creature->SetRespawnDelay(DAY);
-        if (currentDifficulty != RAID_DIFFICULTY_10MAN_HEROIC && currentDifficulty != RAID_DIFFICULTY_25MAN_HEROIC) 
+        m_Count = 0;
+        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL) 
         {
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            m_Count = 3;
-        } else
+        }
+        else
         {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_Count = 6;
-        }
+         }
     }
 
     void AttackStart(Unit *who)
@@ -272,28 +367,45 @@ struct MANGOS_DLL_DECL mob_infernal_volcanoAI : public BSWScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER) return;
+        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            return;
     }
 
-    void JustDied(Unit* Killer)
-    {
-    }
+    void JustDied(Unit* Killer){}
 
     void Aggro(Unit *who)
     {
-        if (!m_pInstance) return;
+        if (!m_pInstance)
+            return;
     }
 
     void UpdateAI(const uint32 diff)
     {
-        if (m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS) 
+        if (m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
             m_creature->ForcedDespawn();
 
-        if (timedQuery(SPELL_INFERNAL_ERUPTION,diff) && m_Count > 0) {
+        if (m_Timer < diff)
+        {
             doCast(SPELL_INFERNAL_ERUPTION);
             DoScriptText(-1713524,m_creature);
-            --m_Count;
+            m_Count++;
+            m_Timer = 5000;
+        }
+        else m_Timer -= diff;
+
+        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
+        {
+            if (m_Count >= 3)
+            {
+                m_creature->ForcedDespawn();
             }
+        }
+
+        if (m_Count >= 3)
+        {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -311,6 +423,7 @@ struct MANGOS_DLL_DECL mob_fel_infernalAI : public BSWScriptedAI
     mob_fel_infernalAI(Creature* pCreature) : BSWScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        currentDifficulty = pCreature->GetMap()->GetDifficulty();
         Reset();
     }
 
@@ -324,16 +437,16 @@ struct MANGOS_DLL_DECL mob_fel_infernalAI : public BSWScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER) return;
+        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            return;
     }
 
-    void JustDied(Unit* Killer)
-    {
-    }
+    void JustDied(Unit* Killer){}
 
     void Aggro(Unit *who)
     {
-        if (!m_pInstance) return;
+        if (!m_pInstance)
+            return;
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -362,32 +475,36 @@ struct MANGOS_DLL_DECL mob_nether_portalAI : public BSWScriptedAI
     mob_nether_portalAI(Creature* pCreature) : BSWScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        currentDifficulty = pCreature->GetMap()->GetDifficulty();
         Reset();
     }
 
     ScriptedInstance* m_pInstance;
     uint32 m_Timer;
-    uint8  m_Count;
+    bool m_bHasSummoned;
 
     void Reset()
     {
-        m_Timer = 10000;
+        m_Timer = 5000;
+        m_bHasSummoned = false;
         m_creature->SetRespawnDelay(DAY);
-        if (currentDifficulty != RAID_DIFFICULTY_10MAN_HEROIC && currentDifficulty != RAID_DIFFICULTY_25MAN_HEROIC) 
+        m_creature->SetDisplayId(22862);
+        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
         {
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            m_Count = 1;
-        } else
+        }
+        else
         {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_Count = 2;
-        }
+         }
+
     }
 
     void KilledUnit(Unit* pVictim)
     {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER) return;
+        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            return;
     }
 
     void AttackStart(Unit *who)
@@ -395,26 +512,41 @@ struct MANGOS_DLL_DECL mob_nether_portalAI : public BSWScriptedAI
         return;
     }
 
-    void JustDied(Unit* Killer)
-    {
-    }
+    void JustDied(Unit* Killer){}
 
     void Aggro(Unit *who)
     {
-        if (!m_pInstance) return;
+        if (!m_pInstance)
+            return;
     }
 
     void UpdateAI(const uint32 diff)
     {
-        if (m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS) 
+        if (m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS )
             m_creature->ForcedDespawn();
 
-        if (m_Timer < diff && m_Count > 0) {
-            DoCast(m_creature,SPELL_NETHER_PORTAL,false);
+        if (m_Timer < diff)
+        {
+            m_creature->SummonCreature(NPC_MISTRESS, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
             DoScriptText(-1713521,m_creature);
-            --m_Count;
-            m_Timer = 60000;
-            } else m_Timer -= diff;
+            m_bHasSummoned = true;
+            m_Timer = 15000;
+        }
+        else m_Timer -= diff;
+
+        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
+        {
+            if (m_bHasSummoned)
+            {
+                m_creature->ForcedDespawn();
+            }
+        }
+
+        if (m_bHasSummoned)
+        {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -432,6 +564,7 @@ struct MANGOS_DLL_DECL mob_mistress_of_painAI : public BSWScriptedAI
     mob_mistress_of_painAI(Creature* pCreature) : BSWScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        currentDifficulty = pCreature->GetMap()->GetDifficulty();
         Reset();
     }
 
@@ -445,12 +578,11 @@ struct MANGOS_DLL_DECL mob_mistress_of_painAI : public BSWScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER) return;
+        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            return;
     }
 
-    void JustDied(Unit* Killer)
-    {
-    }
+    void JustDied(Unit* Killer){}
 
     void Aggro(Unit *who)
     {
@@ -460,7 +592,9 @@ struct MANGOS_DLL_DECL mob_mistress_of_painAI : public BSWScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!m_pInstance) return;
+        if (!m_pInstance)
+            return;
+
         if (m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS) 
             m_creature->ForcedDespawn();
 
@@ -470,6 +604,9 @@ struct MANGOS_DLL_DECL mob_mistress_of_painAI : public BSWScriptedAI
         timedCast(SPELL_SHIVAN_SLASH, uiDiff);
 
         timedCast(SPELL_SPINNING_STRIKE, uiDiff);
+
+        if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            timedCast(SPELL_MISTRESS_KISS, uiDiff);
 
         DoMeleeAttackIfReady();
     }

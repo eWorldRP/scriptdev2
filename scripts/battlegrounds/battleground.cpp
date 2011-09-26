@@ -103,6 +103,51 @@ CreatureAI* GetAI_npc_spirit_guide(Creature* pCreature)
     return new npc_spirit_guideAI(pCreature);
 }
 
+struct MANGOS_DLL_DECL npc_battleground_vehicleAI : public ScriptedAI
+{
+    npc_battleground_vehicleAI(Creature* pCreature) : ScriptedAI(pCreature) 
+    {
+        SetCombatMovement(false);
+        Reset();
+    }
+
+    void Reset()
+    {
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+    }
+
+    void EnterCombat(Unit *pEnemy)
+    {
+        if (!m_creature->isCharmed())
+            m_creature->CombatStop();
+    }
+
+    void Aggro(Unit* who)
+    {
+        // Theorically, we should never be here...
+        if (!m_creature->isCharmed())
+            m_creature->CombatStop(); 
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->isCharmed())
+            if (m_creature->isInCombat()) // And theorically, this should never happen... but it happens
+                m_creature->CombatStop();
+    }
+
+    void HealBy(Unit* pHealer, uint32 uiAmountHealed)
+    {
+        // Some spells like chain heals can heal vehicles, this prevents it:
+        m_creature->DealDamage(m_creature, uiAmountHealed, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+    }
+};
+
+CreatureAI* GetAI_npc_battleground_vehicle(Creature* pCreature)
+{
+    return new npc_battleground_vehicleAI(pCreature);
+}
+
 void AddSC_battleground()
 {
     Script* newscript;
@@ -111,5 +156,10 @@ void AddSC_battleground()
     newscript->Name = "npc_spirit_guide";
     newscript->GetAI = &GetAI_npc_spirit_guide;
     newscript->pGossipHello = &GossipHello_npc_spirit_guide;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_battleground_vehicle";
+    newscript->GetAI = &GetAI_npc_battleground_vehicle;
     newscript->RegisterSelf();
 }

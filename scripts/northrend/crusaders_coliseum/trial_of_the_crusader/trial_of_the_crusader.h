@@ -70,8 +70,8 @@ enum
     NPC_CRUSADER_2_13           = 34445, //Holy paladin
     NPC_CRUSADER_2_14           = 34459, //Moonkin
 
-    NPC_CRUSADER_0_1            = 35465,
-    NPC_CRUSADER_0_2            = 35610,
+    NPC_CRUSADER_0_1            = 35465, //Warlock's pet: Zhaagrym
+    NPC_CRUSADER_0_2            = 35610, //Hunter's pet: Cat
 
     NPC_LIGHTBANE               = 34497,
     NPC_DARKBANE                = 34496,
@@ -96,9 +96,9 @@ enum
     GO_ARGENT_COLISEUM_FLOOR    = 195527, //20943
     GO_MAIN_GATE_DOOR           = 195647,
 
-    GO_WEST_PORTCULLIS          = 195589,
-    GO_SOUTH_PORTCULLIS         = 195590,
-    GO_NORTH_PORTCULLIS         = 195591,
+    GO_EAST_PORTCULLIS          = 195648,
+    GO_SOUTH_PORTCULLIS         = 195649,
+    GO_NORTH_PORTCULLIS         = 195650,
 
     TYPE_DIFFICULTY             = 101,
     TYPE_EVENT_TIMER            = 102,
@@ -112,27 +112,30 @@ enum
 
     DESPAWN_TIME                = 300000,
 
+    RAGGIO_ARENA                = 50,
+    SPELL_LIGHT_ESSENCE    = 65686,
+    SPELL_DARK_ESSENCE     = 65684
 };
 
 static Locations SpawnLoc[]=
 {
     {559.257996f, 90.266197f, 395.122986f},  // 0 Barrent
     {563.672974f, 139.571f, 393.837006f},    // 1 Center
-    {563.833008f, 187.244995f, 394.5f},      // 2 Backdoor
-    {577.347839f, 195.338888f, 395.14f},     // 3 - Right
-    {550.955933f, 195.338888f, 395.14f},     // 4 - Left
-    {575.042358f, 195.260727f, 395.137146f}, // 5
-    {552.248901f, 195.331955f, 395.132658f}, // 6
-    {573.342285f, 195.515823f, 395.135956f}, // 7
-    {554.239929f, 195.825577f, 395.137909f}, // 8
-    {571.042358f, 195.260727f, 395.137146f}, // 9
-    {556.720581f, 195.015472f, 395.132658f}, // 10
-    {569.534119f, 195.214478f, 395.139526f}, // 11
-    {569.231201f, 195.941071f, 395.139526f}, // 12
-    {558.811610f, 195.985779f, 394.671661f}, // 13
-    {567.641724f, 195.351501f, 394.659943f}, // 14
-    {560.633972f, 195.391708f, 395.137543f}, // 15
-    {565.816956f, 195.477921f, 395.136810f}, // 16
+    {563.833008f, 184.244995f, 394.5f},      // 2 Backdoor
+    {577.347839f, 184.338888f, 395.14f},     // 3 - Right
+    {550.955933f, 184.338888f, 395.14f},     // 4 - Left
+    {575.042358f, 184.260727f, 395.137146f}, // 5
+    {552.248901f, 184.331955f, 395.132658f}, // 6
+    {573.342285f, 184.515823f, 395.135956f}, // 7
+    {554.239929f, 184.825577f, 395.137909f}, // 8
+    {571.042358f, 184.260727f, 395.137146f}, // 9
+    {556.720581f, 184.015472f, 395.132658f}, // 10
+    {569.534119f, 184.214478f, 395.139526f}, // 11
+    {569.231201f, 184.941071f, 395.139526f}, // 12
+    {558.811610f, 184.985779f, 394.671661f}, // 13
+    {567.641724f, 184.351501f, 394.659943f}, // 14
+    {560.633972f, 184.391708f, 395.137543f}, // 15
+    {565.816956f, 184.477921f, 395.136810f}, // 16
     {563.549f, 152.474f, 394.393f},          // 17 - Lich king start
     {563.547f, 141.613f, 393.908f},          // 18 - Lich king end
     {787.932556f, 133.28978f, 142.612152f},  // 19 - Anub'arak start location
@@ -142,7 +145,7 @@ static Locations SpawnLoc[]=
     {541.602112f, 161.879837f, 394.587952f}, // 23 - Dark essence 2
     {541.021118f, 117.262932f, 395.314819f}, // 24 - Light essence 1
     {586.200562f, 162.145523f, 394.626129f}, // 25 - Light essence 2
-    {563.833008f, 195.244995f, 394.585561f}, // 26 - outdoor
+    {563.833008f, 184.244995f, 394.585561f}, // 26 - outdoor
     {548.610596f, 139.807800f, 394.321838f}, // 27 - fizzlebang end
 };
 
@@ -173,6 +176,26 @@ enum AnnounserMessages
     MSG_VALKIRIES              = 724004,
     MSG_LICH_KING              = 724005,
     MSG_ANUBARAK               = 724006,
+};
+
+enum FightPhases
+{
+    FIGHT1_INTRO_1          = 110,
+    FIGHT1_INTRO_2          = 120,
+    FIGHT1_INTRO_3          = 122,
+    FIGHT1_INTRO_4          = 130,
+    FIGHT1_INTRO_5          = 132,
+    FIGHT1_INTRO_6          = 140,
+    FIGHT1_SUMMON           = 150,
+    FIGHT1_END              = 160,
+    FIGHT2_INTRO_1          = 200,
+    FIGHT2_INTRO_2          = 205,
+    FIGHT2_SUMMON           = 210,
+    FIGHT2_END              = 220,
+    FIGHT3_INTRO_1          = 300,
+    FIGHT3_INTRO_2          = 305,
+    FIGHT3_SUMMON           = 310,
+    FIGHT3_END              = 320,
 };
 
 #endif

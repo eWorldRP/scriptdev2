@@ -827,7 +827,7 @@ struct MANGOS_DLL_DECL npc_mana_bomb_exp_triggerAI : public ScriptedAI
 
         m_bIsActivated = true;
 
-        pPlayer->KilledMonsterCredit(NPC_MANA_BOMB_KILL_TRIGGER);
+        pPlayer->KilledMonsterCredit(NPC_MANA_BOMB_KILL_TRIGGER, pGo->GetObjectGuid());
 
         pManaBomb = pGo;
     }
@@ -976,10 +976,10 @@ struct MANGOS_DLL_DECL npc_captive_child : public ScriptedAI
 
     void Reset() {}
 
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId)
+    void WaypointReached(uint32 uiPointId)
     {
-        if (uiMotionType == POINT_MOTION_TYPE)
-            m_creature->ForcedDespawn();                    // we only have one waypoint
+        // we only have one waypoint
+        m_creature->ForcedDespawn();
     }
 };
 
