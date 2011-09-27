@@ -222,6 +222,7 @@
     <ClCompile Include="..\include\sc_grid_searchers.cpp" />
     <ClCompile Include="..\include\sc_instance.cpp" />
     <ClCompile Include="..\include\sc_outdoor_pvp.cpp" />
+    <ClCompile Include="..\include\sc_utility.cpp" />
     <ClCompile Include="..\scripts\battlegrounds\battleground.cpp" />
     <ClCompile Include="..\scripts\battlegrounds\battlegroundSA.cpp" />
     <ClCompile Include="..\scripts\custom\npc_arena_honor.cpp" />
@@ -443,7 +444,7 @@
     <ClCompile Include="..\scripts\kalimdor\razorfen_downs\boss_amnennar_the_coldbringer.cpp" />
     <ClCompile Include="..\scripts\kalimdor\razorfen_downs\razorfen_downs.cpp" />
     <ClCompile Include="..\scripts\kalimdor\razorfen_kraul\instance_razorfen_kraul.cpp" />
-	<ClCompile Include="..\scripts\kalimdor\razorfen_kraul\razorfen_kraul.cpp" />
+    <ClCompile Include="..\scripts\kalimdor\razorfen_kraul\razorfen_kraul.cpp" />
     <ClCompile Include="..\scripts\kalimdor\ruins_of_ahnqiraj\boss_ayamiss.cpp" />
     <ClCompile Include="..\scripts\kalimdor\ruins_of_ahnqiraj\boss_buru.cpp" />
     <ClCompile Include="..\scripts\kalimdor\ruins_of_ahnqiraj\boss_kurinnaxx.cpp" />
@@ -710,7 +711,7 @@
     <ClCompile Include="..\scripts\outland\tempest_keep\botanica\boss_high_botanist_freywinn.cpp" />
     <ClCompile Include="..\scripts\outland\tempest_keep\botanica\boss_laj.cpp" />
     <ClCompile Include="..\scripts\outland\tempest_keep\botanica\boss_warp_splinter.cpp" />
-	<ClCompile Include="..\scripts\outland\tempest_keep\the_eye\boss_alar.cpp" />
+    <ClCompile Include="..\scripts\outland\tempest_keep\the_eye\boss_alar.cpp" />
     <ClCompile Include="..\scripts\outland\tempest_keep\the_eye\boss_astromancer.cpp" />
     <ClCompile Include="..\scripts\outland\tempest_keep\the_eye\boss_kaelthas.cpp" />
     <ClCompile Include="..\scripts\outland\tempest_keep\the_eye\boss_void_reaver.cpp" />
@@ -723,14 +724,15 @@
     <ClCompile Include="..\scripts\outland\terokkar_forest.cpp" />
     <ClCompile Include="..\scripts\outland\zangarmarsh.cpp" />
     <ClCompile Include="..\scripts\world\areatrigger_scripts.cpp" />
-	<ClCompile Include="..\scripts\world\bosses_emerald_dragons.cpp" />
+    <ClCompile Include="..\scripts\world\bosses_emerald_dragons.cpp" />
     <ClCompile Include="..\scripts\world\go_scripts.cpp" />
     <ClCompile Include="..\scripts\world\guards.cpp" />
     <ClCompile Include="..\scripts\world\item_scripts.cpp" />
     <ClCompile Include="..\scripts\world\mob_generic_creature.cpp" />
     <ClCompile Include="..\scripts\world\npcs_special.cpp" />
+    <ClCompile Include="..\scripts\world\npc_companion_handler.cpp" />
     <ClCompile Include="..\scripts\world\npc_professions.cpp" />
-	<ClCompile Include="..\scripts\world\pet_scripts.cpp" />
+    <ClCompile Include="..\scripts\world\pet_scripts.cpp" />
     <ClCompile Include="..\scripts\world\spell_scripts.cpp" />
     <ClCompile Include="..\scripts\world\world_map_scripts.cpp" />
     <ClCompile Include="..\include\precompiled.cpp">
@@ -760,6 +762,7 @@
     <ClInclude Include="..\include\sc_grid_searchers.h" />
     <ClInclude Include="..\include\sc_instance.h" />
     <ClInclude Include="..\include\sc_outdoor_pvp.h" />
+    <ClInclude Include="..\include\sc_utility.h" />
     <ClInclude Include="..\scripts\eastern_kingdoms\blackrock_depths\blackrock_depths.h" />
     <ClInclude Include="..\scripts\eastern_kingdoms\blackrock_spire\blackrock_spire.h" />
     <ClInclude Include="..\scripts\eastern_kingdoms\blackwing_lair\blackwing_lair.h" />

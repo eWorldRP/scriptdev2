@@ -996,7 +996,7 @@
     <ClCompile Include="..\scripts\kalimdor\razorfen_kraul\instance_razorfen_kraul.cpp">
       <Filter>scripts\kalimdor\razorfen_kraul</Filter>
     </ClCompile>
-	<ClCompile Include="..\scripts\kalimdor\razorfen_kraul\razorfen_kraul.cpp">
+    <ClCompile Include="..\scripts\kalimdor\razorfen_kraul\razorfen_kraul.cpp">
       <Filter>scripts\kalimdor\razorfen_kraul</Filter>
     </ClCompile>
     <ClCompile Include="..\scripts\kalimdor\ruins_of_ahnqiraj\boss_ayamiss.cpp">
@@ -1779,7 +1779,7 @@
     <ClCompile Include="..\scripts\outland\tempest_keep\botanica\boss_warp_splinter.cpp">
       <Filter>scripts\outland\tempest_keep\botanica</Filter>
     </ClCompile>
-	<ClCompile Include="..\scripts\outland\tempest_keep\the_eye\boss_alar.cpp">
+    <ClCompile Include="..\scripts\outland\tempest_keep\the_eye\boss_alar.cpp">
       <Filter>scripts\outland\tempest_keep\the_eye</Filter>
     </ClCompile>
     <ClCompile Include="..\scripts\outland\tempest_keep\the_eye\boss_astromancer.cpp">
@@ -1818,7 +1818,7 @@
     <ClCompile Include="..\scripts\world\areatrigger_scripts.cpp">
       <Filter>scripts\world</Filter>
     </ClCompile>
-	<ClCompile Include="..\scripts\world\bosses_emerald_dragons.cpp">
+    <ClCompile Include="..\scripts\world\bosses_emerald_dragons.cpp">
       <Filter>scripts\world</Filter>
     </ClCompile>
     <ClCompile Include="..\scripts\world\go_scripts.cpp">
@@ -1873,6 +1873,13 @@
     <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_northrend.cpp" />
     <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_outland.cpp" />
     <ClCompile Include="..\ScriptMgr.cpp" />
+    <ClCompile Include="..\scripts\world\pet_scripts.cpp" />
+    <ClCompile Include="..\scripts\world\npc_companion_handler.cpp">
+      <Filter>scripts\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\sc_utility.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\base\BSW_ai.h">
@@ -2129,6 +2136,9 @@
     <ClInclude Include="..\sd2_revision_nr.h" />
     <ClInclude Include="..\sd2_revision_sql.h" />
     <ClInclude Include="..\ScriptMgr.h" />
+    <ClInclude Include="..\include\sc_utility.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\revision.h" />
