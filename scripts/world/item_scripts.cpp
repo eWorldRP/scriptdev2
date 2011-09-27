@@ -210,7 +210,7 @@ bool ItemUse_item_ram_racing_reins(Player* pPlayer, Item* pItem, const SpellCast
         }
         if (pPlayer->HasAura(SPELL_SPEED_RAM_TROT))
         {
-			if (SpellAuraHolder* pAura = pPlayer->GetSpellAuraHolder(SPELL_SPEED_RAM_TROT))
+			if (SpellAuraHolderPtr pAura = pPlayer->GetSpellAuraHolder(SPELL_SPEED_RAM_TROT))
             {
                 if (pAura->GetAuraDuration() >= (pAura->GetAuraMaxDuration() - 2000))
                 {
@@ -223,7 +223,7 @@ bool ItemUse_item_ram_racing_reins(Player* pPlayer, Item* pItem, const SpellCast
         }
         if (pPlayer->HasAura(SPELL_SPEED_RAM_CANTER))
         {
-            if (SpellAuraHolder* pAura = pPlayer->GetSpellAuraHolder(SPELL_SPEED_RAM_CANTER))
+            if (SpellAuraHolderPtr pAura = pPlayer->GetSpellAuraHolder(SPELL_SPEED_RAM_CANTER))
             {
                 if (pAura->GetAuraDuration() >= (pAura->GetAuraMaxDuration() - 1000))
                 {
@@ -236,7 +236,7 @@ bool ItemUse_item_ram_racing_reins(Player* pPlayer, Item* pItem, const SpellCast
         }
         if (pPlayer->HasAura(SPELL_SPEED_RAM_GALLOP))
         {
-            if (SpellAuraHolder* pAura = pPlayer->GetSpellAuraHolder(SPELL_SPEED_RAM_GALLOP, pPlayer->GetObjectGuid()))
+            if (SpellAuraHolderPtr pAura = pPlayer->GetSpellAuraHolder(SPELL_SPEED_RAM_GALLOP, pPlayer->GetObjectGuid()))
                 pAura->SetAuraDuration(pAura->GetAuraMaxDuration());
         }
     }

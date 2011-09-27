@@ -1352,7 +1352,7 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
                     if (pTemp && pTemp->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDist(pTemp, 60.0f)) //player above don't have to be hit
                     {
                         //workaround for remove sanity
-                        if(SpellAuraHolder* sanityAura = pTemp->GetSpellAuraHolder(SPELL_SANITY))
+                        if(SpellAuraHolderPtr sanityAura = pTemp->GetSpellAuraHolder(SPELL_SANITY))
                         {
                             if(sanityAura->ModStackAmount(-100))
                             {
@@ -1537,7 +1537,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
         if (!pTarget1->IsWithinDist(pTarget2, 20.0f))
         {
             //workaround for remove sanity
-            if(SpellAuraHolder* sanityAura = pTarget1->GetSpellAuraHolder(SPELL_SANITY))
+            if(SpellAuraHolderPtr sanityAura = pTarget1->GetSpellAuraHolder(SPELL_SANITY))
             {
                 if(sanityAura->ModStackAmount(-2))
                 {
@@ -1545,7 +1545,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
                     m_creature->CastSpell(pTarget1, SPELL_INSANE, false);
                  }
              }
-             if(SpellAuraHolder* sanityAura = pTarget2->GetSpellAuraHolder(SPELL_SANITY))
+             if(SpellAuraHolderPtr sanityAura = pTarget2->GetSpellAuraHolder(SPELL_SANITY))
              {
                  if(sanityAura->ModStackAmount(-2))
                  {
@@ -1823,7 +1823,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
                         DoCast(pTarget, m_bIsRegularMode ? SPELL_PHYCHOSIS : SPELL_PHYCHOSIS_H);
 
                         //workaround for remove sanity
-                        if(SpellAuraHolder* sanityAura = pTarget->GetSpellAuraHolder(SPELL_SANITY))
+                        if(SpellAuraHolderPtr sanityAura = pTarget->GetSpellAuraHolder(SPELL_SANITY))
                         {
                             if(sanityAura->ModStackAmount(m_bIsRegularMode ? -12 : -9))
                             {
@@ -1843,7 +1843,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
                         DoCast(pTarget, SPELL_MALADY_OF_THE_MIND);
 
                         //workaround for remove sanity
-                        if(SpellAuraHolder* sanityAura = pTarget->GetSpellAuraHolder(SPELL_SANITY))
+                        if(SpellAuraHolderPtr sanityAura = pTarget->GetSpellAuraHolder(SPELL_SANITY))
                         {
                             if(sanityAura->ModStackAmount(-3))
                             {
@@ -1858,9 +1858,9 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
 
                 if (m_uiBrainLinkTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                         m_uiLinkTarget1GUID = pTarget->GetGUID();
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 1))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
                         m_uiLinkTarget2GUID = pTarget->GetGUID();
                     DoCast(m_creature, SPELL_BRAIN_LINK);
                     m_bIsBrainLink          = true;
