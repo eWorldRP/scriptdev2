@@ -289,7 +289,7 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
     void UpdateAI(const uint32 uiDiff)
     {
 
-        if ((!m_creature->SelectHostileTarget() || !m_creature->getVictim()) && (m_pInstance->GetData(TYPE_NORTHREND_BEASTS) != ACIDMAW_SUBMERGED))
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         switch (stage)
@@ -478,8 +478,7 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if ((!m_creature->SelectHostileTarget() || !m_creature->getVictim()) 
-        && (m_pInstance->GetData(TYPE_NORTHREND_BEASTS) != DREADSCALE_SUBMERGED))
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         switch (stage) 
@@ -658,6 +657,7 @@ struct MANGOS_DLL_DECL boss_icehowlAI : public BSWScriptedAI
     uint8 stage;
     float fPosX, fPosY, fPosZ;
     Unit* pTarget;
+    Unit* pOldTarget;
 
     void Reset()
     {
@@ -693,7 +693,8 @@ struct MANGOS_DLL_DECL boss_icehowlAI : public BSWScriptedAI
             m_creature->GetMotionMaster()->MovementExpired();
             MovementStarted = false;
             SetCombatMovement(true);
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            if (pOldTarget && pOldTarget->isAlive())
+                m_creature->GetMotionMaster()->MoveChase(pOldTarget);
         }
     }
 
@@ -729,6 +730,7 @@ struct MANGOS_DLL_DECL boss_icehowlAI : public BSWScriptedAI
             if (timedQuery(SPELL_MASSIVE_CRASH, uiDiff))
             {
                 m_creature->SetPosition(SpawnLoc[1].x, SpawnLoc[1].y, SpawnLoc[1].z, 0);
+                pOldTarget = m_creature->getVictim();
                 stage = 1;
                 break;
             }
@@ -767,14 +769,14 @@ struct MANGOS_DLL_DECL boss_icehowlAI : public BSWScriptedAI
                     fTarY =fPosY - SpawnLoc[1].y;
                     //this to avoid boss going in texture and despawn
                     if (fTarX > 0)
-                        fTarX = SpawnLoc[1].x - fTarX +5.0f;
+                        fTarX = SpawnLoc[1].x - fTarX +8.0f;
                     else
-                        fTarX = SpawnLoc[1].x - fTarX -5.0f;
+                        fTarX = SpawnLoc[1].x - fTarX -8.0f;
 
                     if (fTarY > 0)
-                        fTarY = SpawnLoc[1].y - fTarY +5.0f;
+                        fTarY = SpawnLoc[1].y - fTarY +8.0f;
                     else
-                        fTarY = SpawnLoc[1].y - fTarY -5.0f;
+                        fTarY = SpawnLoc[1].y - fTarY -8.0f;
 
                     m_creature->SetPosition(fTarX, fTarY, fPosZ, 0);
                     TrampleCasted = false;
@@ -820,8 +822,6 @@ struct MANGOS_DLL_DECL boss_icehowlAI : public BSWScriptedAI
                         doCast(SPELL_TRAMPLE, pPlayer);
                         TrampleCasted = true;
                         MovementStarted = false;
-                        m_creature->GetMotionMaster()->MovementExpired();
-                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                     }
                 }
             }
@@ -840,7 +840,8 @@ struct MANGOS_DLL_DECL boss_icehowlAI : public BSWScriptedAI
             }
             MovementStarted = false;
             m_creature->GetMotionMaster()->MovementExpired();
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            if (pOldTarget->isAlive())
+                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
             SetCombatMovement(true);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             stage = 0;

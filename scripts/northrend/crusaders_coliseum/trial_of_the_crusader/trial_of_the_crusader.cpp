@@ -100,7 +100,7 @@ struct MANGOS_DLL_DECL npc_toc_announcerAI : public ScriptedAI
                 case 0: 
                     break;
                 case 1:
-                    if (pInstance->GetData(TYPE_NORTHREND_BEASTS) == GORMOK_DONE)
+                    if (pInstance->GetData(TYPE_NORTHREND_BEASTS) == GORMOK_DONE && pInstance->GetData(TYPE_EVENT) != FIGHT2_END)
                     {
                         pInstance->SetData(TYPE_STAGE, 2);
                         pInstance->SetData(TYPE_EVENT, FIGHT2_INTRO_1);
@@ -115,7 +115,7 @@ struct MANGOS_DLL_DECL npc_toc_announcerAI : public ScriptedAI
                     }
                     break;
                 case 2:
-                    if (pInstance->GetData(TYPE_NORTHREND_BEASTS) == SNAKES_DONE)
+                    if (pInstance->GetData(TYPE_NORTHREND_BEASTS) == SNAKES_DONE  && pInstance->GetData(TYPE_EVENT) != FIGHT3_END)
                     {
                         pInstance->SetData(TYPE_STAGE, 3);
                         pInstance->SetData(TYPE_EVENT, 300);
