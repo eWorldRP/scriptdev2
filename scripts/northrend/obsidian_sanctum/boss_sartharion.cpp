@@ -174,9 +174,9 @@ float m_afTsunamiStartLoc[5][4]=
     {3287.5f, 511.10f, 58.6f, 3.19f},
 };
 
-uint64 m_uiAcolyteShadronGUID;
-uint64 m_uiAcolyteVesperonGUID;
-std::list<uint64> m_lEggsGUIDList;
+ObjectGuid m_uiAcolyteShadronGUID;
+ObjectGuid m_uiAcolyteVesperonGUID;
+std::list<ObjectGuid> m_lEggsGUIDList;
 
 /*######
 ## Boss Sartharion
@@ -260,9 +260,9 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
 
         if (m_pInstance)
         {
-            Creature* pTene = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_TENEBRON));
-            Creature* pShad = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_SHADRON));
-            Creature* pVesp = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_VESPERON));
+            Creature* pTene = m_pInstance->GetSingleCreatureFromStorage(NPC_TENEBRON);
+            Creature* pShad = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON);
+            Creature* pVesp = m_pInstance->GetSingleCreatureFromStorage(NPC_VESPERON);
 
             if (m_bTenebronHelpedInFight && pTene)
             {
@@ -271,7 +271,7 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
                 else
                     pTene->AI()->EnterEvadeMode();
                 if (!m_lEggsGUIDList.empty()) //inserito per facilitare il reset dopo il fight, in modo da eliminare le uova non schiuse rimaste
-                    for (std::list<uint64>::iterator itr = m_lEggsGUIDList.begin(); itr != m_lEggsGUIDList.end(); ++itr)
+                    for (std::list<ObjectGuid>::iterator itr = m_lEggsGUIDList.begin(); itr != m_lEggsGUIDList.end(); ++itr)
                         if (Creature* pEgg = m_creature->GetMap()->GetCreature( *itr))
                             pEgg->ForcedDespawn();
                 m_lEggsGUIDList.clear();
@@ -371,9 +371,9 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
 
     void FetchDragons()
     {
-        Creature* pTene = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_TENEBRON));
-        Creature* pShad = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_SHADRON));
-        Creature* pVesp = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_VESPERON));
+        Creature* pTene = m_pInstance->GetSingleCreatureFromStorage(NPC_TENEBRON);
+        Creature* pShad = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON);
+        Creature* pVesp = m_pInstance->GetSingleCreatureFromStorage(NPC_VESPERON);
 
         //if at least one of the dragons are alive and are being called
         uint8 uiCountFetchableDragons = 0;
@@ -424,7 +424,7 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
     {
         if (m_pInstance)
         {
-            Creature* pTemp = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(uiEntry));
+            Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiEntry);
 
             if (pTemp && pTemp->isAlive() && !pTemp->getVictim())
             {
@@ -437,13 +437,13 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
                 int32 iTextId = 0;
 
                 Creature* pAdd = NULL;
-                pAdd = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_TENEBRON));
+                pAdd = m_pInstance->GetSingleCreatureFromStorage(NPC_TENEBRON);
                 if (pAdd)
                     m_uiTeneHealth = pAdd->GetHealth();
-                pAdd = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_SHADRON));
+                pAdd = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON);
                 if (pAdd)
                     m_uiShadHealth = pAdd->GetHealth();
-                pAdd = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_VESPERON));
+                pAdd = m_pInstance->GetSingleCreatureFromStorage(NPC_VESPERON);
                 if (pAdd)
                     m_uiVespHealth = pAdd->GetHealth();
 
@@ -535,7 +535,7 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
                     if (pAcolyte->isAlive())
                         bNoAliveTwilightRealm = false;
                 if (!m_lEggsGUIDList.empty())
-                    for (std::list<uint64>::iterator itr = m_lEggsGUIDList.begin(); itr != m_lEggsGUIDList.end(); ++itr)
+                    for (std::list<ObjectGuid>::iterator itr = m_lEggsGUIDList.begin(); itr != m_lEggsGUIDList.end(); ++itr)
                         if (Creature* pTemp = m_creature->GetMap()->GetCreature( *itr))
                             if (pTemp->isAlive())
                             {
@@ -564,13 +564,13 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
             {
                 m_creature->SetHealth(m_uiSarthHealth);
                 Creature* pTemp = NULL;
-                pTemp = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_TENEBRON));
+                pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_TENEBRON);
                 if (pTemp && pTemp->isAlive())
                     pTemp->SetHealth(m_uiTeneHealth);
-                pTemp = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_SHADRON));
+                pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON);
                 if (pTemp && pTemp->isAlive())
                     pTemp->SetHealth(m_uiShadHealth);
-                pTemp = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_VESPERON));
+                pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_VESPERON);
                 if (pTemp && pTemp->isAlive())
                     pTemp->SetHealth(m_uiVespHealth);
             }
@@ -584,13 +584,13 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
             bool canBerserk =false;
             Creature* pTemp = NULL;
 
-            pTemp = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_TENEBRON));
+            pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_TENEBRON);
             if (pTemp && pTemp->isAlive())
                 canBerserk = true;
-            pTemp = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_SHADRON));
+            pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON);
             if (pTemp && pTemp->isAlive())
                 canBerserk = true;
-            pTemp = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_VESPERON));
+            pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_VESPERON);
             if (pTemp && pTemp->isAlive())
                 canBerserk = true;
             if (canBerserk)
@@ -929,7 +929,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                         if (Creature* pEgg = m_creature->SummonCreature(NPC_TWILIGHT_EGG, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000))
                         {
                             pEgg->SetPhaseMask(16, true);
-                            m_lEggsGUIDList.push_back(pEgg->GetGUID());
+                            m_lEggsGUIDList.push_back(pEgg->GetObjectGuid());
                         }
                     }
                     iPortalRespawnTime = 20;
@@ -944,18 +944,18 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                             pAcolyte = NULL;
                             if (pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_SHADRON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000))
                             {
-                                m_uiAcolyteShadronGUID = pAcolyte->GetGUID();
+                                m_uiAcolyteShadronGUID = pAcolyte->GetObjectGuid();
                                 pAcolyte->SetPhaseMask(16, true);
                             }
                         }
                         if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
                         {
-                            if (Creature* pSarth = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_SARTHARION)))
+                            if (Creature* pSarth = m_pInstance->GetSingleCreatureFromStorage(NPC_SARTHARION))
                                 pSarth->CastSpell(pSarth, SPELL_GIFT_OF_TWILIGTH_SAR, true);
                         }
                         else
                         {
-                            if (Creature* pShad = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_SHADRON)))
+                            if (Creature* pShad = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON))
                                 pShad->CastSpell(pShad, SPELL_GIFT_OF_TWILIGTH_SHA, true);
                         }
                     }
@@ -985,7 +985,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                             pAcolyte = NULL;
                             if (pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_VESPERON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000))
                             {
-                                m_uiAcolyteVesperonGUID = pAcolyte->GetGUID();
+                                m_uiAcolyteVesperonGUID = pAcolyte->GetObjectGuid();
                                 pAcolyte->SetPhaseMask(16, true);
                             }
                         }
@@ -1020,7 +1020,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                 if (pAcolyte->isAlive())
                     bNoAliveTwilightRealm = false;
             if (!m_lEggsGUIDList.empty())
-                for (std::list<uint64>::iterator itr = m_lEggsGUIDList.begin(); itr != m_lEggsGUIDList.end(); ++itr)
+                for (std::list<ObjectGuid>::iterator itr = m_lEggsGUIDList.begin(); itr != m_lEggsGUIDList.end(); ++itr)
                     if (Creature* pTemp = m_creature->GetMap()->GetCreature( *itr))
                         if (pTemp->isAlive())
                         {
@@ -1043,7 +1043,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                 iTextId = SAY_TENEBRON_DEATH;
 
                 if (!m_lEggsGUIDList.empty())
-                    for (std::list<uint64>::iterator itr = m_lEggsGUIDList.begin(); itr != m_lEggsGUIDList.end(); ++itr)
+                    for (std::list<ObjectGuid>::iterator itr = m_lEggsGUIDList.begin(); itr != m_lEggsGUIDList.end(); ++itr)
                         if (Creature* pEgg = m_creature->GetMap()->GetCreature( *itr))
                             pEgg->ForcedDespawn();
                 break;
@@ -1080,10 +1080,10 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
             }
 
             // Twilight Revenge to main boss
-            if (Creature* pSartharion = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_SARTHARION)))
+            if (Creature* pSartharion = m_pInstance->GetSingleCreatureFromStorage(NPC_SARTHARION))
             {
                 if (pSartharion->isAlive())
-                m_creature->CastSpell(pSartharion, SPELL_TWILIGHT_REVENGE, true, 0, 0, pSartharion->GetGUID());
+                    m_creature->CastSpell(pSartharion, SPELL_TWILIGHT_REVENGE, true, 0, 0, pSartharion->GetObjectGuid());
                 m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }
         }
@@ -1130,7 +1130,7 @@ struct MANGOS_DLL_DECL mob_tenebronAI : public dummy_dragonAI
         m_uiHatchEggTimer = 15000;
         m_uiCheckTimer = 2000;
         if (!m_lEggsGUIDList.empty()) //inserito per facilitare il reset dopo il fight, in modo da eliminare le uova non schiuse rimaste
-            for (std::list<uint64>::iterator itr = m_lEggsGUIDList.begin(); itr != m_lEggsGUIDList.end(); ++itr)
+            for (std::list<ObjectGuid>::iterator itr = m_lEggsGUIDList.begin(); itr != m_lEggsGUIDList.end(); ++itr)
                 if (Creature* pEgg = m_creature->GetMap()->GetCreature( *itr))
                     pEgg->ForcedDespawn();
         m_lEggsGUIDList.clear();
@@ -1412,7 +1412,7 @@ struct MANGOS_DLL_DECL mob_acolyte_of_shadronAI : public ScriptedAI
             if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
             {
                 //not solo fight, so main boss has deduff
-                pDebuffTarget = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_SARTHARION));
+                pDebuffTarget = m_pInstance->GetSingleCreatureFromStorage(NPC_SARTHARION);
 
                 if (pDebuffTarget && pDebuffTarget->isAlive() && pDebuffTarget->HasAura(SPELL_GIFT_OF_TWILIGTH_SAR))
                     pDebuffTarget->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SAR);
@@ -1420,7 +1420,7 @@ struct MANGOS_DLL_DECL mob_acolyte_of_shadronAI : public ScriptedAI
             else
             {
                 //event not in progress, then solo fight and must remove debuff mini-boss
-                pDebuffTarget = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_SHADRON));
+                pDebuffTarget = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON);
 
                 if (pDebuffTarget && pDebuffTarget->isAlive() && pDebuffTarget->HasAura(SPELL_GIFT_OF_TWILIGTH_SHA))
                     pDebuffTarget->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SHA);
@@ -1667,7 +1667,7 @@ struct MANGOS_DLL_DECL mob_flame_tsunamiAI : public ScriptedAI
 
     uint32 m_uiTickTimer;
     uint32 m_uiMovementStartTimer;
-    uint64 m_uiDummyDamagerGUID;
+    ObjectGuid m_uiDummyDamagerGUID;
 
     void Reset()
     {
@@ -1685,7 +1685,7 @@ struct MANGOS_DLL_DECL mob_flame_tsunamiAI : public ScriptedAI
             pDummyDamager->setFaction(14);
             pDummyDamager->SetWalk(false);
             pDummyDamager->SetSpeedRate(MOVE_RUN, m_creature->GetSpeedRate(MOVE_RUN));
-            m_uiDummyDamagerGUID = pDummyDamager->GetGUID();
+            m_uiDummyDamagerGUID = pDummyDamager->GetObjectGuid();
         }
     }
 
