@@ -1880,6 +1880,9 @@
     <ClCompile Include="..\include\sc_utility.cpp">
       <Filter>include</Filter>
     </ClCompile>
+    <ClCompile Include="..\scripts\kalimdor\durotar.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\base\BSW_ai.h">

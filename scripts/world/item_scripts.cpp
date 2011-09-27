@@ -212,7 +212,7 @@ bool ItemUse_item_ram_racing_reins(Player* pPlayer, Item* pItem, const SpellCast
         {
 			if (SpellAuraHolderPtr pAura = pPlayer->GetSpellAuraHolder(SPELL_SPEED_RAM_TROT))
             {
-                if (pAura->GetAuraDuration() >= (pAura->GetAuraMaxDuration() - 2000))
+                if (pAura->GetAuraDuration() >= (pAura->GetAuraMaxDuration() - 1000))
                 {
                     pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_TROT);
                     pPlayer->CastSpell(pPlayer, SPELL_SPEED_RAM_CANTER, true);
@@ -225,7 +225,7 @@ bool ItemUse_item_ram_racing_reins(Player* pPlayer, Item* pItem, const SpellCast
         {
             if (SpellAuraHolderPtr pAura = pPlayer->GetSpellAuraHolder(SPELL_SPEED_RAM_CANTER))
             {
-                if (pAura->GetAuraDuration() >= (pAura->GetAuraMaxDuration() - 1000))
+                if (pAura->GetAuraDuration() >= (pAura->GetAuraMaxDuration() - 500))
                 {
                     pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_CANTER);
                     pPlayer->CastSpell(pPlayer, SPELL_SPEED_RAM_GALLOP, false);
