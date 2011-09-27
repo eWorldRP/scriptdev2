@@ -50,7 +50,7 @@ void npc_escortAI::GetAIInformation(ChatHandler& reader)
             oss << "\nNext Waypoint Id = " << CurrentWP->uiId << " Position: " << CurrentWP->fX << " " << CurrentWP->fY << " " << CurrentWP->fZ;
     }
 
-    reader.PSendSysMessage(oss.str().c_str());
+    reader.PSendSysMessage("%s",oss.str().c_str());
 }
 
 bool npc_escortAI::IsVisible(Unit* pWho) const
@@ -536,7 +536,7 @@ void npc_escortAI::Start(bool bRun, const Player* pPlayer, const Quest* pQuest, 
     //disable npcflags
     m_creature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
-    debug_log("SD2: EscortAI started with %u waypoints. Run = %d, PlayerGuid = %u", WaypointList.size(), m_bIsRunning, m_playerGuid.GetCounter());
+    debug_log("SD2: EscortAI started with %u waypoints. Run = %d, PlayerGuid = %u", (unsigned int)WaypointList.size(), m_bIsRunning, m_playerGuid.GetCounter());
 
     CurrentWP = WaypointList.begin();
 

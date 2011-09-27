@@ -84,19 +84,19 @@ bool GOUse_go_barov_journal(Player* pPlayer, GameObject* pGo)
 
 enum
 {
-    FACTION_LC     = 1011,
-    FACTION_SHAT   = 935,
-    FACTION_CE     = 942,
-    FACTION_CON    = 933,
-    FACTION_KT     = 989,
-    FACTION_SPOR   = 970,
+    NPC_LC          = 22811,
+    NPC_SHAT        = 22812,
+    NPC_CE          = 22810,
+    NPC_CON         = 22813,
+    NPC_KT          = 22815,
+    NPC_SPOR        = 22814,
 
-    SPELL_REP_LC   = 39456,
-    SPELL_REP_SHAT = 39457,
-    SPELL_REP_CE   = 39460,
-    SPELL_REP_CON  = 39474,
-    SPELL_REP_KT   = 39475,
-    SPELL_REP_SPOR = 39476
+    SPELL_REP_LC    = 39456,
+    SPELL_REP_SHAT  = 39457,
+    SPELL_REP_CE    = 39460,
+    SPELL_REP_CON   = 39474,
+    SPELL_REP_KT    = 39475,
+    SPELL_REP_SPOR  = 39476
 };
 
 const uint32 uiNpcPrisonEntry[] =
@@ -117,23 +117,21 @@ bool GOUse_go_ethereum_prison(Player* pPlayer, GameObject* pGo)
         {
             uint32 uiSpell = 0;
 
-            if (FactionTemplateEntry const* pFaction = pCreature->getFactionTemplateEntry())
+            switch(pCreature->GetEntry())
             {
-                switch(pFaction->faction)
-                {
-                    case FACTION_LC:   uiSpell = SPELL_REP_LC;   break;
-                    case FACTION_SHAT: uiSpell = SPELL_REP_SHAT; break;
-                    case FACTION_CE:   uiSpell = SPELL_REP_CE;   break;
-                    case FACTION_CON:  uiSpell = SPELL_REP_CON;  break;
-                    case FACTION_KT:   uiSpell = SPELL_REP_KT;   break;
-                    case FACTION_SPOR: uiSpell = SPELL_REP_SPOR; break;
-                }
-
-                if (uiSpell)
-                    pCreature->CastSpell(pPlayer,uiSpell,false);
-                else
-                    error_log("SD2: go_ethereum_prison summoned creature (entry %u) but faction (%u) are not expected by script.",pCreature->GetEntry(),pCreature->getFaction());
+                case NPC_LC:   uiSpell = SPELL_REP_LC;   break;
+                case NPC_SHAT: uiSpell = SPELL_REP_SHAT; break;
+                case NPC_CE:   uiSpell = SPELL_REP_CE;   break;
+                case NPC_CON:  uiSpell = SPELL_REP_CON;  break;
+                case NPC_KT:   uiSpell = SPELL_REP_KT;   break;
+                case NPC_SPOR: uiSpell = SPELL_REP_SPOR; break;
+                default: break;
             }
+
+            if (uiSpell)
+                pCreature->CastSpell(pPlayer,uiSpell,false);
+            else
+                error_log("SD2: go_ethereum_prison summoned creature (entry %u) but faction (%u) are not expected by script.",pCreature->GetEntry(),pCreature->getFaction());
         }
     }
 
@@ -479,7 +477,7 @@ bool GOUse_go_scourge_enclosure(Player* pPlayer, GameObject* pGo)
             (*itr)->CastSpell((*itr),SPELL_GYMER_LOCK_EXPLOSION,true);
         }
     }
-    pPlayer->KilledMonsterCredit(NPC_GYMER_LOCK_DUMMY);
+    pPlayer->KilledMonsterCredit(uint32(NPC_GYMER_LOCK_DUMMY));
     return true;
 }
 

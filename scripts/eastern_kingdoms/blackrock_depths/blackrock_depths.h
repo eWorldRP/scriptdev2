@@ -54,6 +54,8 @@ enum
     GO_ARENA_SPOILS         = 181074,
     GO_SECRET_DOOR          = 174553,
 
+    GO_MINIONSUMMONER       = 188508,
+
     SPELL_STONED            = 10255,                        // Aura of Warbringer Constructs in Relict Vault
 };
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -19,25 +19,38 @@ enum
     NPC_ORMOROK                    = 26794,
     NPC_KERISTRASZA                = 26723,
 
+    NPC_COMM_KOLURG                = 26798,
+    NPC_COMM_STOUTBEARD            = 26796,
+
     NPC_BREATH_CASTER              = 27048,
-
-    MOB_ALLY_1                     = 26800,
-    MOB_ALLY_2                     = 26805,
-    MOB_ALLY_3                     = 26802,
-    BOSS_STOUTBEARD_ALLY           = 26796,
-
-    MOB_HORDE_1                    = 26799,
-    MOB_HORDE_2                    = 26803,
-    MOB_HORDE_3                    = 26801,
-    BOSS_KOLURG_HORDE              = 26798,
-
-    COMMANDER_ALLY                 = 27949,
-    COMMANDER_HORDE                = 27947,
 
     GO_CONTAINMENT_SPHERE_TELESTRA = 188526,
     GO_CONTAINMENT_SPHERE_ANOMALUS = 188527,
     GO_CONTAINMENT_SPHERE_ORMOROK  = 188528,
 
-    SPELL_FROZEN_PRISON            = 47854                 // may not be correct spell
+    SPELL_FROZEN_PRISON             = 47854,
 };
+
+class MANGOS_DLL_DECL instance_nexus : public ScriptedInstance
+{
+    public:
+        instance_nexus(Map* pMap);
+
+        void Initialize();
+
+        void OnObjectCreate(GameObject* pGo);
+        void OnCreatureCreate(Creature* pCreature);
+
+        uint32 GetData(uint32 uiType);
+        void SetData(uint32 uiType, uint32 uiData);
+
+        const char* Save() { return m_strInstData.c_str(); }
+
+        void Load(const char* chrIn);
+
+    private:
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        std::string m_strInstData;
+};
+
 #endif

@@ -79,10 +79,10 @@ bool AreaTrigger_at_aldurthar_gate(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     switch(pAt->id)
     {
-        case TRIGGER_SOUTH:     pPlayer->KilledMonsterCredit(NPC_SOUTH_GATE);     break;
-        case TRIGGER_CENTRAL:   pPlayer->KilledMonsterCredit(NPC_CENTRAL_GATE);   break;
-        case TRIGGER_NORTH:     pPlayer->KilledMonsterCredit(NPC_NORTH_GATE);     break;
-        case TRIGGER_NORTHWEST: pPlayer->KilledMonsterCredit(NPC_NORTHWEST_GATE); break;
+        case TRIGGER_SOUTH:     pPlayer->KilledMonsterCredit(uint32(NPC_SOUTH_GATE));     break;
+        case TRIGGER_CENTRAL:   pPlayer->KilledMonsterCredit(uint32(NPC_CENTRAL_GATE));   break;
+        case TRIGGER_NORTH:     pPlayer->KilledMonsterCredit(uint32(NPC_NORTH_GATE));     break;
+        case TRIGGER_NORTHWEST: pPlayer->KilledMonsterCredit(uint32(NPC_NORTHWEST_GATE)); break;
     }
     return true;
 }
@@ -152,7 +152,7 @@ enum
 bool AreaTrigger_at_ravenholdt(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     if (pPlayer->GetQuestStatus(QUEST_MANOR_RAVENHOLDT) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->KilledMonsterCredit(NPC_RAVENHOLDT);
+        pPlayer->KilledMonsterCredit(uint32(NPC_RAVENHOLDT));
 
     return false;
 }
@@ -205,9 +205,9 @@ bool AreaTrigger_at_warsong_farms(Player* pPlayer, AreaTriggerEntry const* pAt)
     {
         switch(pAt->id)
         {
-            case AT_SLAUGHTERHOUSE: pPlayer->KilledMonsterCredit(NPC_CREDIT_SLAUGHTERHOUSE); break;
-            case AT_GRAINERY:       pPlayer->KilledMonsterCredit(NPC_CREDIT_GRAINERY);       break;
-            case AT_TORP_FARM:      pPlayer->KilledMonsterCredit(NPC_CREDIT_TORP_FARM);      break;
+            case AT_SLAUGHTERHOUSE: pPlayer->KilledMonsterCredit(uint32(NPC_CREDIT_SLAUGHTERHOUSE)); break;
+            case AT_GRAINERY:       pPlayer->KilledMonsterCredit(uint32(NPC_CREDIT_GRAINERY));       break;
+            case AT_TORP_FARM:      pPlayer->KilledMonsterCredit(uint32(NPC_CREDIT_TORP_FARM));      break;
         }
     }
     return true;

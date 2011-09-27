@@ -93,6 +93,7 @@ enum BossSpells
     NPC_RAGING_SPIRIT                = 36701,
     NPC_VILE_SPIRIT                  = 37799,
     NPC_STRANGULATE_VEHICLE          = 36598,
+    NPC_SHAMBLING_HORROR             = 37698,
 
 };
 
@@ -113,6 +114,14 @@ static Locations SpawnLoc[]=
     {520.311f, -2124.709961f, 1040.859985f},      // 7 Frostmourne
 };
 
+static Locations SummonLocs[] = // Shambling horror posible summon locations - not offlike
+{
+    {503.324219f, -2089.394531f, 1040.856934f},
+    {541.562561f, -2124.656250f, 1040.860107f},
+    {503.641998f, -2155.307617f, 1040.860107f},
+    {471.933533f, -2124.618652f, 1040.860107f},
+};
+
 struct MANGOS_DLL_DECL boss_the_lich_king_iccAI : public BSWScriptedAI
 {
     boss_the_lich_king_iccAI(Creature* pCreature) : BSWScriptedAI(pCreature)
@@ -122,6 +131,7 @@ struct MANGOS_DLL_DECL boss_the_lich_king_iccAI : public BSWScriptedAI
         Reset();
     }
 
+    uint32 summon_timer;
     instance_icecrown_spire* pInstance;
     uint8 stage;
     uint32 nextEvent;
@@ -158,6 +168,7 @@ struct MANGOS_DLL_DECL boss_the_lich_king_iccAI : public BSWScriptedAI
                pGoFloor->SetUInt32Value(GAMEOBJECT_BYTES_1,oldflag);
             }
         pInstance->DoCloseDoor(pInstance->GetData64(GO_FROSTY_WIND));
+        summon_timer = 15000;
     }
 
     void MoveInLineOfSight(Unit* pWho)
@@ -457,7 +468,16 @@ struct MANGOS_DLL_DECL boss_the_lich_king_iccAI : public BSWScriptedAI
                     timedCast(SPELL_INFEST, diff);
                     timedCast(SPELL_SUMMON_DRUDGE_GHOULS, diff);
                     timedCast(SPELL_PLAGUE_SIPHON, diff);
-                    timedCast(SPELL_SUMMON_SHAMBLING_HORROR, diff);
+                    // timedCast(SPELL_SUMMON_SHAMBLING_HORROR, diff);
+                    if (summon_timer <= diff)
+                    {
+                        uint8 summon_loc = urand(0, 3);
+                        m_creature->SummonCreature(NPC_SHAMBLING_HORROR, SummonLocs[summon_loc].x, SummonLocs[summon_loc].y, SummonLocs[summon_loc].z, 0.0f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
+                        summon_timer = urand(60000, 75000);
+                    }
+                    else
+                        summon_timer -= diff;
+
                     timedCast(SPELL_NECROTIC_PLAGUE, diff);
 
                     DoMeleeAttackIfReady();

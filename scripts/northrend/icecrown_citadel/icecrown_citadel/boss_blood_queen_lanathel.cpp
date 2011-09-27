@@ -68,6 +68,7 @@ struct MANGOS_DLL_DECL boss_blood_queen_lanathelAI : public BSWScriptedAI
     uint8 bloodbolts;
     uint32 UpdateTimer;
     bool movementstarted;
+    uint32 enrage_timer;
 
     void Reset()
     {
@@ -82,6 +83,7 @@ struct MANGOS_DLL_DECL boss_blood_queen_lanathelAI : public BSWScriptedAI
         resetTimers();
         m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 0);
         m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+        enrage_timer = 360000;
     }
 
     void JustReachedHome()
@@ -263,11 +265,16 @@ struct MANGOS_DLL_DECL boss_blood_queen_lanathelAI : public BSWScriptedAI
             --bloodbolts;
         };
 
-        if (timedQuery(SPELL_BERSERK, diff))
+        if (enrage_timer <= diff)
+            m_creature->CastSpell(m_creature, SPELL_BERSERK, true);
+        else
+            enrage_timer -= diff;
+
+        /*if (timedQuery(SPELL_BERSERK, diff))
         {
              doCast(SPELL_BERSERK);
              DoScriptText(-1631332,m_creature);
-        };
+        };*/
 
     }
 };

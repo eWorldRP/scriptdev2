@@ -481,7 +481,8 @@ struct MANGOS_DLL_DECL mob_icc_gas_cloudAI : public BSWScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (!pTarget) Aggro(m_creature->getVictim());
+        if (!pTarget)
+            Aggro(m_creature->getVictim());
 
         if (delay <= uiDiff)
         {

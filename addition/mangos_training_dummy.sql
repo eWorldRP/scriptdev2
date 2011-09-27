@@ -1,0 +1,1 @@
+update creature_template set AiName = '', Scriptname = 'npc_training_dummy' where entry in (17578, 24792, 32543, 32546, 32542, 32545, 30527, 31143, 31144, 31146, 32541, 32666, 32667);

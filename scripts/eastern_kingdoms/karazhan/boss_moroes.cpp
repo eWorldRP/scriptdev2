@@ -255,7 +255,10 @@ struct MANGOS_DLL_DECL boss_moroesAI : public ScriptedAI
                 m_creature->setFaction(35);
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                DoCastSpellIfCan(m_creature, SPELL_VANISH);
+                //Momentarily workarounded because this cast make boss go crazy... -> DoCastSpellIfCan(m_creature, SPELL_VANISH);
+                m_creature->SetVisibility(VISIBILITY_OFF);
+                m_creature->RemoveAllAuras();
+                //end
                 m_bInVanish      = true;
                 m_uiVanish_Timer = 30000;
                 m_uiWait_Timer   = 5000;
@@ -275,6 +278,9 @@ struct MANGOS_DLL_DECL boss_moroesAI : public ScriptedAI
                     m_creature->setFaction(16);
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    //workaround
+                    m_creature->SetVisibility(VISIBILITY_ON);
+                    //end
                     m_creature->AI()->AttackStart(m_creature->getVictim());
                     m_bInVanish = false;
                 }
