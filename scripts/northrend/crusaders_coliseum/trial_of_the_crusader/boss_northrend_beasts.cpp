@@ -243,6 +243,7 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
     bool enraged;
     bool firstAppear;
     uint32 appearTimer;
+    uint32 m_uiSpewTimer;
 
 
     void Reset()
@@ -252,6 +253,7 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
         isSubmerged = false;
         firstAppear = true;
         appearTimer = 0;
+        m_uiSpewTimer = 30000;
         m_creature->SetInCombatWithZone();
         m_creature->SetRespawnDelay(7*DAY);
         m_pInstance->SetData(TYPE_NORTHREND_BEASTS, ACIDMAW_SUBMERGED);
@@ -313,7 +315,12 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
                     }
                 }
 
-                timedCast(SPELL_ACID_SPEW, uiDiff);
+                if ( m_uiSpewTimer < uiDiff)
+                {
+                    doCast(SPELL_ACID_SPEW);
+                    m_uiSpewTimer = 30000;
+                }
+                else m_uiSpewTimer -= uiDiff;
 
                 timedCast(SPELL_PARALYTIC_BITE, uiDiff);
 
@@ -394,6 +401,7 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
                     m_creature->SetPosition(sisx, sisy, sisz, 0, true);
                     pSister->SetPosition(brox, broy, broz, 0, true);
                 }
+                m_uiSpewTimer += 1000;
                 appearTimer = 2000;
                 isSubmerged = true;
                 stage = 0;
@@ -438,6 +446,7 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
     bool enraged;
     bool isSubmerged;
     uint32 appearTimer;
+    uint32 m_uiSpewTimer;
 
     void Reset()
     {
@@ -445,6 +454,7 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
         enraged = false;
         isSubmerged = false;
         appearTimer = 0;
+        m_uiSpewTimer = 30000;
         m_creature->SetInCombatWithZone();
         m_creature->SetRespawnDelay(7*DAY);
     }
@@ -503,8 +513,12 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
                 }
                 timedCast(SPELL_BURNING_BITE, uiDiff);
 
-                timedCast(SPELL_MOLTEN_SPEW, uiDiff);
-
+                if ( m_uiSpewTimer < uiDiff)
+                {
+                    doCast(SPELL_MOLTEN_SPEW);
+                    m_uiSpewTimer = 30000;
+                }
+                else m_uiSpewTimer -= uiDiff;
                 if (timedQuery(SPELL_SLIME_POOL, uiDiff))
                     doCast(NPC_SLIME_POOL);
 
@@ -556,6 +570,7 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
                 DoScriptText(-1713559,m_creature);
                 m_pInstance->SetData(TYPE_NORTHREND_BEASTS, ACIDMAW_SUBMERGED);
                 appearTimer = 2000;
+                m_uiSpewTimer += 1000;
                 isSubmerged = true;
                 stage = 0;
                 break;
@@ -840,8 +855,8 @@ struct MANGOS_DLL_DECL boss_icehowlAI : public BSWScriptedAI
             }
             MovementStarted = false;
             m_creature->GetMotionMaster()->MovementExpired();
-            if (pOldTarget->isAlive())
-                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            if (pOldTarget && pOldTarget->isAlive())
+                m_creature->GetMotionMaster()->MoveChase(pOldTarget);
             SetCombatMovement(true);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             stage = 0;
