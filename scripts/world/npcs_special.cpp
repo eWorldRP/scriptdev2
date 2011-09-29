@@ -55,6 +55,7 @@ npc_experience_eliminator       NPC to stop gaining experience
 pet_spring_rabbit       100%    Noblegarden event
 pet_orphan              100%    Children's Week
 npc_wormhole            100%    Creates an unstable wormhole
+npc_bunny_bark                  Brewfest event
 EndContentData */
 
 /*########
@@ -3050,6 +3051,122 @@ bool GossipSelect_npc_wormhole(Player* pPlayer, Creature* pCreature, uint32 uiSe
     return true;
 };
 
+/*#####
+# npc_bunny_bark
+#####*/
+enum
+{
+    NPC_BUNNY_1             = 24202,
+    NPC_BUNNY_2             = 24203,
+    NPC_BUNNY_3             = 24204,
+    NPC_BUNNY_4             = 24205,
+
+    QUEST_BARK_FOR_BARLEY   = 11293,
+    QUEST_BARK_FOR_THUNDER  = 11294,
+    QUEST_BARK_FOR_DROHN    = 11407,
+    QUEST_BARK_FOR_TCHALI   = 11408,
+
+    SAY_DROHN_1             = -2000001,
+    SAY_DROHN_2             = -2000002,
+    SAY_DROHN_3             = -2000003,
+    SAY_DROHN_4             = -2000004,
+    SAY_TCHALI_1            = -2000005,
+    SAY_TCHALI_2            = -2000006,
+    SAY_TCHALI_3            = -2000007,
+    SAY_TCHALI_4            = -2000008,
+    SAY_BARLEY_1            = -2000009,
+    SAY_BARLEY_2            = -2000010,
+    SAY_BARLEY_3            = -2000011,
+    SAY_BARLEY_4            = -2000012,
+    SAY_THUNDER_1           = -2000013,
+    SAY_THUNDER_2           = -2000014,
+    SAY_THUNDER_3           = -2000015,
+    SAY_THUNDER_4           = -2000016
+};
+
+struct MANGOS_DLL_DECL npc_bunny_bark : public ScriptedAI
+{
+    npc_bunny_bark (Creature* pCreature) : ScriptedAI (pCreature)
+    {
+        m_pMap = pCreature->GetMap();
+        Reset();
+    }
+
+    Map* m_pMap;
+
+    void Reset () {}
+
+    void MoveInLineOfSight (Unit* pWho)
+    {
+        // player should be near the npc
+        if (m_creature->GetDistance(pWho) > 10.0f)
+            return;
+
+        if (pWho->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        Player* pPlayer = m_pMap->GetPlayer(pWho->GetObjectGuid());
+        if (!pPlayer)
+            return;
+
+        if (pPlayer->GetQuestStatus(QUEST_BARK_FOR_BARLEY) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_BARK_FOR_THUNDER) == QUEST_STATUS_INCOMPLETE ||
+            pPlayer->GetQuestStatus(QUEST_BARK_FOR_DROHN) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_BARK_FOR_TCHALI) == QUEST_STATUS_INCOMPLETE )
+        {
+            int32 iText = 0;
+            switch (m_creature->GetEntry())
+            {
+            case NPC_BUNNY_1 :
+                if (pPlayer->HasQuest(QUEST_BARK_FOR_BARLEY))
+                    iText = SAY_BARLEY_1;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_THUNDER))
+                    iText = SAY_THUNDER_1;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_DROHN))
+                    iText = SAY_DROHN_1;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_TCHALI))
+                    iText = SAY_TCHALI_1;
+                break;
+            case NPC_BUNNY_2 :
+                if (pPlayer->HasQuest(QUEST_BARK_FOR_BARLEY))
+                    iText = SAY_BARLEY_2;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_THUNDER))
+                    iText = SAY_THUNDER_2;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_DROHN))
+                    iText = SAY_DROHN_2;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_TCHALI))
+                    iText = SAY_TCHALI_2;
+                break;
+            case NPC_BUNNY_3 :
+                if (pPlayer->HasQuest(QUEST_BARK_FOR_BARLEY))
+                    iText = SAY_BARLEY_3;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_THUNDER))
+                    iText = SAY_THUNDER_3;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_DROHN))
+                    iText = SAY_DROHN_3;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_TCHALI))
+                    iText = SAY_TCHALI_3;
+                break;
+            case NPC_BUNNY_4 :
+                if (pPlayer->HasQuest(QUEST_BARK_FOR_BARLEY))
+                    iText = SAY_BARLEY_4;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_THUNDER))
+                    iText = SAY_THUNDER_4;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_DROHN))
+                    iText = SAY_DROHN_4;
+                else if (pPlayer->HasQuest(QUEST_BARK_FOR_TCHALI))
+                    iText = SAY_TCHALI_4;
+                break;
+            }
+            if (iText)
+                DoScriptText(iText, pPlayer);
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_bunny_bark(Creature* pCreature)
+{
+    return new npc_bunny_bark(pCreature);
+}
+
 void AddSC_npcs_special()
 {
     Script* newscript;
@@ -3229,5 +3346,10 @@ void AddSC_npcs_special()
     newscript->Name = "npc_wormhole";
     newscript->pGossipHello =  &GossipHello_npc_wormhole;
     newscript->pGossipSelect = &GossipSelect_npc_wormhole;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_bunny_bark";
+    newscript->GetAI = &GetAI_npc_bunny_bark;
     newscript->RegisterSelf();
 }

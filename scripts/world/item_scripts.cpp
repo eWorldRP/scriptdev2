@@ -28,6 +28,7 @@ item_gor_dreks_ointment(i30175)     Protecting Our Own(q10488)
 Item_jungle_punch_offer
 item_complimentary_brewfest_sampler Brewfest event
 item_ram_racing_reins               Brewfest event
+item_portable_brewfest_keg          Brewfest event
 EndContentData */
 
 #include "precompiled.h"
@@ -246,6 +247,39 @@ bool ItemUse_item_ram_racing_reins(Player* pPlayer, Item* pItem, const SpellCast
 
     return true;
 }
+
+/*#####
+# item_portable_brewfest_keg
+#####*/
+enum
+{
+    QUEST_BACK_AGAIN_A      = 11122,
+    QUEST_BACK_AGAIN_H      = 11412,
+    NPC_RAM_APPRENTICE_A    = 24468,
+    NPC_RAM_APPRENTICE_H    = 24510,
+    NPC_CREDIT_CREATURE     = 24337,
+
+    ITEM_PORTABLE_KEG       = 33797
+};
+
+bool ItemUse_item_portable_brewfest_keg(Player* pPlayer, Item* pItem, const SpellCastTargets &pTargets)
+{
+    Map* pMap = pPlayer->GetMap();
+    if (pMap)
+    {
+        Unit* pTarget = pMap->GetUnit(pPlayer->GetTargetGuid());
+        if (pTarget)
+        {
+            if ((pTarget->GetEntry() == NPC_RAM_APPRENTICE_A && pPlayer->GetQuestStatus(QUEST_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE) ||
+                (pTarget->GetEntry() == NPC_RAM_APPRENTICE_H && pPlayer->GetQuestStatus(QUEST_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE))
+            {
+                pPlayer->KilledMonsterCredit(NPC_CREDIT_CREATURE,0);
+            }
+        }
+    }
+    return true;
+}
+
 void AddSC_item_scripts()
 {
     Script *newscript;
@@ -283,5 +317,10 @@ void AddSC_item_scripts()
     newscript = new Script;
     newscript->Name = "item_ram_racing_reins";
     newscript->pItemUse = &ItemUse_item_ram_racing_reins;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "item_portable_brewfest_keg";
+    newscript->pItemUse = &ItemUse_item_portable_brewfest_keg;
     newscript->RegisterSelf();
 }

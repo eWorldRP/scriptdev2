@@ -7,6 +7,7 @@ EndScriptData */
 
 /* ContentData
 npc_ram_master_ray        Brewfest event
+npc_bok_ropcertain        Brewfest event
 EndContentData */
 
 #include "precompiled.h"
@@ -17,7 +18,7 @@ EndContentData */
 
 enum
 {
-    QUEST_BARK_FOR_DORN     = 11407,
+    QUEST_BARK_FOR_DROHN     = 11407,
     QUEST_BARK_FOR_TCHALI   = 11408,
     QUEST_NOW_RAM_RACING_H  = 11409,
     QUEST_BACK_AGAIN_H      = 11412,
@@ -36,7 +37,7 @@ bool QuestAccept_npc_ram_master_ray(Player* pPlayer, Creature* pCreature, const 
 {
     switch(pQuest->GetQuestId())
     {
-    case QUEST_BARK_FOR_DORN:
+    case QUEST_BARK_FOR_DROHN:
     case QUEST_BARK_FOR_TCHALI:
     case QUEST_NOW_RAM_RACING_H:
     case QUEST_BACK_AGAIN_H:
@@ -62,6 +63,56 @@ bool QuestRewarded_npc_ram_master_ray(Player* pPlayer, Creature* pCreature, cons
     return true;
 }
 
+/*#####
+# Bok Dropcertain
+#####*/
+enum
+{
+    ITEM_PORTABLE_KEG = 33797
+};
+
+struct MANGOS_DLL_DECL npc_bok_dropcertain : public ScriptedAI
+{
+    npc_bok_dropcertain (Creature* pCreature) : ScriptedAI (pCreature)
+    {
+        m_pMap = pCreature->GetMap();
+        Reset();
+    }
+
+    Map* m_pMap;
+
+    void Reset () {}
+
+    void MoveInLineOfSight (Unit* pWho)
+    {
+        // player should be near the npc
+        if (m_creature->GetDistance(pWho) > 10.0f)
+            return;
+
+        if (pWho->GetTypeId() != TYPEID_PLAYER)
+            return;
+        Player* pPlayer = m_pMap->GetPlayer(pWho->GetObjectGuid());
+        if (!pPlayer)
+            return;
+        if (pPlayer->GetQuestStatus(QUEST_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE)
+        {
+            // player can only have 1 keg
+            if (pPlayer->HasItemCount(ITEM_PORTABLE_KEG, 1))
+                return;
+
+            ItemPosCountVec dest;
+            uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_PORTABLE_KEG, 1, false);
+            if (msg == EQUIP_ERR_OK)
+                pPlayer->StoreNewItem(dest, ITEM_PORTABLE_KEG, 1, true);
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_bok_ropcertain(Creature* pCreature)
+{
+    return new npc_bok_dropcertain(pCreature);
+}
+
 void AddSC_durotar()
 {
     Script* newscript;
@@ -70,5 +121,10 @@ void AddSC_durotar()
     newscript->Name = "npc_ram_master_ray";
     newscript->pQuestAcceptNPC = &QuestAccept_npc_ram_master_ray;
     newscript->pQuestRewardedNPC = &QuestRewarded_npc_ram_master_ray;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_bok_dropcertain";
+    newscript->GetAI = &GetAI_npc_bok_ropcertain;
     newscript->RegisterSelf();
 }

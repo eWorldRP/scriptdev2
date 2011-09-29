@@ -24,7 +24,6 @@ EndScriptData */
 /* ContentData
 npc_mountaineer_pebblebitty
 npc_miran
-npc_neill_ramstein
 EndContentData */
 
 #include "precompiled.h"
@@ -178,57 +177,6 @@ CreatureAI* GetAI_npc_miran(Creature* pCreature)
     return new npc_miranAI(pCreature);
 }
 
-/*#####
-# Neill Ramstein
-#####*/
-
-enum
-{
-    QUEST_BACK_AGAIN_A      = 11122,
-    QUEST_BARK_FOR_BARLEY   = 11293,
-    QUEST_BARK_FOR_THUNDER  = 11294,
-    QUEST_NOW_RAM_RACING_A  = 11318,
-
-    SPELL_RENTAL_RAM              = 43883,
-    SPELL_RAM_FATIGUE             = 43052,
-    SPELL_SPEED_RAM_GALLOP        = 42994,
-    SPELL_SPEED_RAM_CANTER        = 42993,
-    SPELL_SPEED_RAM_TROT          = 42992,
-    SPELL_SPEED_RAM_NORMAL        = 43310,
-    SPELL_SPEED_RAM_EXHAUSED      = 43332,
-    SPELL_RENTAL_RAM_DND          = 42146
-};
-
-bool QuestAccept_npc_neill_ramstein(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    switch (pQuest->GetQuestId())
-    {
-    case QUEST_BACK_AGAIN_A:
-    case QUEST_BARK_FOR_BARLEY:
-    case QUEST_BARK_FOR_THUNDER:
-    case QUEST_NOW_RAM_RACING_A:
-		pPlayer->CastSpell(pPlayer, SPELL_RENTAL_RAM, false);
-        break;
-    }
-    return true;
-}
-
-bool QuestRewarded_npc_neill_ramstein(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pPlayer->HasAura(SPELL_RENTAL_RAM))
-    {
-        pPlayer->RemoveAurasDueToSpell(SPELL_RENTAL_RAM);
-        pPlayer->RemoveAurasDueToSpell(SPELL_RAM_FATIGUE);
-        pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_GALLOP);
-        pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_CANTER);
-        pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_TROT);
-        pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_NORMAL);
-        pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_EXHAUSED);
-        pPlayer->RemoveAurasDueToSpell(SPELL_RENTAL_RAM_DND);
-    }
-    return true;
-}
-
 void AddSC_loch_modan()
 {
     Script* newscript;
@@ -243,11 +191,5 @@ void AddSC_loch_modan()
     newscript->Name = "npc_miran";
     newscript->GetAI = &GetAI_npc_miran;
     newscript->pQuestAcceptNPC = &QuestAccept_npc_miran;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
-    newscript->Name = "npc_neill_ramstein";
-    newscript->pQuestAcceptNPC = &QuestAccept_npc_neill_ramstein;
-    newscript->pQuestRewardedNPC = &QuestRewarded_npc_neill_ramstein;
     newscript->RegisterSelf();
 }

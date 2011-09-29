@@ -23,6 +23,7 @@ EndScriptData */
 
 /* ContentData
 npc_narm_faulk
+npc_neill_ramstein
 EndContentData */
 
 #include "precompiled.h"
@@ -80,6 +81,107 @@ CreatureAI* GetAI_npc_narm_faulk(Creature* pCreature)
     return new npc_narm_faulkAI(pCreature);
 }
 
+/*#####
+# Neill Ramstein
+#####*/
+
+enum
+{
+    QUEST_BACK_AGAIN_A      = 11122,
+    QUEST_BARK_FOR_BARLEY   = 11293,
+    QUEST_BARK_FOR_THUNDER  = 11294,
+    QUEST_NOW_RAM_RACING_A  = 11318,
+
+    SPELL_RENTAL_RAM              = 43883,
+    SPELL_RAM_FATIGUE             = 43052,
+    SPELL_SPEED_RAM_GALLOP        = 42994,
+    SPELL_SPEED_RAM_CANTER        = 42993,
+    SPELL_SPEED_RAM_TROT          = 42992,
+    SPELL_SPEED_RAM_NORMAL        = 43310,
+    SPELL_SPEED_RAM_EXHAUSED      = 43332,
+    SPELL_RENTAL_RAM_DND          = 42146
+};
+
+bool QuestAccept_npc_neill_ramstein(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    switch (pQuest->GetQuestId())
+    {
+    case QUEST_BACK_AGAIN_A:
+    case QUEST_BARK_FOR_BARLEY:
+    case QUEST_BARK_FOR_THUNDER:
+    case QUEST_NOW_RAM_RACING_A:
+        pPlayer->CastSpell(pPlayer, SPELL_RENTAL_RAM, false);
+        break;
+    }
+    return true;
+}
+
+bool QuestRewarded_npc_neill_ramstein(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pPlayer->HasAura(SPELL_RENTAL_RAM))
+    {
+        pPlayer->RemoveAurasDueToSpell(SPELL_RENTAL_RAM);
+        pPlayer->RemoveAurasDueToSpell(SPELL_RAM_FATIGUE);
+        pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_GALLOP);
+        pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_CANTER);
+        pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_TROT);
+        pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_NORMAL);
+        pPlayer->RemoveAurasDueToSpell(SPELL_SPEED_RAM_EXHAUSED);
+        pPlayer->RemoveAurasDueToSpell(SPELL_RENTAL_RAM_DND);
+    }
+    return true;
+}
+
+/*#####
+# Flynn Firebrew
+#####*/
+enum
+{
+    ITEM_PORTABLE_KEG = 33797
+};
+
+struct MANGOS_DLL_DECL npc_flynn_firebrew : public ScriptedAI
+{
+    npc_flynn_firebrew (Creature* pCreature) : ScriptedAI (pCreature)
+    {
+        m_pMap = pCreature->GetMap();
+        Reset();
+    }
+
+    Map* m_pMap;
+
+    void Reset () {}
+
+    void MoveInLineOfSight (Unit* pWho)
+    {
+        // player should be near the npc
+        if (m_creature->GetDistance(pWho) > 10.0f)
+            return;
+
+        if (pWho->GetTypeId() != TYPEID_PLAYER)
+            return;
+        Player* pPlayer = m_pMap->GetPlayer(pWho->GetObjectGuid());
+        if (!pPlayer)
+            return;
+        if (pPlayer->GetQuestStatus(QUEST_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE)
+        {
+            // player can only have 1 keg
+            if (pPlayer->HasItemCount(ITEM_PORTABLE_KEG, 1))
+                return;
+
+            ItemPosCountVec dest;
+            uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_PORTABLE_KEG, 1, false);
+            if (msg == EQUIP_ERR_OK)
+                pPlayer->StoreNewItem(dest, ITEM_PORTABLE_KEG, 1, true);
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_flynn_firebrew(Creature* pCreature)
+{
+    return new npc_flynn_firebrew(pCreature);
+}
+
 void AddSC_dun_morogh()
 {
     Script *newscript;
@@ -87,5 +189,16 @@ void AddSC_dun_morogh()
     newscript = new Script;
     newscript->Name = "npc_narm_faulk";
     newscript->GetAI = &GetAI_npc_narm_faulk;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_neill_ramstein";
+    newscript->pQuestAcceptNPC = &QuestAccept_npc_neill_ramstein;
+    newscript->pQuestRewardedNPC = &QuestRewarded_npc_neill_ramstein;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_flynn_firebrew";
+    newscript->GetAI = &GetAI_npc_flynn_firebrew;
     newscript->RegisterSelf();
 }
