@@ -3158,6 +3158,7 @@ struct MANGOS_DLL_DECL npc_bunny_bark : public ScriptedAI
             }
             if (iText)
                 DoScriptText(iText, pPlayer);
+            pPlayer->KilledMonsterCredit(m_creature->GetEntry(), 0);
         }
     }
 };
