@@ -106,7 +106,7 @@ struct MANGOS_DLL_DECL npc_bok_dropcertain : public ScriptedAI
             if (msg == EQUIP_ERR_OK)
             {
                 pPlayer->StoreNewItem(dest, ITEM_PORTABLE_KEG, 1, true);
-                pPlayer->GetItemByEntry(ITEM_PORTABLE_KEG)->SendCreateUpdateToPlayer();
+                pPlayer->GetItemByEntry(ITEM_PORTABLE_KEG)->SendCreateUpdateToPlayer(pPlayer);
             }
         }
     }
