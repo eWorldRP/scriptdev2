@@ -8,6 +8,7 @@ EndScriptData */
 /* ContentData
 npc_ram_master_ray        Brewfest event
 npc_bok_ropcertain        Brewfest event
+npc_driz_tumblequick      Brewfest event
 EndContentData */
 
 #include "precompiled.h"
@@ -103,7 +104,10 @@ struct MANGOS_DLL_DECL npc_bok_dropcertain : public ScriptedAI
             ItemPosCountVec dest;
             uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_PORTABLE_KEG, 1, false);
             if (msg == EQUIP_ERR_OK)
+            {
                 pPlayer->StoreNewItem(dest, ITEM_PORTABLE_KEG, 1, true);
+                pPlayer->GetItemByEntry(ITEM_PORTABLE_KEG)->SendCreateUpdateToPlayer();
+            }
         }
     }
 };
@@ -113,6 +117,53 @@ CreatureAI* GetAI_npc_bok_ropcertain(Creature* pCreature)
     return new npc_bok_dropcertain(pCreature);
 }
 
+/*#####
+# Driz Tumberquick
+#####*/
+enum
+{
+    NPC_CREDIT_CREATURE     = 24337,
+};
+
+struct MANGOS_DLL_DECL npc_driz_tumblequick : public ScriptedAI
+{
+    npc_driz_tumblequick (Creature* pCreature) : ScriptedAI (pCreature)
+    {
+        m_pMap = pCreature->GetMap();
+        Reset();
+    }
+
+    Map* m_pMap;
+
+    void Reset () {}
+
+    void MoveInLineOfSight (Unit* pWho)
+    {
+        // player should be near the npc
+        if (m_creature->GetDistance(pWho) > 10.0f)
+            return;
+
+        if (pWho->GetTypeId() != TYPEID_PLAYER)
+            return;
+        Player* pPlayer = m_pMap->GetPlayer(pWho->GetObjectGuid());
+        if (!pPlayer)
+            return;
+        if (pPlayer->GetQuestStatus(QUEST_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE)
+        {
+            // player can only have 1 keg
+            if (pPlayer->HasItemCount(ITEM_PORTABLE_KEG, 1))
+            {
+                pPlayer->GetItemByEntry(ITEM_PORTABLE_KEG)->RemoveFromWorld();
+                pPlayer->KilledMonsterCredit(NPC_CREDIT_CREATURE,0);
+            }
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_driz_tumblequick(Creature* pCreature)
+{
+    return new npc_driz_tumblequick(pCreature);
+}
 void AddSC_durotar()
 {
     Script* newscript;
@@ -126,5 +177,10 @@ void AddSC_durotar()
     newscript = new Script;
     newscript->Name = "npc_bok_dropcertain";
     newscript->GetAI = &GetAI_npc_bok_ropcertain;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_driz_tumblequick";
+    newscript->GetAI = &GetAI_npc_driz_tumblequick;
     newscript->RegisterSelf();
 }

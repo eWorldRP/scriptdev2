@@ -3115,7 +3115,7 @@ struct MANGOS_DLL_DECL npc_bunny_bark : public ScriptedAI
             int32 iText = 0;
             switch (m_creature->GetEntry())
             {
-            case NPC_BUNNY_1 :
+            case NPC_BUNNY_1:
                 if (pPlayer->HasQuest(QUEST_BARK_FOR_BARLEY))
                     iText = SAY_BARLEY_1;
                 else if (pPlayer->HasQuest(QUEST_BARK_FOR_THUNDER))
@@ -3125,7 +3125,7 @@ struct MANGOS_DLL_DECL npc_bunny_bark : public ScriptedAI
                 else if (pPlayer->HasQuest(QUEST_BARK_FOR_TCHALI))
                     iText = SAY_TCHALI_1;
                 break;
-            case NPC_BUNNY_2 :
+            case NPC_BUNNY_2:
                 if (pPlayer->HasQuest(QUEST_BARK_FOR_BARLEY))
                     iText = SAY_BARLEY_2;
                 else if (pPlayer->HasQuest(QUEST_BARK_FOR_THUNDER))
@@ -3135,7 +3135,7 @@ struct MANGOS_DLL_DECL npc_bunny_bark : public ScriptedAI
                 else if (pPlayer->HasQuest(QUEST_BARK_FOR_TCHALI))
                     iText = SAY_TCHALI_2;
                 break;
-            case NPC_BUNNY_3 :
+            case NPC_BUNNY_3:
                 if (pPlayer->HasQuest(QUEST_BARK_FOR_BARLEY))
                     iText = SAY_BARLEY_3;
                 else if (pPlayer->HasQuest(QUEST_BARK_FOR_THUNDER))
@@ -3145,7 +3145,7 @@ struct MANGOS_DLL_DECL npc_bunny_bark : public ScriptedAI
                 else if (pPlayer->HasQuest(QUEST_BARK_FOR_TCHALI))
                     iText = SAY_TCHALI_3;
                 break;
-            case NPC_BUNNY_4 :
+            case NPC_BUNNY_4:
                 if (pPlayer->HasQuest(QUEST_BARK_FOR_BARLEY))
                     iText = SAY_BARLEY_4;
                 else if (pPlayer->HasQuest(QUEST_BARK_FOR_THUNDER))
@@ -3157,7 +3157,7 @@ struct MANGOS_DLL_DECL npc_bunny_bark : public ScriptedAI
                 break;
             }
             if (iText)
-                DoScriptText(iText, pPlayer);
+                DoScriptText(iText, pPlayer, NULL);
             pPlayer->KilledMonsterCredit(m_creature->GetEntry(), 0);
         }
     }

@@ -23,7 +23,9 @@ EndScriptData */
 
 /* ContentData
 npc_narm_faulk
-npc_neill_ramstein
+npc_neill_ramstein        Brewfest event
+npc_flynn_firebrew        Brewfest event
+npc_pol_amberstill        Brewfest event
 EndContentData */
 
 #include "precompiled.h"
@@ -172,7 +174,10 @@ struct MANGOS_DLL_DECL npc_flynn_firebrew : public ScriptedAI
             ItemPosCountVec dest;
             uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_PORTABLE_KEG, 1, false);
             if (msg == EQUIP_ERR_OK)
+            {
                 pPlayer->StoreNewItem(dest, ITEM_PORTABLE_KEG, 1, true);
+                pPlayer->GetItemByEntry(ITEM_PORTABLE_KEG)->SendCreateUpdateToPlayer();
+            }
         }
     }
 };
@@ -180,6 +185,54 @@ struct MANGOS_DLL_DECL npc_flynn_firebrew : public ScriptedAI
 CreatureAI* GetAI_npc_flynn_firebrew(Creature* pCreature)
 {
     return new npc_flynn_firebrew(pCreature);
+}
+
+/*#####
+# Pol Amberstill
+#####*/
+enum
+{
+    NPC_CREDIT_CREATURE     = 24337,
+};
+
+struct MANGOS_DLL_DECL npc_pol_amberstill : public ScriptedAI
+{
+    npc_pol_amberstill (Creature* pCreature) : ScriptedAI (pCreature)
+    {
+        m_pMap = pCreature->GetMap();
+        Reset();
+    }
+
+    Map* m_pMap;
+
+    void Reset () {}
+
+    void MoveInLineOfSight (Unit* pWho)
+    {
+        // player should be near the npc
+        if (m_creature->GetDistance(pWho) > 10.0f)
+            return;
+
+        if (pWho->GetTypeId() != TYPEID_PLAYER)
+            return;
+        Player* pPlayer = m_pMap->GetPlayer(pWho->GetObjectGuid());
+        if (!pPlayer)
+            return;
+        if (pPlayer->GetQuestStatus(QUEST_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE)
+        {
+            // player can only have 1 keg
+            if (pPlayer->HasItemCount(ITEM_PORTABLE_KEG, 1))
+            {
+                pPlayer->GetItemByEntry(ITEM_PORTABLE_KEG)->RemoveFromWorld();
+                pPlayer->KilledMonsterCredit(NPC_CREDIT_CREATURE,0);
+            }
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_pol_amberstill(Creature* pCreature)
+{
+    return new npc_pol_amberstill(pCreature);
 }
 
 void AddSC_dun_morogh()
@@ -200,5 +253,10 @@ void AddSC_dun_morogh()
     newscript = new Script;
     newscript->Name = "npc_flynn_firebrew";
     newscript->GetAI = &GetAI_npc_flynn_firebrew;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_pol_amberstill";
+    newscript->GetAI = &GetAI_npc_pol_amberstill;
     newscript->RegisterSelf();
 }
