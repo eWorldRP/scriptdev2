@@ -223,7 +223,7 @@ struct MANGOS_DLL_DECL npc_pol_amberstill : public ScriptedAI
             // player can only have 1 keg
             if (pPlayer->HasItemCount(ITEM_PORTABLE_KEG, 1))
             {
-                pPlayer->GetItemByEntry(ITEM_PORTABLE_KEG)->RemoveFromWorld();
+                pPlayer->DestroyItemCount(ITEM_PORTABLE_KEG, 1, true);
                 pPlayer->KilledMonsterCredit(NPC_CREDIT_CREATURE,0);
             }
         }
