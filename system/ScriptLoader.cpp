@@ -821,6 +821,7 @@ void AddScripts()
     AddSC_darkshore();
     AddSC_desolace();
     AddSC_dustwallow_marsh();
+    AddSC_durotar();
     AddSC_felwood();
     AddSC_feralas();
     AddSC_moonglade();
