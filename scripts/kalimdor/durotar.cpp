@@ -38,11 +38,12 @@ bool QuestAccept_npc_ram_master_ray(Player* pPlayer, Creature* pCreature, const 
 {
     switch(pQuest->GetQuestId())
     {
-    case QUEST_BARK_FOR_DROHN:
-    case QUEST_BARK_FOR_TCHALI:
-    case QUEST_NOW_RAM_RACING_H:
-    case QUEST_BACK_AGAIN_H:
-		pPlayer->CastSpell(pPlayer, SPELL_RENTAL_RAM, false);
+        case QUEST_BARK_FOR_DROHN:
+        case QUEST_BARK_FOR_TCHALI:
+        case QUEST_NOW_RAM_RACING_H:
+        case QUEST_BACK_AGAIN_H:
+            pPlayer->CastSpell(pPlayer, SPELL_RENTAL_RAM, false);
+        
         break;
     }
     return true;
@@ -112,7 +113,7 @@ struct MANGOS_DLL_DECL npc_bok_dropcertain : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_bok_ropcertain(Creature* pCreature)
+CreatureAI* GetAI_npc_bok_dropcertain(Creature* pCreature)
 {
     return new npc_bok_dropcertain(pCreature);
 }
@@ -176,7 +177,7 @@ void AddSC_durotar()
 
     newscript = new Script;
     newscript->Name = "npc_bok_dropcertain";
-    newscript->GetAI = &GetAI_npc_bok_ropcertain;
+    newscript->GetAI = &GetAI_npc_bok_dropcertain;
     newscript->RegisterSelf();
 
     newscript = new Script;
