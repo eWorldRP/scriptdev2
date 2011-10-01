@@ -54,7 +54,6 @@ struct MANGOS_DLL_DECL boss_faction_championsAI : public BSWScriptedAI
         resetTimers();
         m_creature->SetInCombatWithZone();
         m_creature->SetRespawnDelay(DAY);
-		m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     }
 
     void JustReachedHome()
@@ -192,16 +191,6 @@ struct MANGOS_DLL_DECL boss_faction_championsAI : public BSWScriptedAI
             SetCombatMovement(true);
 
         }
-    }
-
-    void MovementInform(uint32 type, uint32 id)
-    {
-        if(!m_pInstance)
-            return;
-
-        if(type != POINT_MOTION_TYPE)
-            return;
-		m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     }
 
     void UpdateAI(const uint32 diff)
