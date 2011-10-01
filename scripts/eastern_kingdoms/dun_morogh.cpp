@@ -108,11 +108,11 @@ bool QuestAccept_npc_neill_ramstein(Player* pPlayer, Creature* pCreature, const 
 {
     switch (pQuest->GetQuestId())
     {
-    case QUEST_BACK_AGAIN_A:
-    case QUEST_BARK_FOR_BARLEY:
-    case QUEST_BARK_FOR_THUNDER:
-    case QUEST_NOW_RAM_RACING_A:
-        pPlayer->CastSpell(pPlayer, SPELL_RENTAL_RAM, false);
+        case QUEST_BACK_AGAIN_A:
+        case QUEST_BARK_FOR_BARLEY:
+        case QUEST_BARK_FOR_THUNDER:
+        case QUEST_NOW_RAM_RACING_A:
+            pPlayer->CastSpell(pPlayer, SPELL_RENTAL_RAM, false);
         break;
     }
     return true;
