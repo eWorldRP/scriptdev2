@@ -32,23 +32,17 @@ struct MANGOS_DLL_DECL instance_eye_of_eternity : public ScriptedInstance
     std::string strInstData;
     uint32 m_auiEncounter[MAX_ENCOUNTER];
 
-    uint64 m_uiMalygosGUID;
-    uint64 m_uiPlatformGUID;
-    uint64 m_uiExitPortalGUID;
-    uint64 m_uiFocusingIrisGUID;
-    uint64 m_uiGiftGUID;
-    uint64 m_uiHeartGUID;
+    uint32 m_uiFocusingIrisActualEntry;
+    ObjectGuid m_uiGiftActualGuid;
+    ObjectGuid m_uiHeartActualGuid;
 
     void Initialize()
     {
         memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
-        m_uiMalygosGUID = 0;
-        m_uiPlatformGUID = 0;
-        m_uiExitPortalGUID = 0;
-        m_uiFocusingIrisGUID = 0;
-        m_uiGiftGUID = 0;
-        m_uiHeartGUID = 0;
+        m_uiFocusingIrisActualEntry = 0;
+        m_uiGiftActualGuid = 0;
+        m_uiHeartActualGuid = 0;
     }
 
     void OnCreatureCreate(Creature* pCreature)
@@ -57,9 +51,9 @@ struct MANGOS_DLL_DECL instance_eye_of_eternity : public ScriptedInstance
         {
             case NPC_MALYGOS:
                 pCreature->SetActiveObjectState(true);
-                m_uiMalygosGUID = pCreature->GetGUID();
                 break;
         }
+        m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
     }
     
     void OnObjectCreate(GameObject* pGo)
@@ -67,24 +61,22 @@ struct MANGOS_DLL_DECL instance_eye_of_eternity : public ScriptedInstance
         switch(pGo->GetEntry())
         {
             case GO_PLATFORM:
-                m_uiPlatformGUID = pGo->GetGUID();
-                break;
             case GO_EXIT_PORTAL:
-                m_uiExitPortalGUID = pGo->GetGUID();
                 break;
             case GO_FOCUSING_IRIS:
             case GO_FOCUSING_IRIS_H:
-                m_uiFocusingIrisGUID = pGo->GetGUID();
+                m_uiFocusingIrisActualEntry = pGo->GetEntry();
                 break;
             case GO_ALEXSTRASZAS_GIFT:
             case GO_ALEXSTRASZAS_GIFT_H:
-                m_uiGiftGUID = pGo->GetGUID();
+                m_uiGiftActualGuid = pGo->GetObjectGuid();
                 break;
             case GO_HEART_OF_MAGIC:
             case GO_HEART_OF_MAGIC_H:
-                m_uiHeartGUID = pGo->GetGUID();
+                m_uiHeartActualGuid = pGo->GetObjectGuid();
                 break;
         }
+        m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
     }
 
     bool IsEncounterInProgress() const
@@ -104,31 +96,31 @@ struct MANGOS_DLL_DECL instance_eye_of_eternity : public ScriptedInstance
             {
                 if (uiData == NOT_STARTED)
                 {
-                    if (GameObject* pFocusingIris = GetSingleGameObjectFromStorage(m_uiFocusingIrisGUID))
+                    if (GameObject* pFocusingIris = GetSingleGameObjectFromStorage(m_uiFocusingIrisActualEntry))
                     {
                         pFocusingIris->SetGoState(GO_STATE_READY);
                         pFocusingIris->SetPhaseMask(1, true);
                     }
-                    if (GameObject* pExitPortal = GetSingleGameObjectFromStorage(m_uiExitPortalGUID))
+                    if (GameObject* pExitPortal = GetSingleGameObjectFromStorage(GO_EXIT_PORTAL))
                         pExitPortal->SetPhaseMask(1, true);
-                    if (GameObject* pPlatform = GetSingleGameObjectFromStorage(m_uiPlatformGUID))
+                    if (GameObject* pPlatform = GetSingleGameObjectFromStorage(GO_PLATFORM))
                         pPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
                 }
                 if (uiData == IN_PROGRESS)
                 {
-                    if (GameObject* pFocusingIris = GetSingleGameObjectFromStorage(m_uiFocusingIrisGUID))
+                    if (GameObject* pFocusingIris = GetSingleGameObjectFromStorage(m_uiFocusingIrisActualEntry))
                         pFocusingIris->SetPhaseMask(2, true);
-                    if (GameObject* pExitPortal = GetSingleGameObjectFromStorage(m_uiExitPortalGUID))
+                    if (GameObject* pExitPortal = GetSingleGameObjectFromStorage(GO_EXIT_PORTAL))
                         pExitPortal->SetPhaseMask(2, true);
                 }
                 if (uiData == DONE)
                 {
-                    if (GameObject* pExitPortal = GetSingleGameObjectFromStorage(m_uiExitPortalGUID))
+                    if (GameObject* pExitPortal = GetSingleGameObjectFromStorage(GO_EXIT_PORTAL))
                         pExitPortal->SetPhaseMask(1, true);
-                    DoRespawnGameObject(m_uiGiftGUID, HOUR*IN_MILLISECONDS);
-                    DoRespawnGameObject(m_uiHeartGUID, HOUR*IN_MILLISECONDS);
+                    DoRespawnGameObject(m_uiGiftActualGuid, HOUR*IN_MILLISECONDS);
+                    DoRespawnGameObject(m_uiHeartActualGuid, HOUR*IN_MILLISECONDS);
                     //hack to make loot accessible
-                    if (GameObject* pPlatform = GetSingleGameObjectFromStorage(m_uiPlatformGUID))
+                    if (GameObject* pPlatform = GetSingleGameObjectFromStorage(GO_PLATFORM))
                     {
                         pPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
                         pPlatform->Respawn();
@@ -184,19 +176,6 @@ struct MANGOS_DLL_DECL instance_eye_of_eternity : public ScriptedInstance
         }
         return 0;
     }
-
-    uint64 GetData64(uint32 uiData)
-    {
-        switch(uiData)
-        {
-            case NPC_MALYGOS:
-                return m_uiMalygosGUID;
-            case GO_PLATFORM:
-                return m_uiPlatformGUID;
-        }
-        return 0;
-    }
-
 };
 
 InstanceData* GetInstanceData_instance_eye_of_eternity(Map* pMap)

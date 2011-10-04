@@ -250,7 +250,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
     uint32 m_uiSpeechTimer;
     uint32 m_uiPortalNeedResTimer;
     uint8 m_uiVortexPhase;
-    std::list<uint64> m_lSparkPortalGUIDList;
+    std::list<ObjectGuid> m_lSparkPortalGUIDList;
 
     uint32 m_uiTimer;
     uint32 m_uiEnrageTimer;
@@ -268,7 +268,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
     uint32 m_uiVortexDmgCount;
     uint32 m_uiSpeedKillTimer;
 
-    uint64 m_uiTargetSparkPortalGUID;
+    ObjectGuid m_uiTargetSparkPortalGUID;
     uint8 m_uiWP;
 
     bool m_bReadyForWPMove;
@@ -323,7 +323,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
         DespawnCreatures(NPC_STATIC_FIELD);
 
         if (!m_lSparkPortalGUIDList.empty())
-            for (std::list<uint64>::iterator itr = m_lSparkPortalGUIDList.begin(); itr != m_lSparkPortalGUIDList.end(); ++itr)
+            for (std::list<ObjectGuid>::iterator itr = m_lSparkPortalGUIDList.begin(); itr != m_lSparkPortalGUIDList.end(); ++itr)
                 if (Creature* pSparkPortal = m_creature->GetMap()->GetCreature(*itr))
                     pSparkPortal->Respawn();
 
@@ -341,7 +341,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
         if (!lSparkPortalList.empty())
             for (std::list<Creature*>::iterator itr = lSparkPortalList.begin(); itr != lSparkPortalList.end(); ++itr)
                 if (*itr)
-                    m_lSparkPortalGUIDList.push_back((*itr)->GetGUID());
+                    m_lSparkPortalGUIDList.push_back((*itr)->GetObjectGuid());
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MALYGOS, IN_PROGRESS);
@@ -408,7 +408,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
         if (pUnit->GetEntry() == NPC_ARCANE_OVERLOAD && pSpell->Id == SPELL_ARCANE_BOMB_MISSILE)
         {
             pUnit->CastSpell(pUnit, SPELL_ARCANE_BOMB_DAMAGE, true);
-            pUnit->CastSpell(pUnit, SPELL_ARCANE_OVERLOAD, false, 0, 0, m_creature->GetGUID());
+            pUnit->CastSpell(pUnit, SPELL_ARCANE_OVERLOAD, false, 0, 0, m_creature->GetObjectGuid());
             pUnit->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
     }
@@ -421,7 +421,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
 
         if (uiEntry == NPC_STATIC_FIELD)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_STATIC_FIELD, false, 0, 0, m_creature->GetGUID());
+            pSummoned->CastSpell(pSummoned, SPELL_STATIC_FIELD, false, 0, 0, m_creature->GetObjectGuid());
             pSummoned->ForcedDespawn(30000);
         }
 
@@ -484,7 +484,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
             {
                 m_creature->SetFacingToObject(pSparkPortal);
                 m_creature->CastSpell(pSparkPortal, SPELL_PORTAL_BEAM, true);
-                m_uiTargetSparkPortalGUID = pSparkPortal->GetGUID();
+                m_uiTargetSparkPortalGUID = pSparkPortal->GetObjectGuid();
             }
 
             m_bReadyForWPMove = true;
@@ -549,7 +549,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
             DoScriptText(SAY_ARCANE_PULSE_WARN, m_creature);
 
             if (Creature* pTemp = m_creature->SummonCreature(NPC_VORTEX, CENTER_X, CENTER_Y, FLOOR_Z, 0, TEMPSUMMON_TIMED_DESPAWN, 9000))
-                m_creature->CastSpell(m_creature, SPELL_SURGE_OF_POWER_BREATH, false, 0, 0, pTemp->GetGUID());
+                m_creature->CastSpell(m_creature, SPELL_SURGE_OF_POWER_BREATH, false, 0, 0, pTemp->GetObjectGuid());
 
             m_uiShellTimer = urand(2000, 4000);
             m_bReadyForWPMove = true;
@@ -770,13 +770,13 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
             if (m_uiPowerSparkTimer <= uiDiff)
             {
                 DoScriptText(SAY_POWER_SPARK, m_creature);
-                std::list<uint64>::iterator pTargetSparkPortalGUID = m_lSparkPortalGUIDList.begin();
+                std::list<ObjectGuid>::iterator pTargetSparkPortalGUID = m_lSparkPortalGUIDList.begin();
                 advance(pTargetSparkPortalGUID, urand(0, m_lSparkPortalGUIDList.size()-1));
                 if (Creature* pTargetSparkPortal = m_creature->GetMap()->GetCreature(*pTargetSparkPortalGUID))
                     if (Creature *pSpark = pTargetSparkPortal->SummonCreature(NPC_POWER_SPARK, pTargetSparkPortal->GetPositionX(), pTargetSparkPortal->GetPositionY(), pTargetSparkPortal->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 120000))
                     {
                         pTargetSparkPortal->CastSpell(pTargetSparkPortal, SPELL_PORTAL_BEAM, true);
-                        m_uiTargetSparkPortalGUID = pTargetSparkPortal->GetGUID();
+                        m_uiTargetSparkPortalGUID = pTargetSparkPortal->GetObjectGuid();
                         pTargetSparkPortal->ForcedDespawn(19500);
                         m_uiPortalNeedResTimer = 19600;
                         m_bPortalNeedRes = true;
@@ -1471,7 +1471,7 @@ struct MANGOS_DLL_DECL npc_alexstraszaAI : public ScriptedAI
         m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
         m_creature->SetLevitate(true);
         if (m_pInstance)
-            if (Creature* pMalygos = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_MALYGOS)))
+            if (Creature* pMalygos = m_pInstance->GetSingleCreatureFromStorage(NPC_MALYGOS))
                 m_creature->SetFacingToObject(pMalygos);
     }
 
@@ -1492,7 +1492,7 @@ struct MANGOS_DLL_DECL npc_alexstraszaAI : public ScriptedAI
             {
                 case 0:
                     if (m_pInstance)
-                        if (Creature* pMalygos = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_MALYGOS)))
+                        if (Creature* pMalygos =  m_pInstance->GetSingleCreatureFromStorage(NPC_MALYGOS))
                             pMalygos->RemoveCorpse();
                     DoScriptText(SAY_OUTRO1, m_creature);
                     m_uiTimer = 5000;
@@ -1532,7 +1532,7 @@ bool GOHello_go_focusing_iris(Player* pPlayer, GameObject* pGo)
 {
     if (ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData())
     {
-        if (Unit* pMalygos = pGo->GetMap()->GetUnit(pInstance->GetData64(NPC_MALYGOS)))
+        if (Unit* pMalygos = pInstance->GetSingleCreatureFromStorage(NPC_MALYGOS))
         {
             if (Creature* pSparkPortal = GetClosestCreatureWithEntry(pMalygos, NPC_SPARK_PORTAL, 100.0f))
                 if (pSparkPortal->HasAura(SPELL_PORTAL_BEAM))
@@ -1644,7 +1644,7 @@ struct MANGOS_DLL_DECL npc_whyrmrest_skytalonAI : public ScriptedAI
                 {
                     m_creature->setFaction(owner->getFaction());
                     owner->CastSpell(m_creature, SPELL_VEHICLE_HARDCODED, true);
-                    if (Creature* pMalygos = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_MALYGOS)))
+                    if (Creature* pMalygos = m_pInstance->GetSingleCreatureFromStorage(NPC_MALYGOS))
                     {
                         pMalygos->SetInCombatWith(m_creature);
                         pMalygos->AddThreat(m_creature);
