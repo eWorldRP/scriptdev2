@@ -338,13 +338,7 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
     {
         if (uiDamage > m_creature->GetHealth())
         {
-            uint8 uiHardMode = 0;
-            if (m_bTenebronHelpedInFight)
-                ++uiHardMode;
-            if (m_bShadronHelpedInFight)
-                ++uiHardMode;
-            if (m_bVesperonHelpedInFight)
-                ++uiHardMode;
+            uint8 uiHardMode = m_pInstance->GetData(TYPE_ALIVE_DRAGONS);
 
             if (uiHardMode)
                 m_creature->UpdateEntry(m_creature->GetEntry()*10+uiHardMode);
@@ -354,6 +348,26 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
     void JustDied(Unit* pKiller)
     {
         DoScriptText(SAY_SARTHARION_DEATH, m_creature);
+
+        // we kill the dragons that hadn't helped the boss
+        if (!m_bTenebronHelpedInFight)
+        {
+            Creature* pTene = m_pInstance->GetSingleCreatureFromStorage(NPC_TENEBRON);
+            if (pTene && pTene->isAlive())
+                    pTene->DealDamage(pTene, pTene->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        }
+        if (!m_bShadronHelpedInFight)
+        {
+            Creature* pShad = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON);
+            if (pShad && pShad->isAlive())
+                    pShad->DealDamage(pShad, pShad->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        }
+        if (!m_bVesperonHelpedInFight)
+        {
+            Creature* pVesp = m_pInstance->GetSingleCreatureFromStorage(NPC_VESPERON);
+            if (pVesp && pVesp->isAlive())
+                    pVesp->DealDamage(pVesp, pVesp->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        }
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_SARTHARION_EVENT, DONE);

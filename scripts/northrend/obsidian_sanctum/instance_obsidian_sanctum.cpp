@@ -57,18 +57,28 @@ void instance_obsidian_sanctum::OnCreatureCreate(Creature* pCreature)
 
 void instance_obsidian_sanctum::SetData(uint32 uiType, uint32 uiData)
 {
-    if (uiType == TYPE_SARTHARION_EVENT)
-        m_auiEncounter[0] = uiData;
-    else if (uiType == TYPE_ALIVE_DRAGONS)
-        m_uiAliveDragons = uiData;
+    switch (uiType)
+    {
+        case TYPE_SARTHARION_EVENT:
+            m_auiEncounter[0] = uiData;
+            break;
+        case TYPE_ALIVE_DRAGONS:
+            m_uiAliveDragons = uiData;
+            break;
+    }
 
     // No need to save anything here
 }
 
 uint32 instance_obsidian_sanctum::GetData(uint32 uiType)
 {
-    if (uiType == TYPE_SARTHARION_EVENT)
-        return m_auiEncounter[0];
+    switch(uiType)
+    {
+        case TYPE_SARTHARION_EVENT:
+            return m_auiEncounter[0];
+        case TYPE_ALIVE_DRAGONS:
+            return m_uiAliveDragons;
+    }
 
     return 0;
 }
