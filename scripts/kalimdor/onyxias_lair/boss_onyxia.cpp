@@ -267,7 +267,7 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
 
         switch (m_uiPhase)
         {
-            case PHASE_END:                                 // Here is room for additional summoned whelps and Erruption
+            case PHASE_END:                                 // Here is room for Erruption
                 if (m_uiBellowingRoarTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BELLOWINGROAR) == CAST_OK)
@@ -275,6 +275,16 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                 }
                 else
                     m_uiBellowingRoarTimer -= uiDiff;
+
+                if (m_uiWhelpTimer < uiDiff)                // sometimes spawn an additional whelp
+                {
+                    uint8 uiSpawnLoc = urand (0,1);
+                    m_creature->SummonCreature(NPC_ONYXIA_WHELP, afSpawnLocations[uiSpawnLoc][0], afSpawnLocations[uiSpawnLoc][1], afSpawnLocations[uiSpawnLoc][2], 0.0f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, MINUTE*IN_MILLISECONDS);
+                    m_uiWhelpTimer = urand(40000, 45000);
+                }
+                else
+                    m_uiWhelpTimer -=uiDiff;
+
                 // no break, phase 3 will use same abilities as in 1
             case PHASE_START:
             {
@@ -345,6 +355,8 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                     // undo flying
                     m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
                     m_creature->SetLevitate(false);
+
+                    m_uiWhelpTimer = urand(40000, 45000);
 
                     SetCombatMovement(true);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
