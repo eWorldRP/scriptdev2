@@ -25,7 +25,8 @@ EndScriptData */
 #include "onyxias_lair.h"
 
 instance_onyxias_lair::instance_onyxias_lair(Map* pMap) : ScriptedInstance(pMap),
-    m_uiAchievWhelpsCount(0)
+    m_uiAchievWhelpsCount(0),
+    m_bPlayerToasted(0)
 {
     Initialize();
 }
@@ -61,14 +62,20 @@ void instance_onyxias_lair::SetData(uint32 uiType, uint32 uiData)
         return;
 
     m_uiEncounter = uiData;
-    if (uiData == IN_PROGRESS)
+    switch (uiData)
     {
-        DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_ONYXIA_ID);
-        m_uiAchievWhelpsCount = 0;
+        case IN_PROGRESS:
+            DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_ONYXIA_ID);
+            m_uiAchievWhelpsCount = 0;
+            m_bPlayerToasted = false;
+            break;
+        case DATA_LIFTOFF:
+            m_tPhaseTwoStart = time(NULL);
+            break;
+        case DATA_PLAYER_TOASTED:
+            m_bPlayerToasted = true;
+            break;
     }
-    if (uiData == DATA_LIFTOFF)
-        m_tPhaseTwoStart = time(NULL);
-
     // Currently no reason to save anything
 }
 
@@ -81,7 +88,7 @@ bool instance_onyxias_lair::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Pl
             return m_uiAchievWhelpsCount >= ACHIEV_CRIT_REQ_MANY_WHELPS;
         case ACHIEV_CRIT_NO_BREATH_N:
         case ACHIEV_CRIT_NO_BREATH_H:
-            return m_uiEncounter != DATA_PLAYER_TOASTED;
+            return !m_bPlayerToasted;
         default:
             return false;
     }
