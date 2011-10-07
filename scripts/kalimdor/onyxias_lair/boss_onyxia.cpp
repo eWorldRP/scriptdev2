@@ -175,8 +175,8 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
     void JustReachedHome()
     {
         // in case evade in phase 2, see comments for hack where phase 2 is set
-        m_creature->SetLevitate(false);
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
+        m_creature->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
+        m_creature->SetHover(false);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ONYXIA, FAIL);
@@ -330,6 +330,7 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                     DoScriptText(SAY_PHASE_2_TRANS, m_creature);
 
                     // flying method borrowed from Sapphiron
+                    m_creature->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
                     DoCastSpellIfCan(m_creature, 11010);
                     m_creature->SetHover(true);
 
@@ -353,6 +354,7 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                     DoScriptText(SAY_PHASE_3_TRANS, m_creature);
 
                     // flying method borrowed from Sapphiron
+                    m_creature->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
                     m_creature->SetHover(false);
 
                     m_uiWhelpTimer = urand(40000, 45000);
