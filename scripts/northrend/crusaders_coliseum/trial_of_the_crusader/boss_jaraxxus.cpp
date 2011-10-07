@@ -81,7 +81,6 @@ struct MANGOS_DLL_DECL boss_jaraxxusAI : public BSWScriptedAI
     uint32 m_uiPowerTimer;
     uint32 m_uiSummonTimer;
     uint8 m_uiStackReply;
-    uint32 m_uiTouchTimer;
     bool m_bVolcanoOrPortal;
     bool m_bPowerCheck;
 
@@ -94,7 +93,6 @@ struct MANGOS_DLL_DECL boss_jaraxxusAI : public BSWScriptedAI
         m_bVolcanoOrPortal = urand(0,1);
         m_uiPowerTimer = 27000;
         m_uiSummonTimer = 60000;
-        m_uiTouchTimer = urand(10000, 15000);
         m_bPowerCheck = false;
 
         if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
@@ -171,27 +169,6 @@ struct MANGOS_DLL_DECL boss_jaraxxusAI : public BSWScriptedAI
                         m_bPowerCheck = true;
                 }
             }
-        }
-        
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
-        {
-            if (m_uiTouchTimer < uiDiff)
-            {
-                Unit* target = NULL;
-                for(uint8 i=0; i<10 ; i++)
-                {
-                    target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-                    if(target->GetTypeId() == TYPEID_PLAYER)
-                        break;
-                }
-                if(target)
-                {
-                    DoCastSpellIfCan(target, SPELL_JARAXXUS_TOUCH, true);
-                    m_uiTouchTimer = urand(10000, 15000);
-                }
-            }
-            else if(m_uiTouchTimer + uiDiff > 0)
-                m_uiTouchTimer -= uiDiff;
         }
 
         timedCast(SPELL_FEL_FIREBALL, uiDiff);
