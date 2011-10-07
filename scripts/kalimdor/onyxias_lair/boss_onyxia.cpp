@@ -85,14 +85,14 @@ struct OnyxiaMove
 
 static OnyxiaMove aMoveData[]=
 {
-    {0, 4, SPELL_BREATH_NORTH_TO_SOUTH,  22.8763f, -217.152f, -45.0548f},   //north
-    {1, 5, SPELL_BREATH_NE_TO_SW,        10.2191f, -247.912f, -45.896f},    //north-east
-    {2, 6, SPELL_BREATH_EAST_TO_WEST,   -31.4963f, -250.123f, -45.1278f},   //east
-    {3, 7, SPELL_BREATH_SE_TO_NW,       -63.5156f, -240.096f, -45.477f},    //south-east
-    {4, 0, SPELL_BREATH_SOUTH_TO_NORTH, -65.8444f, -213.809f, -45.2985f},   //south
-    {5, 1, SPELL_BREATH_SW_TO_NE,       -58.2509f, -189.020f, -45.790f},    //south-west
-    {6, 2, SPELL_BREATH_WEST_TO_EAST,   -33.5561f, -182.682f, -45.9457f},   //west
-    {7, 3, SPELL_BREATH_NW_TO_SE,         6.8951f, -180.246f, -45.896f},    //north-west
+    {0, 4, SPELL_BREATH_NORTH_TO_SOUTH,  22.8763f, -217.152f, -60.0548f},   //north
+    {1, 5, SPELL_BREATH_NE_TO_SW,        10.2191f, -247.912f, -60.896f},    //north-east
+    {2, 6, SPELL_BREATH_EAST_TO_WEST,   -31.4963f, -250.123f, -60.1278f},   //east
+    {3, 7, SPELL_BREATH_SE_TO_NW,       -63.5156f, -240.096f, -60.477f},    //south-east
+    {4, 0, SPELL_BREATH_SOUTH_TO_NORTH, -65.8444f, -213.809f, -60.2985f},   //south
+    {5, 1, SPELL_BREATH_SW_TO_NE,       -58.2509f, -189.020f, -60.790f},    //south-west
+    {6, 2, SPELL_BREATH_WEST_TO_EAST,   -33.5561f, -182.682f, -60.9457f},   //west
+    {7, 3, SPELL_BREATH_NW_TO_SE,         6.8951f, -180.246f, -60.896f},    //north-west
 };
 
 static const float afSpawnLocations[3][3]=
@@ -329,9 +329,9 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
 
                     DoScriptText(SAY_PHASE_2_TRANS, m_creature);
 
-                    // sort of a hack, it is unclear how this really work but the values appear to be valid
-                    m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
-                    m_creature->SetLevitate(true);
+                    // flying method borrowed from Sapphiron
+                    DoCastSpellIfCan(m_creature, 11010);
+                    m_creature->SetHover(true);
 
                     if (m_pPointData)
                         m_creature->GetMotionMaster()->MovePoint(m_pPointData->uiLocId, m_pPointData->fX, m_pPointData->fY, m_pPointData->fZ);
@@ -352,9 +352,8 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                     m_uiPhase = PHASE_END;
                     DoScriptText(SAY_PHASE_3_TRANS, m_creature);
 
-                    // undo flying
-                    m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
-                    m_creature->SetLevitate(false);
+                    // flying method borrowed from Sapphiron
+                    m_creature->SetHover(false);
 
                     m_uiWhelpTimer = urand(40000, 45000);
 
