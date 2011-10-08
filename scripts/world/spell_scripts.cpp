@@ -250,7 +250,8 @@ enum
 
     // quest "The Big Bone Worm" 10930
     SPELL_FUMPING                       = 39246,
-    SPELL_SUMMON_HAISHULUD              = 39248,
+    SPELL_SUMMON_HAISHULUD              = 39248, // doesn't work
+    NPC_HAILSHULUDUN                    = 22038,
     NPC_SAND_GNOME                      = 22483,
     NPC_MATURE_BONE_SIFTER              = 22482,
 
@@ -687,7 +688,8 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                 {
                     case 0:
                     {
-                        pCaster->CastSpell(pCreatureTarget, SPELL_SUMMON_HAISHULUD, true);
+                        if (Creature* pWorm = pCaster->SummonCreature(NPC_HAILSHULUDUN, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+                            pWorm->AI()->AttackStart(pCaster);
                         break;
                     }
                     case 1:
