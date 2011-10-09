@@ -439,6 +439,8 @@ CreatureAI* GetAI_mob_fel_infernal(Creature* pCreature)
 /*#####
 # Nether Portal
 #####*/
+#define SPELL_PORTAL_VISUAL 68424
+
 struct MANGOS_DLL_DECL mob_nether_portalAI : public BSWScriptedAI
 {
     mob_nether_portalAI(Creature* pCreature) : BSWScriptedAI(pCreature)
@@ -458,6 +460,7 @@ struct MANGOS_DLL_DECL mob_nether_portalAI : public BSWScriptedAI
         m_bHasSummoned = false;
         m_creature->SetRespawnDelay(DAY);
         m_creature->SetDisplayId(22862);
+        m_creature->CastSpell(m_creature, SPELL_PORTAL_VISUAL, false);
         if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
         {
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
