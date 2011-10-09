@@ -213,6 +213,15 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
                     doCast(SUMMON_SCARAB);
                     DoScriptText(-1713560,m_creature);
                 }
+
+                if (m_uiBurrowerSummonTimer < uiDiff)
+                {
+                    m_uiBurrowerSummonTimer = 90000;
+                    doCast(SUMMON_BORROWER);
+                    DoScriptText(-1713556, m_creature);
+                }
+                else m_uiBurrowerSummonTimer -= uiDiff;
+
                 if (m_uiBurrowTimer < uiDiff)
                 {
                     m_uiBurrowTimer = urand(45000, 60000);
