@@ -397,6 +397,9 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
             ++uiCountFetchableDragons;
             pTene->SetLevitate(true);
             pTene->SetWalk(false);
+            pTene->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
+            DoCastSpellIfCan(pTene, 11010);
+            pTene->SetHover(true);
             pTene->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aTene[0].m_fX, m_aTene[0].m_fY, m_aTene[0].m_fZ);
 
             if (!pTene->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
@@ -408,6 +411,9 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
             ++uiCountFetchableDragons;
             pShad->SetLevitate(true);
             pShad->SetWalk(false);
+            pShad->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
+            DoCastSpellIfCan(pShad, 11010);
+            pShad->SetHover(true);
             pShad->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aShad[0].m_fX, m_aShad[0].m_fY, m_aShad[0].m_fZ);
 
             if (!pShad->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
@@ -419,6 +425,9 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
             ++uiCountFetchableDragons;
             pVesp->SetLevitate(true);
             pVesp->SetWalk(false);
+            pVesp->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
+            DoCastSpellIfCan(pVesp, 11010);
+            pVesp->SetHover(true);
             pVesp->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aVesp[0].m_fX, m_aVesp[0].m_fY, m_aVesp[0].m_fZ);
 
             if (!pVesp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
@@ -482,7 +491,8 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
                         pTemp->CastSpell(pTemp, SPELL_POWER_OF_VESPERON, false);
                         break;
                 }
-
+                pTemp->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
+                pTemp->SetHover(false);
                 DoScriptText(iTextId, m_creature);
             }
         }
@@ -1565,6 +1575,7 @@ struct MANGOS_DLL_DECL mob_twilight_whelpAI : public ScriptedAI
 
     void Reset()
     {
+        m_creature->SetRespawnDelay(DAY);
         m_uiFadeArmorTimer = 1000;
     }
 
