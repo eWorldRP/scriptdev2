@@ -61,9 +61,9 @@ enum
     //SPELL_BREATH                = 21131,                  // 8x in "array", different initial cast than the other arrays
 
     SPELL_BELLOWINGROAR         = 18431,
-    SPELL_HEATED_GROUND         = 22191,                    // TODO
+    SPELL_HEATED_GROUND         = 22191,                    // seem to works, but need a visual effect
 
-    SPELL_SUMMONWHELP           = 17646,                    // TODO this spell is only a summon spell, but would need a spell to activate the eggs
+    SPELL_SUMMONWHELP           = 17646,
     SPELL_SUMMON_LAIR_GUARD     = 68968,
 
     MAX_WHELPS_PER_PACK         = 40,
@@ -267,11 +267,15 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
 
         switch (m_uiPhase)
         {
-            case PHASE_END:                                 // Here is room for Erruption
+            case PHASE_END:
                 if (m_uiBellowingRoarTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BELLOWINGROAR) == CAST_OK)
+                    {
+                        // seem to trigger correctly the Eruption spell, but without any visual effect
+                        DoCast(m_creature, SPELL_HEATED_GROUND);
                         m_uiBellowingRoarTimer = 30000;
+                    }
                 }
                 else
                     m_uiBellowingRoarTimer -= uiDiff;
@@ -358,6 +362,9 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                     m_creature->SetHover(false);
 
                     m_uiWhelpTimer = urand(40000, 45000);
+
+                    if (m_pInstance)
+                        m_pInstance->SetData(TYPE_ONYXIA, DATA_LAND);
 
                     SetCombatMovement(true);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
