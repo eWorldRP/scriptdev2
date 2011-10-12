@@ -1633,7 +1633,7 @@ bool GossipHello_npc_argent_mage(Player* pPlayer, Creature* pCreature)
     if (!pInstance)
         return false;
 
-    if( pPlayer->IsInCombat() || pInstance->IsEncounterInProgress() || pInstance->GetData(TYPE_EVENT) || pInstance->GetData(TYPE_ANUBARAK) != DONE ) 
+    if(pInstance->GetData(TYPE_ANUBARAK) != DONE )
            return true;
 
     _message = "I'm are ready, let's teleport me to Dalaran!";
