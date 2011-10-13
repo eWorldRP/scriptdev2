@@ -343,6 +343,17 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
 
         DoScriptText(SAY_DEATH, m_creature);
 
+        // kills constructs that are still in combat
+        GetCreatureListWithEntryInGrid(lConstructs, m_creature, MOB_IRON_CONSTRUCT, 200.0f);
+        if (!lConstructs.empty())
+        {
+            for(std::list<Creature*>::iterator iter = lConstructs.begin(); iter != lConstructs.end(); ++iter)
+            {
+                if ((*iter) && (*iter)->isAlive() && !(*iter)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                    (*iter)->DealDamage((*iter), (*iter)->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            }
+        }
+
         if (m_uiEncounterTimer < 240000)
         {
         // hacky way to complete achievements; use only if you have this function
@@ -356,7 +367,8 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
         std::list<Creature* > lConstructList;
         GetCreatureListWithEntryInGrid(lConstructList, m_creature, MOB_IRON_CONSTRUCT, fRange);
 
-        if (lConstructList.empty()){
+        if (lConstructList.empty())
+        {
             m_uiSummon_Timer = 5000;
             return NULL;
         }
@@ -395,7 +407,7 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
             m_pInstance->SetData(TYPE_IGNIS, FAIL);
 
         // respawn constructs
-        GetCreatureListWithEntryInGrid(lConstructs, m_creature, MOB_IRON_CONSTRUCT, DEFAULT_VISIBILITY_INSTANCE);
+        GetCreatureListWithEntryInGrid(lConstructs, m_creature, MOB_IRON_CONSTRUCT, 200.0f);
         if (!lConstructs.empty())
         {
             for(std::list<Creature*>::iterator iter = lConstructs.begin(); iter != lConstructs.end(); ++iter)
@@ -432,18 +444,26 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
         // need vehicle support!!!
         if (m_uiSlag_Pot_Timer < uiDiff)
         {
-            DoScriptText(SAY_SLAGPOT, m_creature);
-            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+            // to avoid the two spell to be casted too close
+            if (m_uiFlame_Jets_Timer < 4000)
             {
-                DoCast(target, m_bIsRegularMode ? SPELL_SLAG_POT : SPELL_SLAG_POT_H);
-                m_uiPotTargetGUID = target->GetGUID();
-                if(m_creature->GetVehicleKit())
-                    target->EnterVehicle(m_creature->GetVehicleKit(), 0);
+                m_uiSlag_Pot_Timer += 5000;
             }
-            m_uiSlag_Pot_Timer      = 30000;
-            m_uiSlag_Pot_Dmg_Timer  = 1000;
-            m_bHasSlagPotCasted     = true;
-            m_uiPotDmgCount         = 0;
+            else
+            {
+                DoScriptText(SAY_SLAGPOT, m_creature);
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                {
+                    DoCast(target, m_bIsRegularMode ? SPELL_SLAG_POT : SPELL_SLAG_POT_H);
+                    m_uiPotTargetGUID = target->GetGUID();
+                    if(m_creature->GetVehicleKit())
+                        target->EnterVehicle(m_creature->GetVehicleKit(), 0);
+                }
+                m_uiSlag_Pot_Timer      = 30000;
+                m_uiSlag_Pot_Dmg_Timer  = 1000;
+                m_bHasSlagPotCasted     = true;
+                m_uiPotDmgCount         = 0;
+            }
         }else m_uiSlag_Pot_Timer -= uiDiff;  
 
         // hacky way of doing damage
