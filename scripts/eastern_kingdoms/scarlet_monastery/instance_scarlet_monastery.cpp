@@ -41,6 +41,10 @@ void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)
         case NPC_MOGRAINE:
         case NPC_WHITEMANE:
         case NPC_VORREL:
+        case NPC_SIR_THOMAS:
+        case NPC_HH_MOUNTED:
+        case NPC_HH_UNHORSED:
+        case NPC_HEAD:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
@@ -48,27 +52,60 @@ void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)
 
 void instance_scarlet_monastery::OnObjectCreate(GameObject* pGo)
 {
-    if (pGo->GetEntry() == GO_WHITEMANE_DOOR)
-        m_mGoEntryGuidStore[GO_WHITEMANE_DOOR] = pGo->GetObjectGuid();
+    switch (pGo->GetEntry())
+    {
+        case GO_WHITEMANE_DOOR:
+        case GO_PUMPKIN_SHRINE:
+            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            break;
+    }
 }
 
 void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
 {
-    if (uiType == TYPE_MOGRAINE_AND_WHITE_EVENT)
+    switch(uiType)
     {
-        if (uiData == IN_PROGRESS)
-            DoUseDoorOrButton(GO_WHITEMANE_DOOR);
-        if (uiData == FAIL)
-            DoUseDoorOrButton(GO_WHITEMANE_DOOR);
-
-        m_auiEncounter[0] = uiData;
+        case TYPE_MOGRAINE_AND_WHITE_EVENT:
+            if (uiData == IN_PROGRESS)
+                DoUseDoorOrButton(GO_WHITEMANE_DOOR);
+            else if (uiData == FAIL)
+                DoUseDoorOrButton(GO_WHITEMANE_DOOR);
+            m_auiEncounter[0] = uiData;
+            break;
+        case DATA_PUMPKIN_SHRINE:
+            HandleGameObject(m_mGoEntryGuidStore[GO_PUMPKIN_SHRINE], false);
+            break;
+        case DATA_HORSEMAN_EVENT:
+            m_auiEncounter[1] = uiData;
+            if (uiData == DONE)
+                HandleGameObject(m_mGoEntryGuidStore[GO_PUMPKIN_SHRINE], true);
+            break;
     }
 }
 
-uint32 instance_scarlet_monastery::GetData(uint32 uiData)
+void instance_scarlet_monastery::HandleGameObject(ObjectGuid uiGuid, bool bOpen)
 {
-    if (uiData == TYPE_MOGRAINE_AND_WHITE_EVENT)
-        return m_auiEncounter[0];
+        GameObject* pGo = instance->GetGameObject(uiGuid);
+
+        if(pGo)
+        {
+            pGo->SetGoState(bOpen ? GO_STATE_ACTIVE : GO_STATE_READY);
+            if (!bOpen)
+                pGo->SetRespawnTime(0);
+        }
+        else
+            debug_log("TSCR: InstanceData: HandleGameObject failed");
+}
+
+uint32 instance_scarlet_monastery::GetData(uint32 uiType)
+{
+    switch(uiType)
+    {
+        case TYPE_MOGRAINE_AND_WHITE_EVENT:
+            return m_auiEncounter[0];
+        case DATA_HORSEMAN_EVENT:
+            return m_auiEncounter[1];
+    }
 
     return 0;
 }
