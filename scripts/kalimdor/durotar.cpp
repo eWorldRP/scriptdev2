@@ -103,7 +103,7 @@ struct MANGOS_DLL_DECL npc_bok_dropcertain : public ScriptedAI
                 return;
 
             ItemPosCountVec dest;
-            uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_PORTABLE_KEG, 1, false);
+            uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_PORTABLE_KEG, 1, NULL);
             if (msg == EQUIP_ERR_OK)
             {
                 pPlayer->StoreNewItem(dest, ITEM_PORTABLE_KEG, 1, true);

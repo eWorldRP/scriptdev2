@@ -282,7 +282,7 @@ CreatureAI* GetAI_npc_sa_vendor(Creature* pCreature)
 
 bool GossipHello_npc_sa_vendor(Player* pPlayer, Creature* pCreature)
 {
-    uint8 gyd = NULL;
+    uint8 gyd = 0;
     if (pCreature->GetEntry() == 29260)
         gyd = 0;
     if (pCreature->GetEntry() == 29262)
@@ -312,7 +312,7 @@ bool GossipSelect_npc_sa_vendor(Player* pPlayer, Creature* pCreature, uint32 uiS
 {
     if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
     {
-        uint8 gyd = NULL;
+        uint8 gyd = 0;
         if (pCreature->GetEntry() == 29260)
             gyd = 0;
         if (pCreature->GetEntry() == 29262)

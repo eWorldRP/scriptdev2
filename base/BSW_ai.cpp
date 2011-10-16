@@ -808,7 +808,7 @@ Unit* BSWScriptedAI::_doSelect(uint32 SpellID, bool spellsearchtype, float range
                 _list.push_back((Unit*)player);
         }
 
-    debug_log("BSW: search random player with criteria = %u, found %u players.",SpellID,_list.size());
+    debug_log("BSW: search random player with criteria = %u, found %u players.",SpellID,(unsigned int)(_list.size()));
 
     if (_list.empty()) return NULL;
         else return _list[urand(0,_list.size() - 1)];

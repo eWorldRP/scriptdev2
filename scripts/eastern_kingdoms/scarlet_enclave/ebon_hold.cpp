@@ -1766,11 +1766,11 @@ struct MANGOS_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(uiRayneGUID))
                 pTemp->SetDeathState(JUST_DIED);
 
-            uiTirionGUID = NULL;
-            uiKorfaxGUID = NULL;
-            uiMaxwellGUID = NULL;
-            uiEligorGUID = NULL;
-            uiRayneGUID = NULL;
+            uiTirionGUID = 0;
+            uiKorfaxGUID = 0;
+            uiMaxwellGUID = 0;
+            uiEligorGUID = 0;
+            uiRayneGUID = 0;
 
             for (uint8 i = 0; i < ENCOUNTER_DEFENDER_NUMBER; ++i)
             {
@@ -1794,10 +1794,10 @@ struct MANGOS_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(uiLichKingGUID))
                 pTemp->SetDeathState(JUST_DIED);
 
-            uiKoltiraGUID = NULL;
-            uiOrbazGUID = NULL;
-            uiThassarianGUID = NULL;
-            uiLichKingGUID = NULL;
+            uiKoltiraGUID = 0;
+            uiOrbazGUID = 0;
+            uiThassarianGUID = 0;
+            uiLichKingGUID = 0;
             for(uint8 i = 0; i < ENCOUNTER_ABOMINATION_NUMBER; ++i)
             {
                 if (Creature* pTemp = m_creature->GetMap()->GetCreature(uiAbominationGUID[i]))

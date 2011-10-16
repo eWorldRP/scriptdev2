@@ -826,7 +826,7 @@ struct MANGOS_DLL_DECL mob_halion_controlAI : public BSWScriptedAI
                 m_lastBuffTwilight = Buff[buffnum].twilight;
             }
 
-            debug_log("ruby_sanctum: Buff num = %u, m_diff = %d ", buffnum, m_diff);
+            debug_log("ruby_sanctum: Buff num = %u, m_diff = %f ", buffnum, m_diff);
 
             pInstance->SetData(TYPE_COUNTER, (uint32)Buff[buffnum].disp_corp);
 

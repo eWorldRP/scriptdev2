@@ -439,7 +439,7 @@ struct MANGOS_DLL_DECL mob_ilsaAI : public ScriptedAI
                     if (m_pBrewed = m_creature->GetMap()->GetPlayer(pTarget->GetObjectGuid()))
                     {
                         ItemPosCountVec dest;
-                        uint8 msg = m_pBrewed->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_BREWMAIDEN_BREW, 1, false);
+                        uint8 msg = m_pBrewed->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_BREWMAIDEN_BREW, 1, NULL);
                         if (msg == EQUIP_ERR_OK)
 					    {
                             m_pBrewed->StoreNewItem(dest, ITEM_BREWMAIDEN_BREW, 1, true);
