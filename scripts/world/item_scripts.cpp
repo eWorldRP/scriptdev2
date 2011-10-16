@@ -28,6 +28,7 @@ item_gor_dreks_ointment(i30175)     Protecting Our Own(q10488)
 Item_jungle_punch_offer
 item_complimentary_brewfest_sampler Brewfest event
 item_ram_racing_reins               Brewfest event
+item_tricky_treat                   Hallow's End event
 EndContentData */
 
 #include "precompiled.h"
@@ -247,6 +248,33 @@ bool ItemUse_item_ram_racing_reins(Player* pPlayer, Item* pItem, const SpellCast
     return true;
 }
 
+/*#####
+# item_tricky_treat
+#####*/
+
+enum
+{
+    SPELL_TRICKY_TREAT_0                = 44436,
+    SPELL_TRICKY_TREAT_RUN              = 42919,
+    SPELL_UPSET_TUMMY                   = 42966,
+};
+
+bool ItemUse_item_tricky_treat(Player* pPlayer, Item* pItem, const SpellCastTargets &pTargets)
+{
+     if (pPlayer->HasAura(SPELL_UPSET_TUMMY))
+       {
+           pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, pItem);
+           return true;
+       }
+       pPlayer->CastSpell(pPlayer, SPELL_TRICKY_TREAT_RUN, true);
+       if (pPlayer->HasAura(SPELL_TRICKY_TREAT_RUN))
+       {
+           if (pPlayer->GetSpellAuraHolder(SPELL_TRICKY_TREAT_RUN)->GetStackAmount() > 2 && roll_chance_i(20 * pPlayer->GetSpellAuraHolder(SPELL_TRICKY_TREAT_RUN)->GetStackAmount()))
+               pPlayer->CastSpell(pPlayer, SPELL_UPSET_TUMMY, true);
+       }
+       return false;
+}
+
 void AddSC_item_scripts()
 {
     Script *newscript;
@@ -284,5 +312,11 @@ void AddSC_item_scripts()
     newscript = new Script;
     newscript->Name = "item_ram_racing_reins";
     newscript->pItemUse = &ItemUse_item_ram_racing_reins;
+    newscript->RegisterSelf();
+
+
+    newscript = new Script;
+    newscript->Name = "item_tricky_treat";
+    newscript->pItemUse = &ItemUse_item_tricky_treat;
     newscript->RegisterSelf();
 }
