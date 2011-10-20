@@ -169,13 +169,6 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
             case 0:
                 timedCast(SPELL_POUND, uiDiff);
                 timedCast(SPELL_COLD, uiDiff);
-                if (m_uiBurrowerSummonTimer < uiDiff)
-                {
-                    m_uiBurrowerSummonTimer = 90000;
-                    doCast(SUMMON_BORROWER);
-                    DoScriptText(-1713556, m_creature);
-                }
-                else m_uiBurrowerSummonTimer -= uiDiff;
 
                 if (m_uiBurrowTimer < uiDiff)
                 {
@@ -214,14 +207,6 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
                     DoScriptText(-1713560,m_creature);
                 }
 
-                if (m_uiBurrowerSummonTimer < uiDiff)
-                {
-                    m_uiBurrowerSummonTimer = 90000;
-                    doCast(SUMMON_BORROWER);
-                    DoScriptText(-1713556, m_creature);
-                }
-                else m_uiBurrowerSummonTimer -= uiDiff;
-
                 if (m_uiBurrowTimer < uiDiff)
                 {
                     m_uiBurrowTimer = urand(45000, 60000);
@@ -243,16 +228,7 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
                 m_uiStage = 5;
                 break;
             case 5:
-                if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
-                {
-                    if (m_uiBurrowerSummonTimer < uiDiff)
-                    {
-                        m_uiBurrowerSummonTimer = 90000;
-                        doCast(SUMMON_BORROWER);
-                        DoScriptText(-1713556, m_creature);
-                    }
-                    else m_uiBurrowerSummonTimer -= uiDiff;
-                }
+
                 timedCast(SPELL_POUND, uiDiff);
                 timedCast(SPELL_COLD, uiDiff);
                 break;
@@ -260,6 +236,29 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
         }
 
         timedCast(NPC_FROST_SPHERE_10, uiDiff);
+
+        if (m_uiBurrowerSummonTimer < uiDiff)
+        {
+            if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            {
+                //two Burrower in each phase in hero mode
+                m_uiBurrowerSummonTimer = 90000;
+                doCast(SUMMON_BORROWER);
+                doCast(SUMMON_BORROWER);
+                DoScriptText(-1713556, m_creature);
+            }
+            else
+            {
+                if (m_uiStage != 4 || m_uiStage != 5)
+                {
+                    //one Burrower in the firsts phases in normal mode
+                    m_uiBurrowerSummonTimer = 90000;
+                    doCast(SUMMON_BORROWER);
+                    DoScriptText(-1713556, m_creature);
+                }
+            }
+        }
+        else m_uiBurrowerSummonTimer -= uiDiff;
 
         if (m_uiBerserkTimer < uiDiff)
         {
