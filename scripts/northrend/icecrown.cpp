@@ -376,6 +376,91 @@ CreatureAI* GetAI_npc_argent_valiant(Creature* pCreature)
     return new npc_argent_valiantAI (pCreature);
 }
 
+/*######
+## npc_fallen_hero_spirit  //quest 14107
+######*/
+
+enum QuestFate // shared enum by conventor mob and fallen hero mob
+{
+    QUEST_THE_FATE_OF_THE_FALLEN        = 14107,
+    NPC_FALLEN_HERO_SPIRIT              = 32149,
+    NPC_FALLEN_HERO_SPIRIT_PROXY        = 35055,
+};
+
+enum
+{
+    SAY_BLESS_1                         = -1000594,
+    SAY_BLESS_2                         = -1000595,
+    SAY_BLESS_3                         = -1000596,
+    SAY_BLESS_4                         = -1000597,
+    SAY_BLESS_5                         = -1000598,
+
+    SPELL_STRIKE                        = 11976,
+    SPELL_BLESSING_OF_PEACE             = 66719,     //spell casted from relic of light
+    GRIP_OF_THE_SCOURGE_AURA            = 60231      //might need server side spell script support (when mob has this spell it's immune to fate of light spell)
+};
+
+
+struct MANGOS_DLL_DECL npc_fallen_hero_spiritAI : public ScriptedAI
+{
+    npc_fallen_hero_spiritAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
+    }
+
+    uint32 m_uiStrike_Timer;
+
+    void Reset()
+    {
+        m_uiStrike_Timer = 10000;
+    }
+
+    void SpellHit(Unit *pCaster, const SpellEntry *pSpell)
+    {
+        // if (m_creature->HasAura(GRIP_OF_THE_SCOURGE_AURA))
+        //     return fasle;
+
+        if (pCaster->GetTypeId() == TYPEID_PLAYER && m_creature->isAlive() && ((pSpell->Id == SPELL_BLESSING_OF_PEACE)))
+        {
+            if (((Player*)pCaster)->GetQuestStatus(QUEST_THE_FATE_OF_THE_FALLEN) == QUEST_STATUS_INCOMPLETE)
+            {
+                ((Player*)pCaster)->KilledMonsterCredit(NPC_FALLEN_HERO_SPIRIT_PROXY);
+                m_creature->ForcedDespawn();
+                switch(urand(0, 4))
+                {
+                    case 0: DoScriptText(SAY_BLESS_1, m_creature); break;
+                    case 1: DoScriptText(SAY_BLESS_2, m_creature); break;
+                    case 2: DoScriptText(SAY_BLESS_3, m_creature); break;
+                    case 3: DoScriptText(SAY_BLESS_4, m_creature); break;
+                    case 4: DoScriptText(SAY_BLESS_5, m_creature); break;
+                }
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiStrike_Timer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature->getVictim(), SPELL_STRIKE);
+            m_uiStrike_Timer = 10000;
+        }
+        else
+            m_uiStrike_Timer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+
+};
+
+CreatureAI* GetAI_npc_fallen_hero_spirit(Creature* pCreature)
+{
+    return new npc_fallen_hero_spiritAI(pCreature);
+}
+
 void AddSC_icecrown()
 {
     Script* newscript;
@@ -410,5 +495,10 @@ void AddSC_icecrown()
     newscript = new Script;
     newscript->Name = "npc_argent_valiant";
     newscript->GetAI = &GetAI_npc_argent_valiant;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_fallen_hero_spirit";
+    newscript->GetAI = &GetAI_npc_fallen_hero_spirit;
     newscript->RegisterSelf();
 }
