@@ -80,6 +80,7 @@ struct MANGOS_DLL_DECL boss_jaraxxusAI : public BSWScriptedAI
     ScriptedInstance* m_pInstance;
     uint32 m_uiPowerTimer;
     uint32 m_uiSummonTimer;
+    uint32 m_uiFizzlebangSecurityKillTimer;
     uint8 m_uiStackReply;
     bool m_bVolcanoOrPortal;
     bool m_bPowerCheck;
@@ -93,6 +94,8 @@ struct MANGOS_DLL_DECL boss_jaraxxusAI : public BSWScriptedAI
         m_bVolcanoOrPortal = urand(0,1);
         m_uiPowerTimer = 27000;
         m_uiSummonTimer = 60000;
+        // this to avoid Fizzlebang to be saved by players
+        m_uiFizzlebangSecurityKillTimer = 7000;
         m_bPowerCheck = false;
 
         if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
@@ -158,15 +161,25 @@ struct MANGOS_DLL_DECL boss_jaraxxusAI : public BSWScriptedAI
 
         if (!m_bPowerCheck)
         {
-            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_FIZZLEBANG))
+            if (Creature* pFizzle = m_pInstance->GetSingleCreatureFromStorage(NPC_FIZZLEBANG))
             {
-                if (!pTemp->isAlive())
+                if (!pFizzle->isAlive())
                 {
                     //little workaround to give initial stack amount of Nether Power
                     doCast(SPELL_NETHER_POWER);
                     m_uiStackReply--;
                     if (m_uiStackReply <= 0)
                         m_bPowerCheck = true;
+                }
+                else if (pFizzle->isAlive()) // don't cast if Fizzlebang is alive
+                {
+                    DoMeleeAttackIfReady();
+
+                    //kill Fizzlebang if is elapsed too much time
+                    if (m_uiFizzlebangSecurityKillTimer < uiDiff)
+                        m_creature->DealDamage(pFizzle, pFizzle->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    else m_uiFizzlebangSecurityKillTimer -= uiDiff;
+                    return;
                 }
             }
         }
@@ -347,6 +360,14 @@ struct MANGOS_DLL_DECL mob_infernal_volcanoAI : public BSWScriptedAI
         if (m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
             m_creature->ForcedDespawn();
 
+        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
+        {
+            if (m_uiCount >= 3)
+            {
+                m_creature->ForcedDespawn();
+            }
+        }
+
         if (m_uiTimer < diff)
         {
             doCast(SPELL_INFERNAL_ERUPTION);
@@ -355,14 +376,6 @@ struct MANGOS_DLL_DECL mob_infernal_volcanoAI : public BSWScriptedAI
             m_uiTimer = 5000;
         }
         else m_uiTimer -= diff;
-
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
-        {
-            if (m_uiCount >= 3)
-            {
-                m_creature->ForcedDespawn();
-            }
-        }
 
         if (m_uiCount >= 3)
         {
@@ -497,6 +510,14 @@ struct MANGOS_DLL_DECL mob_nether_portalAI : public BSWScriptedAI
         if (m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS )
             m_creature->ForcedDespawn();
 
+        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
+        {
+            if (m_bHasSummoned)
+            {
+                m_creature->ForcedDespawn();
+            }
+        }
+
         if (m_uiTimer < diff)
         {
             m_creature->SummonCreature(NPC_MISTRESS, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
@@ -505,14 +526,6 @@ struct MANGOS_DLL_DECL mob_nether_portalAI : public BSWScriptedAI
             m_uiTimer = 15000;
         }
         else m_uiTimer -= diff;
-
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
-        {
-            if (m_bHasSummoned)
-            {
-                m_creature->ForcedDespawn();
-            }
-        }
 
         if (m_bHasSummoned)
         {
