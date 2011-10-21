@@ -118,6 +118,9 @@ int GetPoweringId(Difficulty x)
     }
 }
 
+/*#####
+# Fjola Lightbane
+#####*/
 struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
 {
     boss_fjolaAI(Creature* pCreature) : BSWScriptedAI(pCreature)
@@ -132,7 +135,9 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
     uint32 m_uiVortexTimer;
     uint32 m_uiIncrease;
     uint32 m_uiPactTimer;
+    uint32 m_uiSpecialAbilityTimer;
     uint8 m_uiReply;
+    bool m_bVortexOrPact;
     bool m_bIsVortex;
     bool m_bIsPact;
 
@@ -149,6 +154,8 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
         m_creature->SetRespawnDelay(7*DAY);
         m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_NONE);
         stage = 0;
+        m_uiSpecialAbilityTimer = 45000;
+        m_bVortexOrPact = true;
         m_bIsVortex = false;
         m_bIsPact = false;
         if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL)
@@ -296,18 +303,23 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
                             doCast(SPELL_LIGHT_TOUCH, pTarget);
                     }
                 }
-                if (m_pInstance->GetData(DATA_CASTING_VALKYRS) == SPELL_NONE )
+
+                if (m_uiSpecialAbilityTimer < uiDiff)
                 {
-                    if (timedQuery(SPELL_LIGHT_VORTEX, uiDiff))
+                    if (m_creature->GetHealthPercent() <= 50.0f)
+                        m_bVortexOrPact = !m_bVortexOrPact;     // under 50% healt use alternatively Vortex or Pact ability
+                    else
+                        m_bVortexOrPact = true;                 // over 50% use only Vortex
+
+                    if (m_bVortexOrPact)
                     {
                         m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_LIGHT_VORTEX);
                         DoScriptText(-1713538,m_creature);
                         stage = 1;
                         m_uiReply = 5;
                         m_uiVortexTimer = 8000;
-                        break;
                     }
-                    if (timedQuery(GetRightPactId(currentDifficulty, m_creature->GetEntry()), uiDiff) && m_creature->GetHealthPercent() <= 50.0f)
+                    else
                     {
                         m_creature->InterruptNonMeleeSpells(true);
                         doCast(SPELL_SHIELD_LIGHT);
@@ -315,7 +327,11 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
                         DoScriptText(-1713539,m_creature);
                         stage = 3;
                     }
+                    m_uiSpecialAbilityTimer = 70000;
+                    break;
                 }
+                else m_uiSpecialAbilityTimer -= uiDiff;
+
                 if (m_pInstance->GetData(DATA_CASTING_VALKYRS) == SPELL_TWIN_PACT_20_E || m_pInstance->GetData(DATA_CASTING_VALKYRS) == SPELL_TWIN_PACT_50_E) 
                     if (!m_creature->HasAura(SPELL_TWIN_POWER))
                         doCast(SPELL_TWIN_POWER);
@@ -423,6 +439,9 @@ CreatureAI* GetAI_boss_fjola(Creature* pCreature)
     return new boss_fjolaAI(pCreature);
 }
 
+/*#####
+# Edys Darkbane
+#####*/
 struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
 {
     boss_eydisAI(Creature* pCreature) : BSWScriptedAI(pCreature) 
@@ -438,7 +457,9 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
     uint32 m_uiVortexTimer;
     uint32 m_uiIncrease;
     uint32 m_uiPactTimer;
+    uint32 m_uiSpecialAbilityTimer;
     uint8 m_uiReply;
+    bool m_bVortexOrPact;
     bool m_bIsVortex;
     bool m_bIsPact;
 
@@ -456,6 +477,8 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
         m_creature->SetRespawnDelay(7*DAY);
         m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_NONE);
         stage = 0;
+        m_uiSpecialAbilityTimer = 80000;
+        m_bVortexOrPact = true;
         m_bIsVortex = false;
         m_bIsPact = false;
         if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL)
@@ -628,27 +651,35 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
                             doCast(SPELL_DARK_TOUCH, pTarget);
                     }
                 }
-                if (m_pInstance->GetData(DATA_CASTING_VALKYRS) == SPELL_NONE )
+
+                if (m_uiSpecialAbilityTimer < uiDiff)
                 {
-                    if (timedQuery(SPELL_DARK_VORTEX, uiDiff))
+                    if (m_creature->GetHealthPercent() <= 50.0f)
+                        m_bVortexOrPact = !m_bVortexOrPact;     // under 50% healt use alternatively Vortex or Pact ability
+                    else
+                        m_bVortexOrPact = true;                 // over 50% use only Vortex
+
+                    if (m_bVortexOrPact)
                     {
                         m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_DARK_VORTEX);
                         DoScriptText(-1713540,m_creature);
                         stage = 1;
                         m_uiReply = 5;
                         m_uiVortexTimer = 8000;
-                        break;
                     }
-                    if (timedQuery(GetRightPactId(currentDifficulty, m_creature->GetEntry()), uiDiff) && m_creature->GetHealthPercent() <= 50.0f)
+                    else
                     {
                         m_creature->InterruptNonMeleeSpells(true);
                         doCast(SPELL_SHIELD_DARK);
                         m_pInstance->SetData(DATA_CASTING_VALKYRS, GetRightPactId(currentDifficulty, m_creature->GetEntry()));
                         DoScriptText(-1713539,m_creature);
                         stage = 3;
-                        break;
                     }
+                    m_uiSpecialAbilityTimer = 70000;
+                    break;
                 }
+                else m_uiSpecialAbilityTimer -= uiDiff;
+
                 if (m_pInstance->GetData(DATA_CASTING_VALKYRS) == SPELL_TWIN_PACT_20_F || m_pInstance->GetData(DATA_CASTING_VALKYRS) == SPELL_TWIN_PACT_50_F)
                     if (!m_creature->HasAura(SPELL_TWIN_POWER))
                         doCast(SPELL_TWIN_POWER);
@@ -755,6 +786,9 @@ CreatureAI* GetAI_boss_eydis(Creature* pCreature)
     return new boss_eydisAI(pCreature);
 }
 
+/*#####
+# Light Essence
+#####*/
 struct MANGOS_DLL_DECL mob_light_essenceAI : public ScriptedAI
 {
     mob_light_essenceAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -816,6 +850,9 @@ bool GossipHello_mob_light_essence(Player *player, Creature* pCreature)
     return true;
 };
 
+/*#####
+# Dark Essence
+#####*/
 struct MANGOS_DLL_DECL mob_dark_essenceAI : public ScriptedAI
 {
     mob_dark_essenceAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -875,6 +912,9 @@ bool GossipHello_mob_dark_essence(Player *player, Creature* pCreature)
     return true;
 }
 
+/*#####
+# Dark Orb
+#####*/
 struct MANGOS_DLL_DECL mob_dark_orbAI : public ScriptedAI
 {
     mob_dark_orbAI(Creature *pCreature) : ScriptedAI(pCreature)
@@ -984,6 +1024,9 @@ CreatureAI* GetAI_mob_dark_orb(Creature *pCreature)
     return new mob_dark_orbAI(pCreature);
 }
 
+/*#####
+# Light Orb
+#####*/
 struct MANGOS_DLL_DECL mob_light_orbAI : public ScriptedAI
 {
     mob_light_orbAI(Creature *pCreature) : ScriptedAI(pCreature)
