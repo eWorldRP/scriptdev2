@@ -170,8 +170,8 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
                     if (Creature* pTemp = (Creature*)m_creature->GetMap()->GetUnit( *itr))
                         if (pTemp->isAlive())
                         {
-                            if (m_creature->GetHealth() > m_creature->GetMaxHealth() * 0.05) // remove when SPELL_DECIMATE is working
-                                pTemp->SetHealth(pTemp->GetMaxHealth() * 0.03);
+                            pTemp->GetMotionMaster()->Clear();
+                            pTemp->GetMotionMaster()->MoveFollow(m_creature, 0.0f, 0.0f);
                             pTemp->AddThreat(m_creature, 1000000000.0f); // force move toward to Gluth
                         }
             }
@@ -196,6 +196,9 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     pZombie->AddThreat(pTarget);
+
+                pZombie->GetMotionMaster()->Clear();
+                pZombie->GetMotionMaster()->MoveFollow(m_creature, 0.0f, 0.0f);
                 m_lZombieGUIDList.push_back(pZombie->GetObjectGuid());
             }
 
@@ -205,6 +208,9 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                         pZombie->AddThreat(pTarget);
+
+                    pZombie->GetMotionMaster()->Clear();
+                    pZombie->GetMotionMaster()->MoveFollow(m_creature, 0.0f, 0.0f);
 					m_lZombieGUIDList.push_back(pZombie->GetObjectGuid());
                 }
             }
