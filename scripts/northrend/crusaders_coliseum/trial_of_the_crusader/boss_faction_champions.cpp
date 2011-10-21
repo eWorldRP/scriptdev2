@@ -31,6 +31,9 @@ EndScriptData */
 #define SPELL_ANTI_AOE     68595
 #define SPELL_PVP_TRINKET  65547
 
+/*#####
+# Faction's Champions's shared AI
+#####*/
 struct MANGOS_DLL_DECL boss_faction_championsAI : public BSWScriptedAI
 {
     boss_faction_championsAI(Creature* pCreature, uint32 aitype) : BSWScriptedAI(pCreature) 
@@ -229,11 +232,18 @@ struct MANGOS_DLL_DECL boss_faction_championsAI : public BSWScriptedAI
 #define SPELL_BARKSKIN         65860 //1 min cd
 #define SPELL_THORNS           66068
 #define SPELL_NATURE_GRASP     66071 //1 min cd, self buff
+#define SPELL_TRANQUILLITY_10  67975 //10 min cd
+#define SPELL_TRANQUILLITY_25  67976 //10 min cd
 
 struct MANGOS_DLL_DECL mob_toc_druidAI : public boss_faction_championsAI
 {
-    mob_toc_druidAI(Creature* pCreature) : boss_faction_championsAI(pCreature, AI_HEALER) {Init();}
+    mob_toc_druidAI(Creature* pCreature) : boss_faction_championsAI(pCreature, AI_HEALER)
+    {
+        m_uiTranquillityTimer = 600000;
+        Init();
+    }
 
+   uint32 m_uiTranquillityTimer;
    void Init()
    {
         SetEquipmentSlots(false, 51799, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
@@ -272,6 +282,17 @@ struct MANGOS_DLL_DECL mob_toc_druidAI : public boss_faction_championsAI
                         doCast(SPELL_THORNS, target);
                     break;
             }
+
+        if (m_uiTranquillityTimer < diff)
+        {
+            if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+                DoCast(m_creature, SPELL_TRANQUILLITY_10);
+            if (currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+                DoCast(m_creature, SPELL_TRANQUILLITY_25);
+            m_uiTranquillityTimer = 600000;
+        }
+        else
+            m_uiTranquillityTimer -= diff;
 
         boss_faction_championsAI::UpdateAI(diff);
     }
