@@ -91,6 +91,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
 
     uint32 m_uiTeleportTimer;
     uint32 m_uiShadowboltTimer;
+    uint32 m_uiHarvestSoulTimer;
 
     void Reset()
     {
@@ -104,6 +105,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
 
         m_uiTeleportTimer = 15000;
         m_uiShadowboltTimer = 2500;
+        m_uiHarvestSoulTimer = 2500;
     }
 
     void Aggro(Unit* pWho)
@@ -186,6 +188,70 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
 
             m_creature->SummonCreature(uiSummonEntry, (*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ(), (*itr)->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
             --uiCount;
+        }
+    }
+
+    bool IsCentralDoorClosed()
+    {
+            return m_pInstance && m_pInstance->GetData(TYPE_GOTHIK) != SPECIAL;
+    }
+
+    Player* SelectPlayerInASide(bool bLeft)
+    {
+        if(!m_pInstance)
+            return NULL;
+
+        Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
+        if (!lPlayers.isEmpty())
+        {
+            for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+            {
+                if (Player* pPlayer = itr->getSource())
+                {
+                    if (bLeft)
+                    {
+                        if(!m_pInstance->IsInRightSideGothArea(pPlayer) && pPlayer->isAlive())
+                        {
+                            return pPlayer;
+                        }
+                    }
+                    else
+                    {
+                        if(m_pInstance->IsInRightSideGothArea(pPlayer) && pPlayer->isAlive())
+                        {
+                            return pPlayer;
+                        }
+                    }
+                }
+            }
+        }
+        return NULL;
+    }
+
+    void JustSummoned(Creature* pSummoned)
+    {
+        if (!IsCentralDoorClosed())
+            pSummoned->SetInCombatWithZone();
+        else
+        {
+            bool bSpectral;
+            switch(pSummoned->GetEntry())
+            {
+                case NPC_UNREL_TRAINEE:
+                case NPC_UNREL_DEATH_KNIGHT:
+                case NPC_UNREL_RIDER:
+                    bSpectral = false;
+                    break;
+                case NPC_SPECT_TRAINEE:
+                case NPC_SPECT_DEATH_KNIGHT:
+                case NPC_SPECT_HORSE:
+                case NPC_SPECT_RIDER:
+                    bSpectral = true;
+                    break;
+            }
+            Player* pPlayer = SelectPlayerInASide(bSpectral);
+            if(pPlayer)
+                pSummoned->AI()->AttackStart(pPlayer);
         }
     }
 
@@ -329,6 +395,14 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
                 }
                 else
                     m_uiShadowboltTimer -= uiDiff;
+
+                if (m_uiHarvestSoulTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
+                        m_uiHarvestSoulTimer = 15000;
+                }
+                else
+                    m_uiHarvestSoulTimer -= uiDiff;
 
                 DoMeleeAttackIfReady();                     // possibly no melee at all
                 break;
