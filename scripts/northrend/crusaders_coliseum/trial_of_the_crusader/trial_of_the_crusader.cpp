@@ -301,7 +301,7 @@ bool GossipSelect_npc_toc_announcer(Player* pPlayer, Creature* pCreature, uint32
             Creature* pTemp = pInstance->GetSingleCreatureFromStorage(NPC_ANUBARAK);
 
             if (!pTemp || !pTemp->isAlive())
-                pCreature->SummonCreature(NPC_ANUBARAK, SpawnLoc[19].x, SpawnLoc[19].y, SpawnLoc[19].z, 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
+                pTemp = pCreature->SummonCreature(NPC_ANUBARAK, SpawnLoc[19].x, SpawnLoc[19].y, SpawnLoc[19].z, 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
 
             if (pTemp)
             {
@@ -312,6 +312,7 @@ bool GossipSelect_npc_toc_announcer(Player* pPlayer, Creature* pCreature, uint32
 
             pInstance->SetData(TYPE_STAGE, 9);
             pInstance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
+            pInstance->SetData(TYPE_EVENT, 0);
 
             if (pCreature->GetVisibility() == VISIBILITY_ON)
                 pCreature->SetVisibility(VISIBILITY_OFF);
@@ -482,8 +483,8 @@ struct MANGOS_DLL_DECL boss_lich_king_tocAI : public ScriptedAI
                         pGoFloor->SetUInt32Value(GAMEOBJECT_BYTES_1, 8449);
                     }
                     m_creature->CastSpell(m_creature, 69016, false);
-                    if(pInstance)
-                        pInstance->SetData(TYPE_LICH_KING,DONE);
+
+                    pInstance->SetData(TYPE_LICH_KING,DONE);
     
                     pInstance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
                     m_creature->SummonCreature(NPC_ANUBARAK, SpawnLoc[19].x, SpawnLoc[19].y, SpawnLoc[19].z, 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
@@ -494,7 +495,7 @@ struct MANGOS_DLL_DECL boss_lich_king_tocAI : public ScriptedAI
                         pTemp->SetInCombatWithZone();
                     }
                     pInstance->SetData(TYPE_STAGE, 9);
-                    Event=false;
+                    Event = false;
                     m_creature->ForcedDespawn();
                     pPortal->ForcedDespawn();
                     pInstance->SetData(TYPE_EVENT, 0);
