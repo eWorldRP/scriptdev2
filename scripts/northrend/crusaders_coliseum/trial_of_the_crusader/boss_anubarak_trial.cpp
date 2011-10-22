@@ -99,6 +99,7 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
     uint32 m_uiBurrowTimer;
     uint32 m_uiBurrowerSummonTimer;
     uint8 m_uiStage;
+    uint8 m_uiFrostSpheres;
     bool m_bIntro;
     Unit* m_pTarget;
 
@@ -111,6 +112,7 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
         m_uiBurrowTimer = urand(45000, 60000);
         m_uiBurrowerSummonTimer = 90000;
         m_uiStage = 0;
+        m_uiFrostSpheres = 0;
         m_bIntro = true;
         m_creature->SetRespawnDelay(DAY);
         m_pTarget = NULL;
@@ -237,7 +239,14 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
 
         }
 
-        timedCast(NPC_FROST_SPHERE_10, uiDiff);
+        if (m_uiFrostSpheres <= 6)
+        {
+            timedCast(NPC_FROST_SPHERE_10, uiDiff);
+
+            //if heroic increase de sphere count
+            if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+                m_uiFrostSpheres++;
+        }
 
         if (m_uiBurrowerSummonTimer < uiDiff)
         {
