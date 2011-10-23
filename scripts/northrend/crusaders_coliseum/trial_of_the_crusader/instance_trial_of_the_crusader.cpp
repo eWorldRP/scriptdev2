@@ -186,7 +186,7 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
                                         m_uiTributeChest1 = GO_TRIBUTE_CHEST_10H_25;
                                     if ( m_auiEncounter[7] >= 45)
                                         m_uiTributeChest2 = GO_TRIBUTE_CHEST_10H_45;
-                                    if ( m_auiEncounter[7] >= 49)
+                                    if ( m_auiEncounter[7] == 50)
                                         m_uiTributeChest3 = GO_TRIBUTE_CHEST_10H_50;
                                     m_uiTributeChest4 = GO_TRIBUTE_CHEST_10H_99;
                                 }
@@ -196,24 +196,33 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
                                         m_uiTributeChest1 = GO_TRIBUTE_CHEST_25H_25;
                                     if ( m_auiEncounter[7] >= 45)
                                         m_uiTributeChest2 = GO_TRIBUTE_CHEST_25H_45;
-                                    if ( m_auiEncounter[7] >= 49)
+                                    if ( m_auiEncounter[7] == 50)
                                         m_uiTributeChest3 = GO_TRIBUTE_CHEST_25H_50;
                                     m_uiTributeChest4 = GO_TRIBUTE_CHEST_25H_99;
                                 }
                             // Attention! It is (may be) not off-like, but  spawning all Tribute Chests is real
                             // reward for clearing TOC instance
-                                if (m_uiTributeChest1)
-                                    if (GameObject* pChest1 = GetSingleGameObjectFromStorage(m_uiTributeChest1))
-                                        if (pChest1 && !pChest1->isSpawned())
-                                            pChest1->SetRespawnTime(7*DAY);
-                                if (m_uiTributeChest2)
-                                     if (GameObject* pChest2 = GetSingleGameObjectFromStorage(m_uiTributeChest2))
-                                         if (pChest2 && !pChest2->isSpawned())
-                                             pChest2->SetRespawnTime(7*DAY);
                                 if (m_uiTributeChest3)
                                     if (GameObject* pChest3 = GetSingleGameObjectFromStorage(m_uiTributeChest3))
                                         if (pChest3 && !pChest3->isSpawned())
+                                        {
                                              pChest3->SetRespawnTime(7*DAY);
+                                             break;
+                                        }
+                                if (m_uiTributeChest2)
+                                     if (GameObject* pChest2 = GetSingleGameObjectFromStorage(m_uiTributeChest2))
+                                         if (pChest2 && !pChest2->isSpawned())
+                                         {
+                                             pChest2->SetRespawnTime(7*DAY);
+                                             break;
+                                         }
+                                if (m_uiTributeChest1)
+                                    if (GameObject* pChest1 = GetSingleGameObjectFromStorage(m_uiTributeChest1))
+                                        if (pChest1 && !pChest1->isSpawned())
+                                        {
+                                            pChest1->SetRespawnTime(7*DAY);
+                                            break;
+                                        }
                                 if (m_uiTributeChest4)
                                     if (GameObject* pChest4 = GetSingleGameObjectFromStorage(m_uiTributeChest4))
                                         if (pChest4 && !pChest4->isSpawned())
