@@ -80,7 +80,7 @@ enum PhaseChangeTimer
 {
     PHASE_CHANGE_SKELETON           = 12000,
     PHASE_CHANGE_REAL               = 6000,
-    PHASE_CHANGE_FLESH               = 20000
+    PHASE_CHANGE_FLESH              = 20000
 };
 
 /*######
@@ -98,19 +98,20 @@ struct MANGOS_DLL_DECL boss_tharonjaAI : public ScriptedAI
 
     ScriptedInstance* m_pInstance;
     bool m_bIsRegularMode;
-    uint32 PhaseChangeTimer;
-    uint32 Phase;
-    uint32 CurseOfLife_Timer;
-    uint32 SkeletonSpells_Timer;
-    uint32 PoisonCloud_Timer;
-    uint32 FleshSpells_Timer;
+    uint32 m_uiPhaseChangeTimer;
+    uint32 m_uiPhase;
+    uint32 m_uiCurseOfLifeTimer;
+    uint32 m_uiSkeletonSpellsTimer;
+    uint32 m_uiPoisonCloudTimer;
+    uint32 m_uiFleshSpellsTimer;
 
     void Reset()
     {
-        PhaseChangeTimer = PHASE_CHANGE_SKELETON;
-        Phase = PHASE_SKELETON;
-        SkeletonSpells_Timer = urand (5000, 10000);
-        CurseOfLife_Timer = urand (5000, 10000);
+        m_creature->SetRespawnDelay(DAY);
+        m_uiPhaseChangeTimer = PHASE_CHANGE_SKELETON;
+        m_uiPhase = PHASE_SKELETON;
+        m_uiSkeletonSpellsTimer = urand(5000, 10000);
+        m_uiCurseOfLifeTimer = urand(5000, 10000);
     }
 
     void Aggro(Unit* pWho)
@@ -146,90 +147,105 @@ struct MANGOS_DLL_DECL boss_tharonjaAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (Phase == PHASE_SKELETON)
+        switch (m_uiPhase)
         {
-            if (CurseOfLife_Timer < uiDiff)
+            case PHASE_SKELETON:
             {
-                DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_CURSE_OF_LIFE : H_SPELL_CURSE_OF_LIFE);
-                CurseOfLife_Timer = urand (5000, 10000);
-            }else CurseOfLife_Timer -= uiDiff;
-
-            if (SkeletonSpells_Timer < uiDiff)
-            {     
-                switch(urand(0, 1))
+                if (m_uiCurseOfLifeTimer < uiDiff)
                 {
-                    case 0: 
-                        DoCast(m_creature->getVictim(),  m_bIsRegularMode ? SPELL_SHADOW_VOLLEY : H_SPELL_SHADOW_VOLLEY);
-                    case 1: 
-                        DoCast(m_creature->getVictim(),  m_bIsRegularMode ? SPELL_RAIN_OF_FIRE : H_SPELL_RAIN_OF_FIRE);
+                    DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_CURSE_OF_LIFE : H_SPELL_CURSE_OF_LIFE);
+                    m_uiCurseOfLifeTimer = urand (5000, 10000);
                 }
-                SkeletonSpells_Timer = urand (5000, 10000);
-            }else SkeletonSpells_Timer -= uiDiff;
+                else m_uiCurseOfLifeTimer -= uiDiff;
 
-            if (PhaseChangeTimer < uiDiff)
-            {
-                m_creature->CastSpell(m_creature, SPELL_DECAY_FLESH, true);
-                PhaseChangeTimer = PHASE_CHANGE_REAL;
-                Phase = PHASE_INTOFLESH;
-            }else PhaseChangeTimer -= uiDiff;
-            
-            DoMeleeAttackIfReady();
-        }
-        
-        if (Phase == PHASE_INTOFLESH)
-        {
-            if (PhaseChangeTimer < uiDiff)
-            {
-                m_creature->CastSpell(m_creature, SPELL_GIFT_OF_THARONJA, true);
-                m_creature->SetDisplayId(27073);
-                PhaseChangeTimer = PHASE_CHANGE_FLESH;
-                Phase = PHASE_FLESH;
-                FleshSpells_Timer = 1500;
-                PoisonCloud_Timer = 10000;
-            }else PhaseChangeTimer -= uiDiff;
-        }
-        
-        if (Phase == PHASE_FLESH)
-        {
-            if (PhaseChangeTimer < uiDiff)
-            {
-                DoCast(m_creature, SPELL_RETURN_FLESH);
-                PhaseChangeTimer = PHASE_CHANGE_REAL;
-                Phase = PHASE_INTOSKELETON;
-            }else PhaseChangeTimer -= uiDiff;
-
-            if (PoisonCloud_Timer < uiDiff)
-            {
-                DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_POISON_CLOUD : H_SPELL_POSION_CLOUD);
-                PoisonCloud_Timer = 10000;
-            }else PoisonCloud_Timer -= uiDiff;
-
-            if (FleshSpells_Timer < uiDiff)
-            {     
-                switch(urand(0, 3))
+                if (m_uiSkeletonSpellsTimer < uiDiff)
                 {
-                    case 0:
-                    case 1:
-                    case 2:
-                        DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_LIGHTNING_BREATH : H_SPELL_LIGHTNING_BREATH);
-                    case 3: 
-                        DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_EYE_BEAM : SPELL_EYE_BEAM);
+                    switch(urand(0, 1))
+                    {
+                        case 0:
+                            DoCast(m_creature->getVictim(),  m_bIsRegularMode ? SPELL_SHADOW_VOLLEY : H_SPELL_SHADOW_VOLLEY);
+                        case 1:
+                            DoCast(m_creature->getVictim(),  m_bIsRegularMode ? SPELL_RAIN_OF_FIRE : H_SPELL_RAIN_OF_FIRE);
+                    }
+                    m_uiSkeletonSpellsTimer = urand (5000, 10000);
                 }
-                FleshSpells_Timer = 1500;
-            }else FleshSpells_Timer -= uiDiff;
-        }
-        
-        if (Phase == PHASE_INTOSKELETON)
-        {
-            if (PhaseChangeTimer < uiDiff)
+                else m_uiSkeletonSpellsTimer -= uiDiff;
+
+                if (m_uiPhaseChangeTimer < uiDiff)
+                {
+                    m_creature->CastSpell(m_creature, SPELL_DECAY_FLESH, true);
+                    m_uiPhaseChangeTimer = PHASE_CHANGE_REAL;
+                    m_uiPhase = PHASE_INTOFLESH;
+                }
+                else m_uiPhaseChangeTimer -= uiDiff;
+
+                DoMeleeAttackIfReady();
+                break;
+            }
+            case PHASE_INTOFLESH:
             {
-                DoCast(m_creature, SPELL_DECAY_FLESH);
-                m_creature->SetDisplayId(27072);
-                PhaseChangeTimer = PHASE_CHANGE_SKELETON;
-                Phase = PHASE_SKELETON;
-                SkeletonSpells_Timer = urand (5000, 10000);
-                CurseOfLife_Timer = urand (5000, 10000);
-            }else PhaseChangeTimer -= uiDiff;
+                if (m_uiPhaseChangeTimer < uiDiff)
+                {
+                    m_creature->CastSpell(m_creature, SPELL_GIFT_OF_THARONJA, true);
+                    m_creature->SetDisplayId(27073);
+                    m_uiPhaseChangeTimer = PHASE_CHANGE_FLESH;
+                    m_uiPhase = PHASE_FLESH;
+                    m_uiFleshSpellsTimer = 1500;
+                    m_uiPoisonCloudTimer = 10000;
+                }
+                else m_uiPhaseChangeTimer -= uiDiff;
+
+                break;
+            }
+            case PHASE_FLESH:
+            {
+                if (m_uiPhaseChangeTimer < uiDiff)
+                {
+                    DoCast(m_creature, SPELL_RETURN_FLESH);
+                    m_uiPhaseChangeTimer = PHASE_CHANGE_REAL;
+                    m_uiPhase = PHASE_INTOSKELETON;
+                }
+                else m_uiPhaseChangeTimer -= uiDiff;
+
+                if (m_uiPoisonCloudTimer < uiDiff)
+                {
+                    DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_POISON_CLOUD : H_SPELL_POSION_CLOUD);
+                    m_uiPoisonCloudTimer = 10000;
+                }
+                else m_uiPoisonCloudTimer -= uiDiff;
+
+                if (m_uiFleshSpellsTimer < uiDiff)
+                {
+                    switch(urand(0, 3))
+                    {
+                        case 0:
+                        case 1:
+                        case 2:
+                            DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_LIGHTNING_BREATH : H_SPELL_LIGHTNING_BREATH);
+                        case 3:
+                            DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_EYE_BEAM : SPELL_EYE_BEAM);
+                    }
+                    m_uiFleshSpellsTimer = 1500;
+                }
+                else m_uiFleshSpellsTimer -= uiDiff;
+
+                DoMeleeAttackIfReady();
+                break;
+            }
+            case PHASE_INTOSKELETON:
+            {
+                if (m_uiPhaseChangeTimer < uiDiff)
+                {
+                    m_creature->SetDisplayId(27072);
+                    m_uiPhaseChangeTimer = PHASE_CHANGE_SKELETON;
+                    m_uiPhase = PHASE_SKELETON;
+                    m_uiSkeletonSpellsTimer = urand(5000, 10000);
+                    m_uiCurseOfLifeTimer = urand(5000, 10000);
+                }
+                else m_uiPhaseChangeTimer -= uiDiff;
+
+                break;
+            }
         }
     }
 };
