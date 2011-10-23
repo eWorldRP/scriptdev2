@@ -78,6 +78,7 @@ struct MANGOS_DLL_DECL boss_harbinger_skyrissAI : public ScriptedAI
 
     void Reset()
     {
+        m_bIntroFinished = false;
         m_bDidSplitImage33 = false;
         m_bDidSplitImage66 = false;
 
@@ -166,6 +167,8 @@ struct MANGOS_DLL_DECL boss_harbinger_skyrissAI : public ScriptedAI
                     case 3:
                         m_bIntroFinished = true;
                         // TODO - Let Attack here, or change Unit_flag
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         break;
                 }
             }
