@@ -180,31 +180,30 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
                             {
                                 if (Difficulty == RAID_DIFFICULTY_10MAN_HEROIC)
                                 {
-                                    if ( m_auiEncounter[7] == 50)
+                                    if (m_auiEncounter[7] == 50)
                                         m_uiTributeChest = GO_TRIBUTE_CHEST_10H_50;
-                                    else if ( m_auiEncounter[7] >= 45)
+                                    else if (m_auiEncounter[7] >= 45)
                                         m_uiTributeChest = GO_TRIBUTE_CHEST_10H_45;
-                                    else if ( m_auiEncounter[7] >= 25)
+                                    else if (m_auiEncounter[7] >= 25)
                                         m_uiTributeChest = GO_TRIBUTE_CHEST_10H_25;
                                     else
                                         m_uiTributeChest = GO_TRIBUTE_CHEST_10H_99;
                                 }
                                 if (Difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
                                 {
-                                    if ( m_auiEncounter[7] == 50)
+                                    if (m_auiEncounter[7] == 50)
                                         m_uiTributeChest = GO_TRIBUTE_CHEST_25H_50;
-                                    else if ( m_auiEncounter[7] >= 45)
+                                    else if (m_auiEncounter[7] >= 45)
                                         m_uiTributeChest = GO_TRIBUTE_CHEST_25H_45;
-                                    else if ( m_auiEncounter[7] >= 25)
+                                    else if (m_auiEncounter[7] >= 25)
                                         m_uiTributeChest = GO_TRIBUTE_CHEST_25H_25;
                                     else
                                         m_uiTributeChest = GO_TRIBUTE_CHEST_25H_99;
                                 }
-                            // Attention! It is (may be) not off-like, but  spawning all Tribute Chests is real
                             // reward for clearing TOC instance
                                 if (m_uiTributeChest)
                                 {
-                                    DoRespawnGameObject(GetSingleGameObjectFromStorage(m_uiTributeChest)->GetObjectGuid(), DAY);;
+                                    DoRespawnGameObject(GetSingleGameObjectFromStorage(m_uiTributeChest)->GetObjectGuid(), DAY);
                                 }
                             }
                             break;
