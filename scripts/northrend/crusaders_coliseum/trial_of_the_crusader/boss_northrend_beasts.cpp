@@ -333,7 +333,7 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
                 timedCast(SPELL_PARALYTIC_BITE, uiDiff);
 
                 if (timedQuery(SPELL_SLIME_POOL, uiDiff))
-                    m_creature->SummonCreature(NPC_SLIME_POOL, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
+                    m_creature->SummonCreature(NPC_SLIME_POOL, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000);
 
                 if (m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == ACIDMAW_SUBMERGED)
                      m_uiStage = 1;
@@ -531,7 +531,7 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
                 }
                 else m_uiSpewTimer -= uiDiff;
                 if (timedQuery(SPELL_SLIME_POOL, uiDiff))
-                    m_creature->SummonCreature(NPC_SLIME_POOL, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
+                    m_creature->SummonCreature(NPC_SLIME_POOL, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000);
 
                 if (m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == DREADSCALE_SUBMERGED)
                      m_uiStage = 1;
@@ -624,7 +624,10 @@ struct MANGOS_DLL_DECL mob_slime_poolAI : public BSWScriptedAI
 
     ScriptedInstance *m_pInstance;
     uint32 m_uiDespawnTimer;
-    bool m_bCloudcasted;
+    uint32 m_uiSizeTimer;
+    uint32 m_uiPoolTimer;
+    float m_fSize;
+    bool m_bCloudCasted;
 
     void Reset()
     {
@@ -633,13 +636,14 @@ struct MANGOS_DLL_DECL mob_slime_poolAI : public BSWScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetInCombatWithZone();
         SetCombatMovement(false);
-        doCast(SPELL_SLIME_POOL_2);
-        m_creature->SetFloatValue(OBJECT_FIELD_SCALE_X, 3.0f);
-        m_uiDespawnTimer = 15000;
-        m_bCloudcasted = false;
+        m_uiDespawnTimer = 30000;
+        m_bCloudCasted = false;
+        m_uiPoolTimer = 1000;
+        m_fSize = m_creature->GetFloatValue(OBJECT_FIELD_SCALE_X);
+        m_uiSizeTimer = 500;
     }
 
-    void AttackStart(Unit *who)
+    void AttackStart(Unit *pWho)
     {
         return;
     }
@@ -649,12 +653,26 @@ struct MANGOS_DLL_DECL mob_slime_poolAI : public BSWScriptedAI
         if (m_pInstance->GetData(TYPE_BEASTS) != IN_PROGRESS)
             m_creature->ForcedDespawn();
 
-        if (!m_bCloudcasted)
+        if (!m_bCloudCasted)
         {
-            doCast(SPELL_SLIME_POOL_2);
-            doCast(SPELL_SLIME_POOL_VISUAL);
-            m_bCloudcasted = true;
+            DoCast(m_creature, SPELL_SLIME_POOL_VISUAL);
+            m_bCloudCasted = true;
         }
+
+        if (m_uiPoolTimer < uiDiff)
+        {
+            doCast(SPELL_SLIME_POOL_1);
+            m_uiPoolTimer = 1000;
+        }
+        else m_uiPoolTimer -= uiDiff;
+
+        if (m_uiSizeTimer < uiDiff)
+        {
+                m_fSize = m_fSize*1.035;
+                m_creature->SetFloatValue(OBJECT_FIELD_SCALE_X, m_fSize);
+                m_uiSizeTimer = 500;
+        }
+        else m_uiSizeTimer -= uiDiff;
 
         if (m_uiDespawnTimer <= uiDiff)
         {
