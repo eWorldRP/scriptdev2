@@ -56,6 +56,7 @@ pet_spring_rabbit       100%    Noblegarden event
 pet_orphan              100%    Children's Week
 npc_wormhole            100%    Creates an unstable wormhole
 npc_bunny_bark                  Brewfest event
+npc_bunny_fire                  Hallow's End event
 EndContentData */
 
 /*########
@@ -3168,6 +3169,39 @@ CreatureAI* GetAI_npc_bunny_bark(Creature* pCreature)
     return new npc_bunny_bark(pCreature);
 }
 
+/*#####
+# npc_bunny_fire
+#####*/
+enum
+{
+    NPC_BUNNY_FIRE_CREDIT   = 23537,
+    SPELL_BUCKET_LANDS      = 42339
+};
+
+struct MANGOS_DLL_DECL npc_bunny_fire : public ScriptedAI
+{
+    npc_bunny_fire (Creature* pCreature) : ScriptedAI (pCreature)
+    {
+        Reset();
+    }
+
+    void Reset () {}
+
+    void SpellHit(Unit* pWho, const SpellEntry* pSpell)
+    {
+        if (pWho->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        if (pSpell->Id == SPELL_BUCKET_LANDS)
+            ((Player*)pWho)->KilledMonsterCredit(NPC_BUNNY_FIRE_CREDIT);
+    }
+};
+
+CreatureAI* GetAI_npc_bunny_fire(Creature* pCreature)
+{
+    return new npc_bunny_fire(pCreature);
+}
+
 void AddSC_npcs_special()
 {
     Script* newscript;
@@ -3352,5 +3386,10 @@ void AddSC_npcs_special()
     newscript = new Script;
     newscript->Name = "npc_bunny_bark";
     newscript->GetAI = &GetAI_npc_bunny_bark;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_bunny_fire";
+    newscript->GetAI = &GetAI_npc_bunny_fire;
     newscript->RegisterSelf();
 }
