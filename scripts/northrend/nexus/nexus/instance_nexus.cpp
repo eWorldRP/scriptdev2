@@ -31,12 +31,19 @@ bool GOUse_go_containment_sphere(Player* pPlayer, GameObject* pGo)
     if (!pInstance)
         return false;
 
+    uint32 type = 0;
+
     switch(pGo->GetEntry())
     {
-        case GO_CONTAINMENT_SPHERE_TELESTRA: pInstance->SetData(TYPE_TELESTRA, SPECIAL); break;
-        case GO_CONTAINMENT_SPHERE_ANOMALUS: pInstance->SetData(TYPE_ANOMALUS, SPECIAL); break;
-        case GO_CONTAINMENT_SPHERE_ORMOROK:  pInstance->SetData(TYPE_ORMOROK, SPECIAL);  break;
+        case GO_CONTAINMENT_SPHERE_TELESTRA: type = TYPE_TELESTRA; break;
+        case GO_CONTAINMENT_SPHERE_ANOMALUS: type = TYPE_ANOMALUS; break;
+        case GO_CONTAINMENT_SPHERE_ORMOROK: type = TYPE_ORMOROK; break;
+        default:
+            return false;
     }
+
+    if (pInstance->GetData(type) == DONE)
+        pInstance->SetData(type, SPECIAL);
 
     if (Creature *pCaster = GetClosestCreatureWithEntry(pGo, NPC_BREATH_CASTER, 15.0f))
         pCaster->ForcedDespawn();
@@ -136,11 +143,9 @@ void instance_nexus::SetData(uint32 uiType, uint32 uiData)
         Creature* pCreature = GetSingleCreatureFromStorage(NPC_KERISTRASZA);
         if (pCreature && pCreature->isAlive())
         {
-            if (pCreature->isAlive())
-            {
-                pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
-                pCreature->RemoveAurasDueToSpell(SPELL_FROZEN_PRISON);
-            }
+            pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE
+                                  | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            pCreature->RemoveAurasDueToSpell(SPELL_FROZEN_PRISON);
         }
     }
 
@@ -175,6 +180,9 @@ void instance_nexus::Load(const char* chrIn)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
             m_auiEncounter[i] = NOT_STARTED;
+
+        if (m_auiEncounter[i] == SPECIAL)
+            m_auiEncounter[i] = (i == TYPE_KERISTRASZA) ? NOT_STARTED : DONE;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
