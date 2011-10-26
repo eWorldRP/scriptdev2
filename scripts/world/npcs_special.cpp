@@ -56,7 +56,9 @@ pet_spring_rabbit       100%    Noblegarden event
 pet_orphan              100%    Children's Week
 npc_wormhole            100%    Creates an unstable wormhole
 npc_bunny_bark                  Brewfest event
-npc_bunny_fire                  Hallow's End event
+npc_bunny_fire_training         Hallow's End event
+npc_bunny_fire_town             Hallow's End event
+npc_bunny_horseman              Hallow's End event
 EndContentData */
 
 /*########
@@ -3170,7 +3172,7 @@ CreatureAI* GetAI_npc_bunny_bark(Creature* pCreature)
 }
 
 /*#####
-# npc_bunny_fire
+# npc_bunny_fire_training
 #####*/
 enum
 {
@@ -3178,9 +3180,9 @@ enum
     SPELL_BUCKET_LANDS      = 42339
 };
 
-struct MANGOS_DLL_DECL npc_bunny_fire : public ScriptedAI
+struct MANGOS_DLL_DECL npc_bunny_fire_trainingAI : public ScriptedAI
 {
-    npc_bunny_fire (Creature* pCreature) : ScriptedAI (pCreature)
+    npc_bunny_fire_trainingAI (Creature* pCreature) : ScriptedAI (pCreature)
     {
         Reset();
     }
@@ -3193,13 +3195,157 @@ struct MANGOS_DLL_DECL npc_bunny_fire : public ScriptedAI
             return;
 
         if (pSpell->Id == SPELL_BUCKET_LANDS)
+        {
             ((Player*)pWho)->KilledMonsterCredit(NPC_BUNNY_FIRE_CREDIT);
+            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            m_creature->ForcedDespawn();
+        }
     }
 };
 
-CreatureAI* GetAI_npc_bunny_fire(Creature* pCreature)
+CreatureAI* GetAI_npc_bunny_fire_training(Creature* pCreature)
 {
-    return new npc_bunny_fire(pCreature);
+    return new npc_bunny_fire_trainingAI(pCreature);
+}
+
+/*#####
+# npc_bunny_fire_town
+#####*/
+enum
+{
+    NPC_BUNNY_HORSEMAN   = 23543,
+};
+
+struct sLocation
+{
+    float x, y, z, o;
+    uint32 map;
+    uint32 zone;
+    uint32 area;
+};
+
+static sLocation asLocation [6] =
+{
+//   X            Y             Z           O           MapId   ZoneId  AreaId
+    {-9458.885,   62.351,       55.785,     6.264,      0,      12,     87  },      // Elwyn's Forest, Goldshire
+    {-5602.197,   -483.211,     396.981,    3.000,      0,      1,      131 },      // Dun Murogh, Kharanos
+    {-4179.134,   -12483.937,   44.348,     6.275,      530,    3524,   3576},      // Azuremyst Isle, Azure Watch
+    {2259.250,    290.430,      34.114,     0.987,      0,      85,     159 },      // Trisifal Glades, Brill
+    {322.1362,    -4742.212,    9.656,      3.180,      1,       14,     362 },      // Durotar, Razor Hill
+    {9525.682,    -6830.646,    16.493,     2.969,      530,    3430,   3665}       // Eversong Woods, Falconing Square
+};
+
+struct MANGOS_DLL_DECL npc_bunny_fire_townAI : public ScriptedAI
+{
+    npc_bunny_fire_townAI (Creature* pCreature) : ScriptedAI (pCreature)
+    {
+        m_uiMapId = pCreature->GetMapId();
+        pCreature->GetZoneAndAreaId(m_uiZoneId, m_uiAreaId);
+        Reset();
+    }
+
+    uint32 m_uiMapId;
+    uint32 m_uiAreaId;
+    uint32 m_uiZoneId;
+    bool m_bBucketReceived;
+
+    void Reset ()
+    {
+
+        m_bBucketReceived = false;
+    }
+    void SpellHit(Unit* pWho, const SpellEntry* pSpell)
+    {
+        if (pWho->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        if (pSpell->Id == SPELL_BUCKET_LANDS)
+            m_bBucketReceived = true;
+    }
+
+    void UpdateAI (const uint32 uiDiff)
+    {
+        if (m_bBucketReceived)
+        {
+            uint8 uiIndex;
+            bool bFind = false;
+            for (uiIndex = 0; uiIndex < 6; uiIndex++)
+            {
+                if (m_uiMapId == asLocation[uiIndex].map && m_uiZoneId == asLocation[uiIndex].zone && m_uiAreaId == asLocation[uiIndex].area)
+                {
+                    bFind = true;
+                    break;
+                }
+            }
+
+            if (bFind)
+            {
+                Creature* pHorseman = m_creature->SummonCreature(NPC_BUNNY_HORSEMAN, asLocation[uiIndex].x, asLocation[uiIndex].y, asLocation[uiIndex].z, asLocation[uiIndex].o, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
+                pHorseman->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                pHorseman->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                pHorseman->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                pHorseman->setFaction(14);
+            }
+            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            m_creature->ForcedDespawn();
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_bunny_fire_town(Creature* pCreature)
+{
+    return new npc_bunny_fire_townAI(pCreature);
+}
+
+/*#####
+# npc_bunny_horseman
+#####*/
+enum
+{
+    SPELL_SUMMON_LANTERN_MISSILE        = 44255,
+    SPELL_SUMMON_LANTERN                = 44231,
+    QUEST_LET_THE_FIRE_COMES_A          = 12135,
+    QUEST_LET_THE_FIRE_COMES_H          = 12139,
+};
+
+struct MANGOS_DLL_DECL npc_bunny_horsemanAI : ScriptedAI
+{
+    npc_bunny_horsemanAI (Creature* pCreature) : ScriptedAI (pCreature)
+    {
+        Reset();
+    }
+
+    void Reset(){}
+
+    void JustDied (Unit* pKiller)
+    {
+        DoCast(m_creature, SPELL_SUMMON_LANTERN);
+
+        // to give the quest completed to all player near the Horseman
+        Map* pMap = m_creature->GetMap();
+        Map::PlayerList const &lPlayers = pMap->GetPlayers();
+        for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+        {
+            Player* pPlayer = itr->getSource();
+            if(pPlayer)
+            {
+                // consider only player near the corpse
+                if (!pPlayer->IsWithinDist2d(m_creature->GetPositionX(), m_creature->GetPositionY(), 20.0f))
+                    continue;
+
+                if (pPlayer->GetQuestStatus(QUEST_LET_THE_FIRE_COMES_A) == QUEST_STATUS_INCOMPLETE)
+                    pPlayer->SetQuestStatus(QUEST_LET_THE_FIRE_COMES_A, QUEST_STATUS_COMPLETE);
+
+                if (pPlayer->GetQuestStatus(QUEST_LET_THE_FIRE_COMES_H) == QUEST_STATUS_INCOMPLETE)
+                    pPlayer->SetQuestStatus(QUEST_LET_THE_FIRE_COMES_H, QUEST_STATUS_COMPLETE);
+            }
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_bunny_horseman(Creature* pCreature)
+{
+    return new npc_bunny_horsemanAI(pCreature);
 }
 
 void AddSC_npcs_special()
@@ -3389,7 +3535,17 @@ void AddSC_npcs_special()
     newscript->RegisterSelf();
 
     newscript = new Script;
-    newscript->Name = "npc_bunny_fire";
-    newscript->GetAI = &GetAI_npc_bunny_fire;
+    newscript->Name = "npc_bunny_fire_training";
+    newscript->GetAI = &GetAI_npc_bunny_fire_training;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_bunny_fire_town";
+    newscript->GetAI = &GetAI_npc_bunny_fire_town;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_bunny_horseman";
+    newscript->GetAI = &GetAI_npc_bunny_horseman;
     newscript->RegisterSelf();
 }
