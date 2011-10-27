@@ -3285,6 +3285,7 @@ struct MANGOS_DLL_DECL npc_bunny_fire_townAI : public ScriptedAI
                 pHorseman->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
                 pHorseman->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 pHorseman->setFaction(14);
+                pHorseman->SetPhaseMask(2,true);
             }
             m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
             m_creature->ForcedDespawn();
