@@ -503,6 +503,19 @@ struct MANGOS_DLL_DECL npc_time_lost_proto_drakeAI : public ScriptedAI
 {
     npc_time_lost_proto_drakeAI(Creature*pCreature) : ScriptedAI(pCreature)
     {
+        m_bWasVisible = false;
+        Reset();
+    }
+
+    uint32 m_uiTime2Spawn;
+    bool m_bNeedInvisible;
+    bool m_bWasVisible;
+
+    void Reset()
+    {
+        if (m_bWasVisible)
+            return;
+
         //set appearance  between 8h and 8h 30m
         m_uiTime2Spawn = 28800000 + rand()%1800000;
         //set drake invisible and not selectable
@@ -510,11 +523,6 @@ struct MANGOS_DLL_DECL npc_time_lost_proto_drakeAI : public ScriptedAI
         m_creature->SetVisibility(VISIBILITY_OFF);
         m_bNeedInvisible = true;
     }
-
-    uint32 m_uiTime2Spawn;
-    bool m_bNeedInvisible;
-
-    void Reset(){}
 
     void UpdateAI(const uint32 uiDiff)
     {
@@ -525,6 +533,7 @@ struct MANGOS_DLL_DECL npc_time_lost_proto_drakeAI : public ScriptedAI
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_creature->SetVisibility(VISIBILITY_ON);
                 m_bNeedInvisible = false;
+                m_bWasVisible = true;
 			}
 			else 
                 m_uiTime2Spawn -= uiDiff;
