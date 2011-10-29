@@ -1197,11 +1197,11 @@ enum eEyeOfAcherus
     DISPLAYID_EYE_HUGE      = 26320,
     DISPLAYID_EYE_SMALL     = 25499,
 
-    //SPELL_EYE_PHASEMASK     = 70889,
+    SPELL_EYE_PHASEMASK     = 70889,
     SPELL_EYE_VISUAL        = 51892,
     //SPELL_EYE_FL_BOOST_RUN  = 51923,
     SPELL_EYE_FL_BOOST_FLY  = 51890,
-    //SPELL_EYE_CONTROL       = 51852,
+    SPELL_EYE_CONTROL       = 51852,
 
     TEXT_EYE_UNDER_CONTROL  = -1666452,
     TEXT_EYE_LAUNCHED       = -1666451,
@@ -1214,30 +1214,27 @@ struct MANGOS_DLL_DECL npc_eye_of_acherusAI : public ScriptedAI
         Reset();
     }
 
-    uint32  ControlInformTimer, FlyStartTimer;
-    bool    ControlInform, FlyStart;
+    bool m_isActive;
 
     void Reset()
     {
-		if(Unit* pController = m_creature->GetCharmer())
-			m_creature->SetLevel(pController->getLevel());
-
-        // I think those morphs are not blizzlike...
         m_creature->SetDisplayId(DISPLAYID_EYE_HUGE);
-
-		ControlInformTimer  = 2000;
-        FlyStartTimer       = 3000;
-
-        ControlInform       = true;
-        FlyStart            = true;
-
-        // the visual summon effect + remove player control for now
-        m_creature->CastSpell(m_creature, SPELL_EYE_VISUAL, true);
-        ((Player*)(m_creature->GetCharmer()))->SetClientControl(m_creature, 0);
+        m_isActive = false;
     }
 
-    void AttackStart(Unit *) {}
-    void MoveInLineOfSight(Unit *) {}
+    void AttackStart(Unit *pWho)
+    {
+    }
+
+    void MoveInLineOfSight(Unit* pWho)
+    {
+    }
+
+    void JustDied(Unit* pKiller)
+    {
+        if (Unit* pCharmer = m_creature->GetCharmer())
+            pCharmer->RemoveAurasDueToSpell(SPELL_EYE_CONTROL);
+    }
 
     void MovementInform(uint32 uiType, uint32 uiPointId)
     {
@@ -1245,42 +1242,37 @@ struct MANGOS_DLL_DECL npc_eye_of_acherusAI : public ScriptedAI
             return;
 
         DoScriptText(TEXT_EYE_UNDER_CONTROL, m_creature);
-        // I think those morphs are not blizzlike...
         m_creature->SetDisplayId(DISPLAYID_EYE_SMALL);
-
-        // for some reason it does not work when this spell is casted before the waypoint movement
         m_creature->CastSpell(m_creature, SPELL_EYE_FL_BOOST_FLY, true);
-        ((Player*)(m_creature->GetCharmer()))->SetClientControl(m_creature, 1);
+    }
+
+    void AttackedBy(Unit* pAttacker)
+    {
+        // called on remove SPELL_AURA_MOD_POSSESS
+        if (!m_creature->isCharmed() && pAttacker->GetTypeId() == TYPEID_PLAYER)
+        {
+            pAttacker->RemoveAurasDueToSpell(SPELL_EYE_CONTROL);
+//            m_creature->ForcedDespawn();
+        }
     }
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (ControlInform)
+        if (m_creature->isCharmed())
         {
-            if (ControlInformTimer < uiDiff)
+            if (!m_isActive)
             {
+                m_creature->CastSpell(m_creature, SPELL_EYE_PHASEMASK, true);
+                m_creature->CastSpell(m_creature, SPELL_EYE_VISUAL, true);
+                //m_creature->CastSpell(m_creature, SPELL_EYE_FL_BOOST_FLY, true);
+                //m_creature->SetLevitate(true);   // will be uncommented if any troubles with flying inhabit 4
+                m_creature->SetWalk(false);
+                m_creature->SetSpeedRate(MOVE_RUN, 5.0f);
                 DoScriptText(TEXT_EYE_LAUNCHED, m_creature);
-                ControlInform = false;
+                m_creature->GetMotionMaster()->MovePoint(0,1750.8276f, -5873.788f, 147.2266f);
+                m_isActive = true;
             }
-            else
-                ControlInformTimer -= uiDiff;
-        }
-
-        // fly to start point
-        if (FlyStart)
-        {
-            if (FlyStartTimer < uiDiff)
-            {
-                // workaround for faster flight speed
-                //m_creature->CastSpell(m_creature, SPELL_EYE_FL_BOOST_RUN, true);
-                m_creature->SetSpeedRate(MOVE_FLIGHT , 6.4f,true);
-
-                // start moving
-                m_creature->GetMotionMaster()->MovePoint(0, 1711.0f, -5820.0f, 147.0f);
-                FlyStart = false;
-            }
-		    else FlyStartTimer -= uiDiff;
-        }
+        } else m_creature->ForcedDespawn();
     }
 };
 
@@ -1446,6 +1438,7 @@ enum mograine
     ENCOUNTER_BEHEMOTH_NUMBER         = 2,  // how many of behemoth
     ENCOUNTER_GHOUL_NUMBER            = 10, // how many of ghoul
     ENCOUNTER_WARRIOR_NUMBER          = 2,  // how many of warrior
+
     ENCOUNTER_TOTAL_DAWN              = 300,  // Total number
     ENCOUNTER_TOTAL_SCOURGE           = 10000,
 

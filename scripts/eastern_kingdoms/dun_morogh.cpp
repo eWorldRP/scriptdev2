@@ -237,7 +237,7 @@ CreatureAI* GetAI_npc_pol_amberstill(Creature* pCreature)
 
 void AddSC_dun_morogh()
 {
-    Script *newscript;
+    Script* newscript;
 
     newscript = new Script;
     newscript->Name = "npc_narm_faulk";

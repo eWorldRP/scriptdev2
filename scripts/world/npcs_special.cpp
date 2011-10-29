@@ -40,7 +40,6 @@ npc_garments_of_quests   80%    NPC's related to all Garments of-quests 5621, 56
 npc_injured_patient     100%    patients for triage-quests (6622 and 6624)
 npc_doctor              100%    Gustaf Vanhowzen and Gregory Victor, quest 6622 and 6624 (Triage)
 npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
-npc_kingdom_of_dalaran_quests   Misc NPC's gossip option related to quests 12791, 12794 and 12796
 npc_lunaclaw_spirit     100%    Appears at two different locations, quest 6001/6002
 npc_mount_vendor        100%    Regular mount vendors all over the world. Display gossip if player doesn't meet the requirements to buy
 npc_rogue_trainer        80%    Scripted trainers, so they are able to offer item 17126 for class quest 6681
@@ -1710,7 +1709,7 @@ bool GossipSelect_npc_locksmith(Player* pPlayer, Creature* pCreature, uint32 uiS
 
 /*######
 ## npc_experience_eliminator
-+######*/
+######*/
 
 #define GOSSIP_ITEM_STOP_XP_GAIN "I don't want to gain experience anymore."
 #define GOSSIP_CONFIRM_STOP_XP_GAIN "Are you sure you want to stop gaining experience?"
@@ -3350,7 +3349,7 @@ CreatureAI* GetAI_npc_bunny_horseman(Creature* pCreature)
 }
 
 void AddSC_npcs_special()
-{
+{    
     Script* newscript;
 
     newscript = new Script;
@@ -3396,7 +3395,7 @@ void AddSC_npcs_special()
     newscript->pGossipHello = &GossipHello_npc_innkeeper;
     newscript->pGossipSelect = &GossipSelect_npc_innkeeper;
     newscript->RegisterSelf(false);                         // script and error report disabled, but script can be used for custom needs, adding ScriptName
-
+    
     newscript = new Script;
     newscript->Name = "npc_kingdom_of_dalaran_quests";
     newscript->pGossipHello =  &GossipHello_npc_kingdom_of_dalaran_quests;
@@ -3465,11 +3464,6 @@ void AddSC_npcs_special()
     newscript->GetAI = &GetAI_npc_death_knight_gargoyle;
     newscript->RegisterSelf();  
     
-    newscript = new Script;
-    newscript->Name = "npc_training_dummy";
-    newscript->GetAI = &GetAI_npc_training_dummy;
-    newscript->RegisterSelf();
-
     newscript = new Script;
     newscript->Name = "npc_risen_ally";
     newscript->GetAI = &GetAI_npc_risen_ally;

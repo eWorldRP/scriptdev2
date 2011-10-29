@@ -18,16 +18,74 @@
 SDName: Icecrown
 SD%Complete: 100
 SDComment: Vendor support: 34885
+Quest Support: 13663, 13665, 13745, 13750, 13756, 13761, 13767, 13772, 13777, 13782, 13787, 14107
 SDCategory: Icecrown
 EndScriptData */
 
 /* ContentData
 npc_dame_evniki_kapsalis
+npc_scourge_conventor
+npc_fallen_hero_spirit
+npc_valiants
+npc_champions
+npc_black_knights_gryphon
 EndContentData */
 
 #include "precompiled.h"
 #include "Vehicle.h"
 #include "GossipDef.h"
+#include "escort_ai.h"
+#include "TemporarySummon.h"
+
+/*#####
+## npc_black_knights_gryphon
+#####*/
+ 
+struct MANGOS_DLL_DECL npc_black_knights_gryphonAI : public npc_escortAI
+{
+    npc_black_knights_gryphonAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+ 
+    void Reset() { }
+ 
+    void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
+    {
+        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(((TemporarySummon*)m_creature)->GetSummonerGuid()))
+            pPlayer->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+ 
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetSpeedRate(MOVE_RUN, 3.0f);
+        Start(true, ((Player*)pCaster));
+    }
+ 
+    void WaypointReached(uint32 uiPointId)
+    {
+        switch(uiPointId)
+        {
+            case 0:
+                SetRun();
+                break;
+            case 10:
+                m_creature->SetLevitate(true);
+                m_creature->SetSpeedRate(MOVE_RUN, 6.0f);
+                break;
+            case 15:
+                //if (Player* pPlayer = GetPlayerForEscort())
+                    //hack to prevent Player's death
+                  //  pPlayer->CastSpell(pPlayer, 64505, true);
+                    break;
+            case 16:
+                m_creature->ForcedDespawn(2000);
+                return;
+            default:
+                break;
+        }
+    }
+};
+ 
+CreatureAI* GetAI_npc_black_knights_gryphon(Creature* pCreature)
+{
+    return new npc_black_knights_gryphonAI(pCreature);
+}
 
 /*######
 ## npc_dame_evniki_kapsalis
@@ -376,9 +434,12 @@ CreatureAI* GetAI_npc_argent_valiant(Creature* pCreature)
     return new npc_argent_valiantAI (pCreature);
 }
 
+
 /*######
-## npc_fallen_hero_spirit  //quest 14107
+## npc_scourge_conventor  //quest 14107
 ######*/
+
+// grip of scourge still needs implented and used
 
 enum QuestFate // shared enum by conventor mob and fallen hero mob
 {
@@ -386,6 +447,74 @@ enum QuestFate // shared enum by conventor mob and fallen hero mob
     NPC_FALLEN_HERO_SPIRIT              = 32149,
     NPC_FALLEN_HERO_SPIRIT_PROXY        = 35055,
 };
+
+enum
+{
+    SPELL_CONE_OF_COLD              = 20828,
+    SPELL_FORST_NOVA                = 11831,
+    SPELL_FROSTBOLT                 = 20822,
+    SPELL_GRIP_OF_THE_SCOURGE       = 60212,     // spell casted by mob
+};
+
+struct MANGOS_DLL_DECL npc_scourge_conventorAI : public ScriptedAI
+{
+    npc_scourge_conventorAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiConeofCold_Timer;
+    uint32 m_uiFrostNova_Timer;
+    uint32 m_uiFrostBolt_Timer;
+    //uint32 m_uiGrip_Timer;
+
+    void Reset()
+    {
+        m_uiConeofCold_Timer  = 10000;
+        m_uiFrostNova_Timer    = 11000;
+        m_uiFrostBolt_Timer    = 9000;
+        //m_uiGrip_Timer = 10000;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiConeofCold_Timer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature->getVictim(),SPELL_CONE_OF_COLD);
+            m_uiConeofCold_Timer = 10000;
+        }
+        else
+            m_uiConeofCold_Timer -= uiDiff;
+
+        if (m_uiFrostNova_Timer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature->getVictim(),SPELL_FORST_NOVA);
+            m_uiFrostNova_Timer = 11000;
+        }
+        else
+            m_uiFrostNova_Timer -= uiDiff;
+
+        if (m_uiFrostBolt_Timer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature->getVictim(),SPELL_FROSTBOLT);
+            m_uiFrostBolt_Timer = 9000;
+        }
+        else
+            m_uiFrostBolt_Timer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+
+};
+
+CreatureAI* GetAI_npc_scourge_conventor(Creature* pCreature)
+{
+    return new npc_scourge_conventorAI(pCreature);
+}
+
+/*######
+## npc_fallen_hero_spirit  //quest 14107
+######*/
 
 enum
 {
@@ -461,44 +590,173 @@ CreatureAI* GetAI_npc_fallen_hero_spirit(Creature* pCreature)
     return new npc_fallen_hero_spiritAI(pCreature);
 }
 
+/*#####
+## npc_valiants
+#####*/
+
+enum
+{
+    SAY_DEFEATED          = -1667788,
+    SPELL_VCHARGE         = 63010,
+    SPELL_VSHIELDBREAKER  = 65147,
+
+    SPELL_MOUNTED_MELEE_VICTORY = 62724,
+};
+
+struct MANGOS_DLL_DECL npc_valiantsAI : public ScriptedAI
+{
+   npc_valiantsAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    //uint32 m_uiVCHARGE_Timer;
+    //uint32 m_uiVSHIELDBREAKER_Timer;
+
+    void Reset()
+    {
+       //m_uiVCHARGE_Timer          = 2000;  need correct timers
+       //m_uiVSHIELDBREAKER_Timer   = 5000;  need correct timers
+    }
+
+    void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
+    {
+        if (uiDamage > m_creature->GetHealth())
+        {
+            uiDamage = 5;
+
+            if (Unit* pPlayer = pDoneBy->GetCharmerOrOwnerPlayerOrPlayerItself())
+                pPlayer->CastSpell(pPlayer, SPELL_MOUNTED_MELEE_VICTORY, true);
+
+            DoScriptText(SAY_DEFEATED, m_creature);
+            EnterEvadeMode();
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+       /* {    STILL HAVE ATTACK SPELLS TO DO
+        }*/
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_valiants(Creature* pCreature)
+{
+    return new npc_valiantsAI(pCreature);
+}
+
+/*#####
+## npc_champions
+#####*/
+
+enum
+{
+    // spells are defined above
+    SPELL_CHAMP_MOUNTED_MELEE_VICTORY = 63596,
+};
+
+struct MANGOS_DLL_DECL npc_championsAI : public ScriptedAI
+{
+   npc_championsAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    //uint32 m_uiVCHARGE_Timer;
+    //uint32 m_uiVSHIELDBREAKER_Timer;
+
+    void Reset()
+    {
+       //m_uiVCHARGE_Timer          = 2000;  need correct timers
+       //m_uiVSHIELDBREAKER_Timer   = 5000;  need correct timers
+    }
+
+    void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
+    {
+        if (uiDamage > m_creature->GetHealth())
+        {
+            uiDamage = 5;
+
+            if (Unit* pPlayer = pDoneBy->GetCharmerOrOwnerPlayerOrPlayerItself())
+                pPlayer->CastSpell(pPlayer, SPELL_CHAMP_MOUNTED_MELEE_VICTORY, true);
+
+            DoScriptText(SAY_DEFEATED, m_creature);
+            EnterEvadeMode();
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+       /* {    STILL HAVE ATTACK SPELLS TO DO
+        }*/
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_champions(Creature* pCreature)
+{
+    return new npc_championsAI(pCreature);
+}
+
 void AddSC_icecrown()
 {
-    Script* newscript;
+    Script* pNewScript;
+	
+    pNewScript = new Script;
+    pNewScript->Name = "npc_black_knights_gryphon";
+    pNewScript->GetAI = &GetAI_npc_black_knights_gryphon;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_dame_evniki_kapsalis";
-    newscript->pGossipHello = &GossipHello_npc_dame_evniki_kapsalis;
-    newscript->pGossipSelect = &GossipSelect_npc_dame_evniki_kapsalis;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_dame_evniki_kapsalis";
+    pNewScript->pGossipHello = &GossipHello_npc_dame_evniki_kapsalis;
+    pNewScript->pGossipSelect = &GossipSelect_npc_dame_evniki_kapsalis;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_argent_tournament_questgiver";
-    newscript->pGossipHello = &GossipHello_npc_argent_tournament_questgiver;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_scourge_conventor";
+    pNewScript->GetAI = &GetAI_npc_scourge_conventor;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_argent_tournament_requires_EAC";
-    newscript->pGossipHello = &GossipHello_npc_argent_tournament_requires_EAC;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_fallen_hero_spirit";
+    pNewScript->GetAI = &GetAI_npc_fallen_hero_spirit;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_valiants";
+    pNewScript->GetAI = &GetAI_npc_valiants;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_champions";
+    pNewScript->GetAI = &GetAI_npc_champions;
+    pNewScript->RegisterSelf();
     
-    newscript = new Script;
-    newscript->Name = "npc_rhydalla";
-    newscript->pGossipHello = &GossipHello_npc_rhydalla;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_argent_tournament_questgiver";
+    pNewScript->pGossipHello = &GossipHello_npc_argent_tournament_questgiver;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_argent_tournament_requires_EAC";
+    pNewScript->pGossipHello = &GossipHello_npc_argent_tournament_requires_EAC;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_rhydalla";
+    pNewScript->pGossipHello = &GossipHello_npc_rhydalla;
+    pNewScript->RegisterSelf();
     
-    newscript = new Script;
-    newscript->Name = "npc_squire_david";
-    newscript->pGossipHello = &GossipHello_npc_squire_david;
-    newscript->pGossipSelect = &GossipSelect_npc_squire_david;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
-    newscript->Name = "npc_argent_valiant";
-    newscript->GetAI = &GetAI_npc_argent_valiant;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
-    newscript->Name = "npc_fallen_hero_spirit";
-    newscript->GetAI = &GetAI_npc_fallen_hero_spirit;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_squire_david";
+    pNewScript->pGossipHello = &GossipHello_npc_squire_david;
+    pNewScript->pGossipSelect = &GossipSelect_npc_squire_david;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_argent_valiant";
+    pNewScript->GetAI = &GetAI_npc_argent_valiant;
+    pNewScript->RegisterSelf();
 }

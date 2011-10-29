@@ -108,7 +108,6 @@ bool GossipSelect_npc_zidormi(Player* pPlayer, Creature* pCreature, uint32 uiSen
     return true;
 }
 
-
 /***************/
 /* npc_maloric */
 /***************/

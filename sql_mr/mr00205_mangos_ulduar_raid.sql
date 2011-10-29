@@ -389,6 +389,9 @@ UPDATE `creature_template` SET `mechanic_immune_mask` = 619397115 WHERE `entry` 
 UPDATE creature_template SET ScriptName = 'mob_saronite_animus' WHERE entry = 33524;
 UPDATE creature_template SET ScriptName = 'mob_saronite_vapor', movementType = 1  WHERE entry = 33488;
 
+-- official sd2 sql clean up for ulduar
+DELETE FROM scripted_event_id WHERE id=9735;
+
 -- Yogg
 UPDATE creature_template SET ScriptName = 'boss_yogg_saron' WHERE entry = 33288;
 UPDATE creature_template SET `RegenHealth`= 0, `flags_extra` = 1,`type_flags` = 108, ScriptName = 'boss_sara' WHERE entry = 33134;

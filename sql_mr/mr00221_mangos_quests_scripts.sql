@@ -37,6 +37,13 @@ UPDATE `creature_template` SET `npcflag`=1, `scriptname`='npc_toc_announcer' WHE
 UPDATE `creature_template` SET `pickpocketloot` = 0 WHERE `entry` = 37444;
 UPDATE `creature_template` SET `pickpocketloot` = 0 WHERE `entry` = 31818;
 UPDATE `creature_template` SET `pickpocketloot` = 0 WHERE `entry` = 37283;
+UPDATE `creature_template` SET `AIName` = 'EventAI', `ScriptName` = '' WHERE `entry` = 20159;
+
+
+DELETE FROM `gameobject` WHERE `id`=190643;
+INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`) VALUES
+(310000, 190643, 571, 1, 1, 5545.45, 5767.53, -77.8042, 5.39307, 0, 0, 0.959937, 0.280215, -25, 0, 1),
+(47391, 190643, 571, 1, 1, 5547.61, 5767.75, -78.0231, 4.08966, 0, 0, 0.889734, -0.456479, -120, 100, 1);
 
 -- EAI Text clean up for quests/sd2
 DELETE FROM `creature_ai_texts` WHERE (`entry`='-1120') OR (`entry`='-1121') OR (`entry`='-1122') OR (`entry`='-1123') OR (`entry`='-1124') OR (`entry`='-1125') OR (`entry`='-1126') OR (`entry`='-1127') OR (`entry`='-1128');
@@ -44,10 +51,128 @@ DELETE FROM `creature_ai_texts` WHERE (`entry`='-555') OR (`entry`='-556') OR (`
 DELETE FROM `creature_ai_texts` WHERE (`entry`='-696') OR (`entry`='-697');
 DELETE FROM `creature_ai_texts` WHERE (`entry`='-312491') OR (`entry`='-312492') OR (`entry`='-312493');
 
+-- Official Sd2 Clean up
+DELETE FROM scripted_event_id WHERE id = 9735;
+
+-- ------------------------------------
+-- -   Events, Holidays & Ect  Area ---
+-- -------------------------------- ---
+
+-- Fixed Correct spell on bobbing apples ( Hallo Event )
+UPDATE `item_template` SET `spellid_1` = 24707 WHERE `entry` = 20516;
 
 -- ----------------------------------------------------------------
 -- Start of Quest and related data and fixes ----------------------
 -- ----------------------------------------------------------------
+
+-- ---
+-- -Quest 8468
+-- ---
+
+-- Thaelis has wrong faction was gettting killed by his own kind 8P
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16 WHERE `entry` = 15949;
+
+-- ------------
+-- Quest 13663
+-- ------------
+
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_black_knights_gryphon' WHERE `entry` = 33519;
+UPDATE creature_template SET vehicle_id = 402 WHERE entry = 33519; -- vehicle_id can be 88 107 108 112 143 etc.
+UPDATE creature_template SET KillCredit1 = 33341 WHERE entry = 33229;
+UPDATE creature_template SET KillCredit1 = 38595 WHERE entry = 33448;
+
+UPDATE `creature_template` SET `modelid_2` = 28652 WHERE `entry` = 33513;
+UPDATE `creature_template` SET `modelid_2` = 28652 WHERE `entry` = 33519;
+
+-- ------------------
+-- Quests 13665, 13745, 13750, 13756, 13761, 13767, 13772, 13777, 13782, 13787, 13790, 13793, 13811, 13814
+-- ------------------
+-- dk fix
+
+UPDATE quest_template SET RequiredClasses = 0 WHERE entry = 13794;
+UPDATE quest_template SET PrevQuestId = 13795 WHERE entry IN (13793,13814,13791,13813);
+UPDATE quest_template SET PrevQuestId = 13794, ExclusiveGroup = 0 WHERE entry = 13795;
+
+-- it is also necessary (otherwise spell=63010 do not work)
+UPDATE creature_template SET unit_flags = 8 WHERE entry IN
+(33217,33316,33317,33318,33319,33320,33321,33322,33323,33324);
+
+-- The Valiant's Challenge (10 quests)
+DELETE FROM creature WHERE id = 33707; -- Argent Champion
+DELETE FROM creature_addon WHERE guid = 129089;
+UPDATE creature_template SET faction_A = 7, faction_H = 7, npcflag = 0, KillCredit1 = 33708 WHERE entry = 33707;
+REPLACE INTO creature_template_addon (`entry`,`mount`,`auras`) VALUES (33707,14337,63501);
+UPDATE gossip_scripts SET datalong = 33707 WHERE id IN (33518,50102);
+UPDATE creature_template SET npcflag = 0 WHERE entry = 33448; -- Argent Valiant
+ 
+-- Among the Champions (4 quests)
+DELETE FROM gossip_scripts WHERE id IN (10453,10454,10455,10456,10457,10458,10459,10460,10461,10462);
+DELETE FROM gossip_menu_option WHERE menu_id IN (10453,10454,10455,10456,10457,10458,10459,10460,10461,10462);
+ 
+INSERT INTO `gossip_menu_option`(`menu_id`,`id`,`option_icon`,`option_text`,`option_id`,`npc_option_npcflag`,
+`action_menu_id`,`action_poi_id`,`action_script_id`,`box_coded`,`box_money`,`box_text`,`cond_1`,`cond_1_val_1`,
+`cond_1_val_2`,`cond_2`,`cond_2_val_1`,`cond_2_val_2`,`cond_3`,`cond_3_val_1`,`cond_3_val_2`) VALUES
+(10453,0,0,'I am ready to fight!',1,1,-1,0,10453,0,0,NULL,1,62853,0,6,469,0,0,0,0),
+(10454,0,0,'I am ready to fight!',1,1,-1,0,10454,0,0,NULL,1,62853,0,6,469,0,0,0,0),
+(10455,0,0,'I am ready to fight!',1,1,-1,0,10455,0,0,NULL,1,62853,0,6,469,0,0,0,0),
+(10456,0,0,'I am ready to fight!',1,1,-1,0,10456,0,0,NULL,1,62853,0,6,469,0,0,0,0),
+(10457,0,0,'I am ready to fight!',1,1,-1,0,10457,0,0,NULL,1,62853,0,6,67,0,0,0,0),
+(10458,0,0,'I am ready to fight!',1,1,-1,0,10458,0,0,NULL,1,62853,0,6,67,0,0,0,0),
+(10459,0,0,'I am ready to fight!',1,1,-1,0,10459,0,0,NULL,1,62853,0,6,67,0,0,0,0),
+(10460,0,0,'I am ready to fight!',1,1,-1,0,10460,0,0,NULL,1,62853,0,6,469,0,0,0,0),
+(10461,0,0,'I am ready to fight!',1,1,-1,0,10461,0,0,NULL,1,62853,0,6,67,0,0,0,0),
+(10462,0,0,'I am ready to fight!',1,1,-1,0,10462,0,0,NULL,1,62853,0,6,67,0,0,0,0);
+ 
+INSERT INTO `gossip_scripts`(`id`,`delay`,`command`,`datalong`,`datalong2`,`datalong3`,`datalong4`,
+`data_flags`,`dataint`,`dataint2`,`dataint3`,`dataint4`,`x`,`y`,`z`,`o`,`comments`) VALUES
+(10453,1,22,14,0,0,0,2,0,0,0,0,0,0,0,0,''),
+(10453,0,0,0,0,0,0,4,2000000449,2000000450,2000000451,0,0,0,0,0,''),
+(10454,1,22,14,0,0,0,2,0,0,0,0,0,0,0,0,''),
+(10454,0,0,0,0,0,0,4,2000000449,2000000450,2000000451,0,0,0,0,0,''),
+(10455,1,22,14,0,0,0,2,0,0,0,0,0,0,0,0,''),
+(10455,0,0,0,0,0,0,4,2000000449,2000000450,2000000451,0,0,0,0,0,''),
+(10456,1,22,14,0,0,0,2,0,0,0,0,0,0,0,0,''),
+(10456,0,0,0,0,0,0,4,2000000449,2000000450,2000000451,0,0,0,0,0,''),
+(10457,1,22,14,0,0,0,2,0,0,0,0,0,0,0,0,''),
+(10457,0,0,0,0,0,0,4,2000000449,2000000450,2000000451,0,0,0,0,0,''),
+(10458,1,22,14,0,0,0,2,0,0,0,0,0,0,0,0,''),
+(10458,0,0,0,0,0,0,4,2000000449,2000000450,2000000451,0,0,0,0,0,''),
+(10459,1,22,14,0,0,0,2,0,0,0,0,0,0,0,0,''),
+(10459,0,0,0,0,0,0,4,2000000449,2000000450,2000000451,0,0,0,0,0,''),
+(10460,1,22,14,0,0,0,2,0,0,0,0,0,0,0,0,''),
+(10460,0,0,0,0,0,0,4,2000000449,2000000450,2000000451,0,0,0,0,0,''),
+(10461,1,22,14,0,0,0,2,0,0,0,0,0,0,0,0,''),
+(10461,0,0,0,0,0,0,4,2000000449,2000000450,2000000451,0,0,0,0,0,''),
+(10462,1,22,14,0,0,0,2,0,0,0,0,0,0,0,0,''),
+(10462,0,0,0,0,0,0,4,2000000449,2000000450,2000000451,0,0,0,0,0,'');
+
+DELETE FROM creature_ai_texts WHERE entry = -335621;
+DELETE FROM creature_ai_scripts WHERE creature_id IN (33285,33306,33382,33383,33384,33558,33559,33561,33562,33564);
+UPDATE gossip_scripts SET datalong2 = 0 WHERE command = 22 AND id IN (10469,10468,10470,10472,10473,10466,10464,10471,10465,10467);
+UPDATE `creature_template` SET `gossip_menu_id` = 10470 WHERE `entry` = 33382;
+
+-- valiants
+UPDATE creature_template SET unit_flags = 0, AIName = '', ScriptName = 'npc_valiants' WHERE entry IN (33285,33306,33382,33383,33384,33558,33559,33561,33562,33564);
+
+-- Champions
+UPDATE creature_template SET ScriptName = 'npc_champions', AIName = '' WHERE entry IN
+(33738,33739,33740,33743,33744,33745,33746,33747,33748,33749);
+
+UPDATE creature_template SET spell1 = 63010, spell2 = 64342 WHERE entry IN (33217,33316,33317,33318,33319,33320,33321,33322,33323,33324);
+UPDATE creature_template SET spell3 = 0,spell4 = 0,spell5 = 0,spell6 = 0 WHERE entry IN (33217,33316,33317,33318,33319,33320,33321,33322,33323,33324);
+DELETE FROM creature_spell WHERE guid IN (33217,33316,33317,33318,33319,33320,33321,33322,33323,33324);
+
+-- ------------------
+-- Quest 12065/12066
+-- ------------------
+-- Just a side note i dont think the mobs are correctly spawned/Placed around this area need to research or get someone to screen shot in live
+
+-- Added Quest credit
+UPDATE `creature_template` SET `AIName` = 'EventAI', `ScriptName` = '' WHERE `entry` = '26773';
+DELETE FROM `creature_ai_scripts` WHERE (`id`='2677351');
+INSERT INTO `creature_ai_scripts` VALUES ('2677351', '26773', '8', '0', '100', '1', '50546', '-1', '1000', '1000', '11', '47390', '6', '6', '33', '26773', '6', '0', '0', '0', '0', '0', 'ytdb/R2');
+-- npc 26773 -- not selectable -- kill bunny credit
+UPDATE `creature_template` SET `unit_flags` = 33554688 WHERE `entry` = 26773;
 
 -- ------------------
 -- Quest 12860/12927-
@@ -232,7 +357,7 @@ ScriptName='npc_tipsy_mcmanus'
 WHERE entry=28566;
 
 DELETE FROM `gameobject` WHERE guid = '200000';
-INSERT INTO `gameobject` VALUES ('200000','190643','571','3','1','5545.45','5767.53','-77.8042','5.39307','0','0','0.959937','0.280215','-25','0','1');
+INSERT INTO `gameobject` VALUES ('200000','190643','571','1','1','5545.45','5767.53','-77.8042','5.39307','0','0','0.959937','0.280215','-25','0','1');
 
 DELETE FROM creature where id=28537;
 INSERT INTO creature VALUES
