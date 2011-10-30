@@ -3306,6 +3306,8 @@ enum
     SPELL_SUMMON_LANTERN                = 44231,
     QUEST_LET_THE_FIRE_COMES_A          = 12135,
     QUEST_LET_THE_FIRE_COMES_H          = 12139,
+    SAY_HORSEMAN_SHADE_SUMMONED         = -2760020,
+    SAY_HORSEMAN_SHADE_DEATH            = -2760021
 };
 
 struct MANGOS_DLL_DECL npc_bunny_horsemanAI : ScriptedAI
@@ -3315,11 +3317,15 @@ struct MANGOS_DLL_DECL npc_bunny_horsemanAI : ScriptedAI
         Reset();
     }
 
-    void Reset(){}
+    void Reset()
+    {
+        DoScriptText(SAY_HORSEMAN_SHADE_SUMMONED, m_creature);
+    }
 
     void JustDied (Unit* pKiller)
     {
         DoCast(m_creature, SPELL_SUMMON_LANTERN);
+        DoScriptText(SAY_HORSEMAN_SHADE_DEATH, m_creature);
 
         // to give the quest completed to all player near the Horseman
         Map* pMap = m_creature->GetMap();
