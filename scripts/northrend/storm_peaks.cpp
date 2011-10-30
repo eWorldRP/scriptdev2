@@ -516,8 +516,8 @@ struct MANGOS_DLL_DECL npc_time_lost_proto_drakeAI : public ScriptedAI
         if (m_bWasVisible)
             return;
 
-        //set appearance  between 8h and 8h 30m
-        m_uiTime2Spawn = 28800000 + rand()%1800000;
+        //set appearance  between 6h and 6h 30m
+        m_uiTime2Spawn = 21600000 + rand()%1800000;
         //set drake invisible and not selectable
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->SetVisibility(VISIBILITY_OFF);
