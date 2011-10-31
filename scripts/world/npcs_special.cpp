@@ -3226,12 +3226,12 @@ struct sLocation
 static sLocation asLocation [6] =
 {
 //   X            Y             Z           O           MapId   ZoneId  AreaId
-    {-9458.885,   62.351,       55.785,     6.264,      0,      12,     87  },      // Elwyn's Forest, Goldshire
-    {-5602.197,   -483.211,     396.981,    3.000,      0,      1,      131 },      // Dun Murogh, Kharanos
-    {-4179.134,   -12483.937,   44.348,     6.275,      530,    3524,   3576},      // Azuremyst Isle, Azure Watch
-    {2259.250,    290.430,      34.114,     0.987,      0,      85,     159 },      // Trisifal Glades, Brill
-    {322.1362,    -4742.212,    9.656,      3.180,      1,       14,     362 },      // Durotar, Razor Hill
-    {9525.682,    -6830.646,    16.493,     2.969,      530,    3430,   3665}       // Eversong Woods, Falconing Square
+    {-9458.885f,   62.351f,       55.785f,     6.264f,      0,      12,     87  },      // Elwyn's Forest, Goldshire
+    {-5602.197f,   -483.211f,     396.981f,    3.000f,      0,      1,      131 },      // Dun Murogh, Kharanos
+    {-4179.134f,   -12483.937f,   44.348f,     6.275f,      530,    3524,   3576},      // Azuremyst Isle, Azure Watch
+    {2259.250f,    290.430f,      34.114f,     0.987f,      0,      85,     159 },      // Trisifal Glades, Brill
+    {322.1362f,    -4742.212f,    9.656f,      3.180f,      1,       14,     362 },      // Durotar, Razor Hill
+    {9525.682f,    -6830.646f,    16.493f,     2.969f,      530,    3430,   3665}       // Eversong Woods, Falconing Square
 };
 
 struct MANGOS_DLL_DECL npc_bunny_fire_townAI : public ScriptedAI
