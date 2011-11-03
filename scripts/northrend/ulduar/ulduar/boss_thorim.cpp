@@ -594,7 +594,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
     uint32 m_uiDeafeningThunderTimer;
     uint32 m_uiChargeOrbTimer;
     uint32 m_uiSummonWavesTimer;
-    uint64 m_uiStormTargetGUID;
+    ObjectGuid m_uiStormTargetGUID;
 
     uint32 m_uiChainLightningTimer;
     uint32 m_uiLightningChargeTimer;
@@ -608,7 +608,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
     bool m_bIsHardMode;
     uint32 m_uiPreAddsKilled;
 
-    uint64 m_uiSifGUID;
+    ObjectGuid m_uiSifGUID;
 
     // intro & outro
     bool m_bIsOutro;
@@ -620,7 +620,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
 
     // mob list check
     std::list<Creature*> lIronDwarfes;
-    std::list<uint64> m_lOrbsGUIDList;
+    std::list<ObjectGuid> m_lOrbsGUIDList;
 
     void Reset()
     {
@@ -680,21 +680,21 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
         if(m_pInstance) 
         {
             // respawn runic colossus
-            if (Creature* pColossus = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_RUNIC_COLOSSUS)))
+            if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_RUNIC_COLOSSUS))
             {
                 if (!pColossus->isAlive())
                     pColossus->Respawn();
             }
 
             // respawn ancient rune giant
-            if (Creature* pRuneGiant = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_RUNE_GIANT)))
+            if (Creature* pRuneGiant = m_pInstance->GetSingleCreatureFromStorage(NPC_RUNE_GIANT))
             {
                 if (!pRuneGiant->isAlive())
                     pRuneGiant->Respawn();
             }
 
             // respawn jormungar
-            if (Creature* pJormungar = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_JORMUNGAR_BEHEMOTH)))
+            if (Creature* pJormungar = m_pInstance->GetSingleCreatureFromStorage(NPC_JORMUNGAR_BEHEMOTH))
             {
                 if (!pJormungar->isAlive())
                     pJormungar->Respawn();
@@ -855,7 +855,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                         if(Creature* pSif = m_creature->SummonCreature(NPC_SIF, m_creature->GetPositionX() + 10, m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 700000))
                         {
                             pSif->setFaction(35);
-                            m_uiSifGUID = pSif->GetGUID();
+                            m_uiSifGUID = pSif->GetObjectGuid();
                         }
                         ++m_uiIntroStep;
                         m_uiIntroTimer = 9000;
@@ -1229,7 +1229,7 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
     uint32 m_uiSpellTimer;
     uint32 m_uiRunicBarrierTimer;
     uint32 m_uiSmashTimer;
-    uint64 m_uiSmashTargetGUID;
+    ObjectGuid m_uiSmashTargetGUID;
     bool m_bIsSmash;
     bool m_bMustSmash;
 
@@ -1258,7 +1258,7 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
         if (pWho->isTargetableForAttack() && pWho->isInAccessablePlaceFor(m_creature) &&
             !m_bIsSmash && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 70) && m_creature->IsWithinLOSInMap(pWho))
         {
-            m_uiSmashTargetGUID = pWho->GetGUID();
+            m_uiSmashTargetGUID = pWho->GetObjectGuid();
             m_creature->GetMotionMaster()->MoveIdle();
             m_bIsSmash = true;
         }
@@ -1276,7 +1276,7 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
         // smash, doesn't work. Spell needs core fix
         if(m_uiSmashTimer < uiDiff && m_bIsSmash && m_bMustSmash)
         {
-            if(Unit* pTarget = m_creature->GetMap()->GetUnit( m_uiSmashTargetGUID))
+            if(Unit* pTarget = m_creature->GetMap()->GetUnit(m_uiSmashTargetGUID))
                 DoCast(pTarget, SPELL_RUNIC_SMASH_DMG);
             m_uiSmashTimer = 10000;
         }
@@ -1473,7 +1473,7 @@ struct MANGOS_DLL_DECL mob_thorim_preaddsAI : public ScriptedAI
     void JustDied(Unit *killer)
     {
         // start the encounter
-        if (Creature* pThorim = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_THORIM)))
+        if (Creature* pThorim = m_pInstance->GetSingleCreatureFromStorage(NPC_THORIM))
         {
             if(pThorim->isAlive())
                 ((boss_thorimAI*)pThorim->AI())->m_uiPreAddsKilled += 1;

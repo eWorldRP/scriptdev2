@@ -140,7 +140,7 @@ struct MANGOS_DLL_DECL mob_sanctum_sentryAI : public ScriptedAI
     {
         if (m_pInstance)
         {
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_AURIAYA)))
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_AURIAYA))
             {
                 if (pTemp->isAlive())
                     pTemp->SetInCombatWithZone();
@@ -170,7 +170,7 @@ struct MANGOS_DLL_DECL mob_sanctum_sentryAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
         {
             // they should follow Auriaya, but this looks ugly!
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_AURIAYA)))
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_AURIAYA))
             {
                 if (pTemp->isAlive() && !m_creature->hasUnitState(UNIT_STAT_FOLLOW))
                 {
@@ -483,7 +483,7 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
 
         if (m_uiSummon_Timer < uiDiff && !m_bIsDefender)
         {
-            if (Creature* pTemp = m_creature->SummonCreature(MOB_FERAL_DEFENDER, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+            if (Creature* pTemp = m_creature->SummonCreature(MOB_FERAL_DEFENDER, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_CORPSE_DESPAWN, 10000))
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
@@ -510,7 +510,7 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
                 float angle = (float) rand()*360/RAND_MAX + 1;
                 float homeX = m_creature->GetPositionX() + 10*cos(angle*(M_PI/180));
                 float homeY = m_creature->GetPositionY() + 10*sin(angle*(M_PI/180));
-                if (Creature* pTemp = m_creature->SummonCreature(MOB_GUARDIAN_SWARN, homeX, homeY, m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                if (Creature* pTemp = m_creature->SummonCreature(MOB_GUARDIAN_SWARN, homeX, homeY, m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 10000))
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {

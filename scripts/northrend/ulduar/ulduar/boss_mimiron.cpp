@@ -228,15 +228,12 @@ struct MANGOS_DLL_DECL boss_leviathan_mkAI : public ScriptedAI
         if(!m_bStartAttack)
             return;
 
-        if (m_creature->Attack(pWho, true)) 
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            if(m_pInstance->GetData(TYPE_MIMIRON_PHASE) == PHASE_LEVIATHAN)
-                DoStartMovement(pWho);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        }
+        m_creature->AddThreat(pWho);
+        m_creature->SetInCombatWith(pWho);
+        pWho->SetInCombatWith(m_creature);
+        if(m_pInstance->GetData(TYPE_MIMIRON_PHASE) == PHASE_LEVIATHAN)
+            DoStartMovement(pWho);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     }
 
     void DamageTaken(Unit *done_by, uint32 &uiDamage)
@@ -275,7 +272,7 @@ struct MANGOS_DLL_DECL boss_leviathan_mkAI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        if (Creature* pMimiron = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MIMIRON)))
+        if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
         {
             if(m_pInstance->GetData(TYPE_MIMIRON_PHASE) == PHASE_LEVIATHAN)
             {
@@ -459,7 +456,7 @@ struct MANGOS_DLL_DECL boss_leviathan_mkAI : public ScriptedAI
                 m_creature->SetHealth(m_creature->GetMaxHealth());
                 m_creature->GetMotionMaster()->MovePoint(0, PosTankHome[0], PosTankHome[1], CENTER_Z); 
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                if (Creature* pMimiron = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MIMIRON)))
+                if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
                     DoScriptText(SAY_TANK_DEATH, pMimiron);
                 ++m_uiOutroStep;
                 m_uiOutroTimer = 12000;
@@ -553,7 +550,7 @@ struct MANGOS_DLL_DECL boss_vx001AI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        if (Creature* pMimiron = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MIMIRON)))
+        if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
         {
             if(m_pInstance->GetData(TYPE_MIMIRON_PHASE) == PHASE_VX001)
             {
@@ -593,7 +590,7 @@ struct MANGOS_DLL_DECL boss_vx001AI : public ScriptedAI
         {
             if(m_pInstance->GetData(TYPE_MIMIRON_PHASE) == PHASE_VX001)
             {
-                if (Creature* pMimiron = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MIMIRON)))
+                if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
                     DoScriptText(SAY_TORSO_DEATH, pMimiron);
                 m_pInstance->SetData(TYPE_MIMIRON_PHASE, PHASE_TRANS_2);
                 m_pInstance->SetData(TYPE_VX001, DONE);
@@ -937,7 +934,7 @@ struct MANGOS_DLL_DECL boss_aerial_command_unitAI : public ScriptedAI
         {
             if(m_pInstance->GetData(TYPE_MIMIRON_PHASE) == PHASE_AERIAL)
             {
-                if (Creature* pMimiron = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MIMIRON)))
+                if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
                     DoScriptText(SAY_HEAD_DEATH, pMimiron);
                 m_pInstance->SetData(TYPE_MIMIRON_PHASE, PHASE_TRANS_3);
                 m_pInstance->SetData(TYPE_AERIAL_UNIT, DONE);
@@ -947,7 +944,7 @@ struct MANGOS_DLL_DECL boss_aerial_command_unitAI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        if (Creature* pMimiron = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MIMIRON)))
+        if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
         {
             if(m_pInstance->GetData(TYPE_MIMIRON_PHASE) == PHASE_AERIAL)
             {
@@ -1141,10 +1138,6 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
     bool m_bIsIntro;
     bool m_bIsRobotReady;
 
-    uint64 m_uiTankGUID;
-    uint64 m_uiTorsoGUID;
-    uint64 m_uiHeadGUID;
-
     bool m_bIsTankDead;
     bool m_bIsTorsoDead;
     bool m_bIsHeadDead;
@@ -1168,12 +1161,8 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
         m_bIsTorsoDead          = false;
         m_bIsHeadDead           = false;
 
-        m_uiTankGUID            = 0;
-        m_uiTorsoGUID           = 0;
-        m_uiHeadGUID            = 0;
-
         // reset button
-        if(GameObject* pButton = m_pInstance->instance->GetGameObject(m_pInstance->GetData64(GO_MIMIRON_BUTTON)))
+        if(GameObject* pButton = m_pInstance->GetSingleGameObjectFromStorage(GO_MIMIRON_BUTTON))
             pButton->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
 
         // reset elevator
@@ -1188,7 +1177,7 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
             pHead->DealDamage(pHead, pHead->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
         // reset tank
-        if (Creature* pTank = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_LEVIATHAN_MK)))
+        if (Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
         {
             if(pTank->isAlive())
                 pTank->AI()->EnterEvadeMode();
@@ -1273,7 +1262,7 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
                         m_uiIntroTimer = 10000;
                         break;
                     case 3:
-                        if(GameObject* pButton = m_pInstance->instance->GetGameObject(m_pInstance->GetData64(GO_MIMIRON_BUTTON)))
+                        if(GameObject* pButton = m_pInstance->GetSingleGameObjectFromStorage(GO_MIMIRON_BUTTON))
                             pButton->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                         if(m_bIsHardMode)
                         {
@@ -1288,13 +1277,12 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
                         }
                         break;
                     case 5:
-                        if (Creature* pTank = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_LEVIATHAN_MK)))
+                        if (Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                         {
                             if(pTank->isAlive())
                             {
                                 DoScriptText(SAY_TANK_ACTIVE, m_creature);
                                 pTank->GetMotionMaster()->MovePoint(0, CENTER_X, CENTER_Y, CENTER_Z);
-                                m_uiTankGUID = pTank->GetGUID();
                             }
                             else
                                 EnterEvadeMode();
@@ -1303,7 +1291,7 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
                         m_uiIntroTimer = 18000;
                         break;
                     case 7:
-                        if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
+                        if(Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                         {
                             if(m_bIsHardMode)
                             {
@@ -1315,7 +1303,7 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
                             {
                                 if(m_pInstance)
                                     m_pInstance->SetData(TYPE_MIMIRON_PHASE, PHASE_LEVIATHAN);
-                                        ((boss_leviathan_mkAI*)pTank->AI())->m_bStartAttack = true;
+                                ((boss_leviathan_mkAI*)pTank->AI())->m_bStartAttack = true;
                                 pTank->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 pTank->SetInCombatWithZone();
                                 m_uiBerserkTimer        = 900000;   // 15 min
@@ -1330,7 +1318,7 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
                         {
                             if(m_pInstance)
                                 m_pInstance->SetData(TYPE_MIMIRON_PHASE, PHASE_LEVIATHAN);
-                            if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
+                            if(Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                             {
                                 pTank->SetHealth(pTank->GetMaxHealth()+ (pTank->GetMaxHealth() * 0.3));
                                 ((boss_leviathan_mkAI*)pTank->AI())->m_bStartAttack = true;
@@ -1364,7 +1352,7 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
                 if(m_uiUseLiftTimer < uiDiff)
                 {
                     if(GameObject* pLift = GetClosestGameObjectWithEntry(m_creature, GO_MIMIRON_ELEVATOR, DEFAULT_VISIBILITY_INSTANCE))
-                        m_pInstance->DoUseDoorOrButton(pLift->GetGUID());
+                        m_pInstance->DoUseDoorOrButton(pLift->GetObjectGuid());
                     m_uiUseLiftTimer = 60000;
                 }
                 else m_uiUseLiftTimer -= uiDiff;
@@ -1372,14 +1360,13 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
                 if(m_uiPhaseDelayTimer < uiDiff && !m_bHasMoreHp)
                 {
                     DoScriptText(SAY_TORSO_ACTIVE, m_creature);
-                    if(Creature* pTorso = m_creature->SummonCreature(NPC_VX001, CENTER_X, CENTER_Y, CENTER_Z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                    if(Creature* pTorso = m_creature->SummonCreature(NPC_VX001, CENTER_X, CENTER_Y, CENTER_Z, 0, TEMPSUMMON_CORPSE_DESPAWN, 10000))
                     {
                         if(m_bIsHardMode)
                         {
                             pTorso->CastSpell(pTorso, SPELL_EMERGENCY_MODE, false);
                             m_bHasMoreHp        = true;
                             m_uiHpCheckTimer    = 1000;
-                            m_uiTorsoGUID = pTorso->GetGUID();
                         }
                         else
                         {
@@ -1392,7 +1379,7 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
 
                 if (m_uiHpCheckTimer <= uiDiff && m_bHasMoreHp)
                 {
-                    if(Creature* pTorso = m_pInstance->instance->GetCreature(m_uiTorsoGUID))
+                    if(Creature* pTorso = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001))
                         pTorso->SetHealth(pTorso->GetMaxHealth()+ (pTorso->GetMaxHealth() * 0.3));
                     m_bHasMoreHp        = false;
                     m_uiPhaseDelayTimer = 10000;
@@ -1420,7 +1407,7 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
                 if(m_uiPhaseDelayTimer < uiDiff && !m_bHasMoreHp)
                 {
                     DoScriptText(SAY_HEAD_ACTIVE, m_creature);
-                    if(Creature* pHead = m_creature->SummonCreature(NPC_AERIAL_UNIT, CENTER_X, CENTER_Y, CENTER_Z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                    if(Creature* pHead = m_creature->SummonCreature(NPC_AERIAL_UNIT, CENTER_X, CENTER_Y, CENTER_Z, 0, TEMPSUMMON_CORPSE_DESPAWN, 10000))
                     {
                         if(m_bIsHardMode)
                         {
@@ -1433,14 +1420,13 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
                             m_pInstance->SetData(TYPE_MIMIRON_PHASE, PHASE_AERIAL);
                             m_uiPhaseDelayTimer = 15000;
                         }
-                        m_uiHeadGUID = pHead->GetGUID();
                     }
                 }
                 else m_uiPhaseDelayTimer -= uiDiff;
 
                 if (m_uiHpCheckTimer <= uiDiff && m_bHasMoreHp)
                 {
-                    if(Creature* pHead = m_pInstance->instance->GetCreature(m_uiHeadGUID))
+                    if(Creature* pHead = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
                         pHead->SetHealth(pHead->GetMaxHealth()+ (pHead->GetMaxHealth() * 0.3));
                     m_bHasMoreHp        = false;
                     m_uiPhaseDelayTimer = 15000;
@@ -1467,12 +1453,11 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
             {
                 if(m_uiPhaseDelayTimer < uiDiff && !m_bIsRobotReady)
                 {
-                    if (Creature* pTank = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_LEVIATHAN_MK)))
+                    if (Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                     {
                         if(pTank->isAlive())
                         {
                             pTank->GetMotionMaster()->MovePoint(0, CENTER_X, CENTER_Y, CENTER_Z);
-                            m_uiTankGUID = pTank->GetGUID();
                             m_bIsRobotReady = true;
                             m_uiRobotDelayTimer = 15000;
                         }
@@ -1486,39 +1471,37 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
                 if(m_uiRobotDelayTimer < uiDiff && m_bIsRobotReady && !m_bHasMoreHp)
                 {
                     DoScriptText(SAY_ROBOT_ACTIVE, m_creature);
-                    if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
+                    if(Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                         ((boss_leviathan_mkAI*)pTank->AI())->SetPhase();
 
-                    if(Creature* pTorso = m_creature->SummonCreature(NPC_VX001, CENTER_X, CENTER_Y, CENTER_Z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+                    if(Creature* pTorso = m_creature->SummonCreature(NPC_VX001, CENTER_X, CENTER_Y, CENTER_Z, 0, TEMPSUMMON_CORPSE_DESPAWN, 30000))
                     {
                         ((boss_vx001AI*)pTorso->AI())->SetPhase();
-                        m_uiTorsoGUID = pTorso->GetGUID();
                     }
 
-                    if(Creature* pHead = m_creature->SummonCreature(NPC_AERIAL_UNIT, CENTER_X, CENTER_Y, CENTER_Z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+                    if(Creature* pHead = m_creature->SummonCreature(NPC_AERIAL_UNIT, CENTER_X, CENTER_Y, CENTER_Z, 0, TEMPSUMMON_CORPSE_DESPAWN, 30000))
                     {
                         ((boss_aerial_command_unitAI*)pHead->AI())->SetPhase();
-                        m_uiHeadGUID = pHead->GetGUID();
                     }
 
                     if(m_bIsHardMode)
                     {
-                        if(Creature* pTorso = m_pInstance->instance->GetCreature(m_uiTorsoGUID))
+                        if(Creature* pTorso = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001))
                             pTorso->CastSpell(pTorso, SPELL_EMERGENCY_MODE, false);
-                        if(Creature* pHead = m_pInstance->instance->GetCreature(m_uiHeadGUID))
+                        if(Creature* pHead = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
                             pHead->CastSpell(pHead, SPELL_EMERGENCY_MODE, false);
-                        if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
+                        if(Creature* pTank =  m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                             pTank->CastSpell(pTank, SPELL_EMERGENCY_MODE, false);
                         m_bHasMoreHp = true;
                         m_uiHpCheckTimer = 1000;
                     }
                     else
                     {
-                        if(Creature* pTorso = m_pInstance->instance->GetCreature(m_uiTorsoGUID))
+                        if(Creature* pTorso = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001))
                             pTorso->SetHealth(pTorso->GetMaxHealth() * 0.5);
-                        if(Creature* pHead = m_pInstance->instance->GetCreature(m_uiHeadGUID))
+                        if(Creature* pHead = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
                             pHead->SetHealth(pHead->GetMaxHealth() * 0.5);
-                        if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
+                        if(Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                             pTank->SetHealth(pTank->GetMaxHealth() * 0.5);
                         m_pInstance->SetData(TYPE_MIMIRON_PHASE, PHASE_ROBOT);
                     }
@@ -1528,11 +1511,11 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
 
                 if (m_uiHpCheckTimer <= uiDiff && m_bHasMoreHp)
                 {
-                    if(Creature* pHead = m_pInstance->instance->GetCreature(m_uiHeadGUID))
+                    if(Creature* pHead = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
                         pHead->SetHealth(pHead->GetMaxHealth() * 0.5);
-                    if(Creature* pTorso = m_pInstance->instance->GetCreature(m_uiTorsoGUID))
+                    if(Creature* pTorso = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001))
                         pTorso->SetHealth(pTorso->GetMaxHealth()* 0.5);
-                    if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
+                    if(Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                         pTank->SetHealth(pTank->GetMaxHealth()* 0.5);   
                     m_pInstance->SetData(TYPE_MIMIRON_PHASE, PHASE_ROBOT);
                     // start again 3 fires
@@ -1591,17 +1574,17 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
                         m_bHasChecked = false;
                         if(m_bIsTankDead)
                         {
-                            if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
+                            if(Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                                 ((boss_leviathan_mkAI*)pTank->AI())->Repair();
                         }
                         if(m_bIsTorsoDead)
                         {
-                            if(Creature* pTorso = m_pInstance->instance->GetCreature(m_uiTorsoGUID))
+                            if(Creature* pTorso = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001))
                                 ((boss_vx001AI*)pTorso->AI())->Repair();
                         }
                         if(m_bIsHeadDead)
                         {
-                            if(Creature* pHead = m_pInstance->instance->GetCreature(m_uiHeadGUID))
+                            if(Creature* pHead = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
                                 ((boss_aerial_command_unitAI*)pHead->AI())->Repair();
                         }
                     }
@@ -1615,11 +1598,11 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
             {
                 if(m_uiOutroTimer < uiDiff)
                 {
-                    if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
+                    if(Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                         m_creature->DealDamage(pTank, pTank->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    if(Creature* pHead = m_pInstance->instance->GetCreature(m_uiHeadGUID))
+                    if(Creature* pHead = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
                         m_creature->DealDamage(pHead, pHead->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    if(Creature* pTorso = m_pInstance->instance->GetCreature(m_uiTorsoGUID))
+                    if(Creature* pTorso = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001))
                         m_creature->DealDamage(pTorso, pTorso->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     DoOutro();
                     m_uiOutroTimer = 60000;
@@ -1633,19 +1616,19 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
         // berserk
         if (m_uiBerserkTimer <= uiDiff)
         {
-            if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
+            if(Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
             {
                 if(pTank && pTank->isAlive())
                     pTank->CastSpell(pTank, SPELL_BERSERK, false);
             }
 
-            if(Creature* pTorso = m_pInstance->instance->GetCreature(m_uiTorsoGUID))
+            if(Creature* pTorso = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001))
             {
                 if(pTorso && pTorso->isAlive())
                     pTorso->CastSpell(pTorso, SPELL_BERSERK, false);
             }
 
-            if(Creature* pHead = m_pInstance->instance->GetCreature(m_uiHeadGUID))
+            if(Creature* pHead = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
             {
                 if(pHead && pHead->isAlive())
                     pHead->CastSpell(pHead, SPELL_BERSERK, false);
@@ -1707,7 +1690,7 @@ struct MANGOS_DLL_DECL leviathan_turretAI : public ScriptedAI
 
         if(m_uiPlasmaBlastTimer < uiDiff)
         {
-            if (Creature* pTank = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_LEVIATHAN_MK)))
+            if (Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
             {
                 DoScriptText(EMOTE_PLASMA_BLAST, m_creature);
                 if (Unit* pTarget = pTank->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0))
@@ -1719,7 +1702,7 @@ struct MANGOS_DLL_DECL leviathan_turretAI : public ScriptedAI
 
         if(m_uiNapalmShellTimer < uiDiff)
         {
-            if (Creature* pTank = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_LEVIATHAN_MK)))
+            if (Creature* pTank = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
             {
                 if (Unit* pTarget = pTank->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
@@ -2113,7 +2096,7 @@ bool GOHello_go_red_button(Player* pPlayer, GameObject* pGo)
     if (!m_pInstance)
         return false;
 
-    if (Creature* pMimiron = pGo->GetMap()->GetCreature(m_pInstance->GetData64(NPC_MIMIRON)))
+    if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
     {
         pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT); 
         pPlayer->CastSpell(pPlayer, SPELL_FLAMES_SUMMON, false);
