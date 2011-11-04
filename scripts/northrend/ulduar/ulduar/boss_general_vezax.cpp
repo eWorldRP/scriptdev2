@@ -409,10 +409,12 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
 
     uint32 m_uiDieTimer;
+    bool m_bDie;
 
     void Reset()
     {
-        m_uiDieTimer = 600000;
+        m_bDie = false;
+        m_uiDieTimer = 30000;
         m_creature->SetRespawnDelay(DAY);
     }
 
@@ -432,8 +434,15 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
         if(uiDamage >= m_creature->GetHealth())
         {
             uiDamage = 0;
-            m_uiDieTimer = 500;
-            DoCast(m_creature, SPELL_SARONITE_VAPORS);
+            if (!m_bDie)
+            {
+                m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
+                m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+                m_creature->GetMotionMaster()->MoveIdle();
+                SetCombatMovement(false);
+                m_bDie = true;
+                DoCast(m_creature, SPELL_SARONITE_VAPORS);
+            }
         }
     }
 
@@ -442,9 +451,12 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
         if (m_pInstance && m_pInstance->GetData(TYPE_VEZAX) != IN_PROGRESS) 
             m_creature->ForcedDespawn();
 
-        if (m_uiDieTimer < diff)
-            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-        else m_uiDieTimer -= diff;
+        if (m_bDie)
+        {
+            if (m_uiDieTimer < diff)
+                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            else m_uiDieTimer -= diff;
+        }
     }
 };
 
