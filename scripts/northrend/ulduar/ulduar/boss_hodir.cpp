@@ -58,6 +58,8 @@ enum
     EMOTE_FLASH_FREEZE      = -1603360,
     EMOTE_FROZEN_BLOWS      = -1603361,
 
+    SPELL_HODIR_CREDIT      = 64899,
+
     ACHIEV_RARE_CACHE       = 3182,
     ACHIEV_RARE_CACHE_H     = 3184,
     ACHIEV_COOLEST_FRIEND   = 2963,
@@ -160,10 +162,12 @@ struct MANGOS_DLL_DECL mob_icicleAI : public ScriptedAI
     {
         pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         SetCombatMovement(false);
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         pCreature->setFaction(14);
         Reset();
     }
 
+    ScriptedInstance* m_pInstance;
     uint32 m_uiSpellDelayTimer;
 
     void Reset()
@@ -179,6 +183,9 @@ struct MANGOS_DLL_DECL mob_icicleAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     { 
+        if (m_pInstance->GetData(TYPE_HODIR) != IN_PROGRESS)
+            m_creature->ForcedDespawn();
+
         if(m_uiSpellDelayTimer < diff)
         {
             DoCast(m_creature, SPELL_ICICLE_DUMMY);
@@ -406,6 +413,16 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
 
             if (m_bIsCheese)
                 m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_CHEESE_FREEZE : ACHIEV_CHEESE_FREEZE_H);
+        }
+
+        Map* pMap = m_creature->GetMap();
+        Map::PlayerList const &lPlayers = pMap->GetPlayers();
+        for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+        {
+            Player* pPlayer = itr->getSource();
+            if (!pPlayer)
+                continue;
+            pPlayer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, SPELL_HODIR_CREDIT);
         }
         m_creature->ForcedDespawn();
     }

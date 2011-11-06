@@ -1229,6 +1229,16 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
             }
             m_pInstance->SetData(TYPE_MIMIRON, DONE);
         }
+
+        Map* pMap = m_creature->GetMap();
+        Map::PlayerList const &lPlayers = pMap->GetPlayers();
+        for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+        {
+            Player* pPlayer = itr->getSource();
+            if (!pPlayer)
+                continue;
+            pPlayer->KilledMonsterCredit(NPC_LEVIATHAN_MK);
+        }
         m_creature->ForcedDespawn();
     }
 

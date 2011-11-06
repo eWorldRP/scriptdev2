@@ -164,6 +164,8 @@ enum
     SPELL_BARBED_SHOT                = 62318,
     SPELL_WING_CLIP                    = 40652,
 
+    SPELL_THORIM_CREDIT             = 64985,
+
     ACHIEV_LOSE_ILLUSION            = 3176,
     ACHIEV_LOSE_ILLUSION_H          = 3183,
     ACHIEV_SIFFED                   = 2977,
@@ -735,6 +737,15 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
             m_pInstance->SetData(TYPE_THORIM, DONE);
         }
 
+        Map* pMap = m_creature->GetMap();
+        Map::PlayerList const &lPlayers = pMap->GetPlayers();
+        for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+        {
+            Player* pPlayer = itr->getSource();
+            if (!pPlayer)
+                continue;
+            pPlayer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_THORIM_CREDIT);
+        }
         m_creature->ForcedDespawn();
     }
 
