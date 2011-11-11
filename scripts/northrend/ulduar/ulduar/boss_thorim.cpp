@@ -60,6 +60,7 @@ enum
     NPC_THUNDER_ORB                 = 33378,    // npc used to cast charged orb
     SPELL_BERSERK_ADDS              = 62560,    // 5 min phase 1 -> for adds
     SPELL_SUMMON_LIGHTNING_ORB      = 62391,
+    NPC_LIGHTNING_ORB               = 33138,
     // phase2
     SPELL_TOUTCH_OF_DOMINION        = 62565,    // not available in hard mode
     SPELL_CHAIN_LIGHTNING           = 62131,
@@ -319,6 +320,11 @@ struct MANGOS_DLL_DECL mob_dark_rune_championAI : public ScriptedAI
         m_uiSpell_Timer = urand(3000, 6000);
     }
 
+    void JustReachedHome()
+    {
+        m_creature->ForcedDespawn();
+    }
+
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -363,6 +369,11 @@ struct MANGOS_DLL_DECL mob_dark_rune_commonerAI : public ScriptedAI
     void Reset()
     {
         m_uiSpell_Timer = urand(3000, 6000);
+    }
+
+    void JustReachedHome()
+    {
+        m_creature->ForcedDespawn();
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -622,7 +633,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
 
     // mob list check
     std::list<Creature*> lIronDwarfes;
-    std::list<ObjectGuid> m_lOrbsGUIDList;
+    std::list<Creature*> m_lOrbs;
 
     void Reset()
     {
@@ -656,10 +667,22 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
         m_bIsOutro              = false;
         m_uiSifGUID             = 0;
         lIronDwarfes.clear();
-        m_lOrbsGUIDList.clear();
+        m_lOrbs.clear();
 
         // exploit check
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); 
+
+        // orbs
+        GetCreatureListWithEntryInGrid(m_lOrbs, m_creature, NPC_THUNDER_ORB, 100.0f);
+        if (!m_lOrbs.empty())
+        {
+            for(std::list<Creature*>::iterator iter = m_lOrbs.begin(); iter != m_lOrbs.end(); ++iter)
+            {
+                if ((*iter) && !(*iter)->isAlive())
+                    (*iter)->Respawn();
+                (*iter)->setFaction(35);
+            }
+        }
 
         // respawn adds
         GetCreatureListWithEntryInGrid(lIronDwarfes, m_creature, MOB_IRON_RING_GUARD, DEFAULT_VISIBILITY_INSTANCE);
@@ -737,6 +760,14 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
             m_pInstance->SetData(TYPE_THORIM, DONE);
         }
 
+        if (!m_lOrbs.empty())
+        {
+            for(std::list<Creature*>::iterator iter = m_lOrbs.begin(); iter != m_lOrbs.end(); ++iter)
+            {
+                (*iter)->setFaction(35);
+            }
+        }
+
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &lPlayers = pMap->GetPlayers();
         for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
@@ -773,7 +804,6 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                 // move in arena
                 m_creature->GetMotionMaster()->MovePoint(0, 2134.719f, -263.148f, 419.846f);
                 m_creature->SetWalk(false);
-//                m_creature->SetSplineFlags(SPLINEFLAG_FALLING); 
                 m_bIsPhaseEnd = true;
                 m_uiPhase2Timer = 9000;
             }
@@ -790,41 +820,29 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
     void StartEncounter()
     {
         m_uiPhase    = PHASE_INTRO;
-        m_bIsIntro    = true;
-    }
+        m_bIsIntro   = true;
 
-    // hacky way for berserk in phase 1 :)
-    void KillPlayers()
-    {
-        Map *map = m_creature->GetMap();
-        if (map->IsDungeon())
+        if (!m_lOrbs.empty())
         {
-            Map::PlayerList const &PlayerList = map->GetPlayers();
-
-            if (PlayerList.isEmpty())
-                return;
-
-            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            for(std::list<Creature*>::iterator iter = m_lOrbs.begin(); iter != m_lOrbs.end(); ++iter)
             {
-                if (i->getSource()->isAlive() && m_creature->GetDistance(i->getSource()->GetPositionX(), i->getSource()->GetPositionY(), i->getSource()->GetPositionZ()) < 200.0f)
-                    i->getSource()->DealDamage(i->getSource(), i->getSource()->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                (*iter)->setFaction(14);
             }
-        } 
+        }
     }
+
 
     Creature* SelectRandomOrb()
     {
-        std::list<Creature* > lThunderList;
-        GetCreatureListWithEntryInGrid(lThunderList, m_creature, NPC_THUNDER_ORB, 100.0f);
- 
         //This should not appear!
-        if (lThunderList.empty()){
+        if (m_lOrbs.empty())
+        {
             m_uiChargeOrbTimer = 5000;
             return NULL;
         }
             
-        std::list<Creature* >::iterator iter = lThunderList.begin();
-        advance(iter, urand(0, lThunderList.size()-1));
+        std::list<Creature* >::iterator iter = m_lOrbs.begin();
+        advance(iter, urand(0, m_lOrbs.size()-1));
  
         return *iter;
     }
@@ -835,7 +853,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
         {
             // start the encounter when all the preadds have died
         case PHASE_PREADDS:
-            if(m_uiPreAddsKilled == 4)
+            if(m_uiPreAddsKilled >= 4)
                 StartEncounter();
             break;
             // do intro
@@ -900,7 +918,6 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                 // phase 2 prepared
                 if(m_uiPhase2Timer < uiDiff && m_bIsPhaseEnd)
                 {
-//                    m_creature->RemoveSplineFlag(SPLINEFLAG_FALLING);
                     m_creature->RemoveAurasDueToSpell(SPELL_SHEAT_OF_LIGHTNING);
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     if(!m_bIsHardMode)
@@ -928,7 +945,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                     return;
 
                 // hard mode check
-                if (m_uiHardModeTimer <= uiDiff && m_bIsHardMode)
+                if (m_uiHardModeTimer < uiDiff && m_bIsHardMode)
                 {
                     m_bIsHardMode = false;
                     if(Creature* Sif = m_pInstance->instance->GetCreature(m_uiSifGUID))
@@ -940,7 +957,8 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                         }
                     }
                     m_uiHardModeTimer = 330000;
-                } m_uiHardModeTimer -= uiDiff;
+                }
+                else m_uiHardModeTimer -= uiDiff;
 
                 // spawn adds in arena
                 if(m_uiSummonWavesTimer < uiDiff)
@@ -1028,7 +1046,6 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
 
                 // phase 1 spells
                 // charge orb
-                // doesn't work right, needs fixing
                 if(m_uiChargeOrbTimer < uiDiff)
                 {
                     if (Creature* pOrb = SelectRandomOrb())
@@ -1040,15 +1057,9 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                 // storm hammer
                 if(m_uiStormHammerTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    {
-                        // should target only the players in the arena!
-                        //if(pTarget->IsWithinLOSInMap(m_creature))
-                        {
-                            DoCast(pTarget, SPELL_STORMHAMMER);
-                            m_uiStormHammerTimer = 15000;
-                        }
-                    }
+                    // need to find a way to ignore LOS
+                    DoCast(m_creature, SPELL_STORMHAMMER);
+                    m_uiStormHammerTimer = 15000;
                 }
                 else m_uiStormHammerTimer -= uiDiff; 
 
@@ -1068,10 +1079,10 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                 if(m_uiArenaBerserkTimer < uiDiff)
                 {
                     DoScriptText(SAY_ARENA_WIPE, m_creature);
-                    //DoCast(m_creature, SPELL_BERSERK_ADDS);
-                    // workaround because berserk doesn't work. It's casted on players not on adds. Needs core fix
-                    KillPlayers();
-                    DoCast(m_creature, SPELL_SUMMON_LIGHTNING_ORB);
+                    // half working, it affects thorim but not his army of adds...
+                    DoCast(m_creature, SPELL_BERSERK_ADDS);
+                    // should be done by spell
+                    DoSpawnCreature(NPC_LIGHTNING_ORB, 0, 5.0f, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 120000);
                     m_uiArenaBerserkTimer = 30000;
                 }
                 else m_uiArenaBerserkTimer -= uiDiff;
@@ -1467,6 +1478,26 @@ struct MANGOS_DLL_DECL mob_thorim_preaddsAI : public ScriptedAI
         m_uiWingClipTimer        = urand(10000, 15000);
     }
 
+    void DamageTaken(Unit* pDoneBy, uint32& uiDamage)
+    {
+        // this to avoid that the preadds to kill themselves
+        if (pDoneBy->GetTypeId() != TYPEID_PLAYER)
+        {
+            switch(pDoneBy->GetEntry())
+            {
+                case NPC_JORMUNGAR_BEHEMOTH:
+                case NPC_CAPTAIN_ALY:
+                case NPC_CAPTAIN_HORDE:
+                case NPC_MERCENARY_ALY:
+                case NPC_MERCENARY_HORDE:
+                    uiDamage = 0;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     void AttackStart(Unit* pWho)
     {
         if (m_creature->Attack(pWho, true)) 
@@ -1647,6 +1678,22 @@ CreatureAI* GetAI_npc_sif(Creature* pCreature)
     return new npc_sifAI(pCreature);
 }
 
+// thunder orb
+struct MANGOS_DLL_DECL npc_thunder_orbAI : public ScriptedAI
+{
+    npc_thunder_orbAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        SetCombatMovement(false);
+    }
+
+    void Reset(){}
+};
+
+CreatureAI* GetAI_npc_thunder_orb(Creature* pCreature)
+{
+    return new npc_thunder_orbAI(pCreature);
+}
+
 // script for the orb on the hallway which should wipe the raid. Needs more research!
 struct MANGOS_DLL_DECL npc_lightning_orbAI : public ScriptedAI
 {
@@ -1655,20 +1702,20 @@ struct MANGOS_DLL_DECL npc_lightning_orbAI : public ScriptedAI
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         pCreature->setFaction(14);
         SetCombatMovement(false);
         Reset();
     }
 
     ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
 
+    uint32 m_uiKillTimer;
     uint32 m_uiMoveTimer;
     uint8 m_uiWaypoint;
 
     void Reset()
     {
+        m_uiKillTimer = 500;
         m_uiMoveTimer = 1000;
         m_uiWaypoint = 0;
         m_creature->SetRespawnDelay(DAY);
@@ -1685,6 +1732,24 @@ struct MANGOS_DLL_DECL npc_lightning_orbAI : public ScriptedAI
         if (m_pInstance && m_pInstance->GetData(TYPE_THORIM) != IN_PROGRESS) 
             m_creature->ForcedDespawn();
 
+        if (m_uiKillTimer < uiDiff)
+        {
+            Map *map = m_creature->GetMap();
+            Map::PlayerList const &PlayerList = map->GetPlayers();
+
+            if (!PlayerList.isEmpty())
+            {
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                {
+                    if (i->getSource()->isAlive() && m_creature->GetDistance(i->getSource()) < 30.0f)
+                        if (m_creature->IsWithinLOSInMap(i->getSource()))
+                            i->getSource()->DealDamage(i->getSource(), i->getSource()->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                }
+            }
+            m_uiKillTimer = 500;
+        }
+        else m_uiKillTimer -= uiDiff;
+
         if (m_uiMoveTimer < uiDiff && m_uiWaypoint < 4)
         {
             m_creature->GetMotionMaster()->MovePoint(0, OrbLoc[m_uiWaypoint].x, OrbLoc[m_uiWaypoint].y, OrbLoc[m_uiWaypoint].z);
@@ -1700,6 +1765,16 @@ CreatureAI* GetAI_npc_lightning_orb(Creature* pCreature)
     return new npc_lightning_orbAI(pCreature);
 }
 
+// door lever
+bool pGOUse_go_thorim_lever(Player* pPlayer, GameObject* pGo)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+    if(GameObject* pDoor = pInstance->GetSingleGameObjectFromStorage(GO_DARK_IRON_PORTCULIS))
+    {
+        pDoor->SetGoState(GO_STATE_ACTIVE);
+    }
+    return true;
+}
 
 void AddSC_boss_thorim()
 {
@@ -1727,6 +1802,11 @@ void AddSC_boss_thorim()
     newscript = new Script;
     newscript->Name = "npc_lightning_orb";
     newscript->GetAI = &GetAI_npc_lightning_orb;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_thunder_orb";
+    newscript->GetAI = &GetAI_npc_thunder_orb;
     newscript->RegisterSelf();
 
     newscript = new Script;
@@ -1772,5 +1852,10 @@ void AddSC_boss_thorim()
     newscript = new Script;
     newscript->Name = "mob_thorim_trap_bunny";
     newscript->GetAI = &GetAI_mob_thorim_trap_bunny;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "go_thorim_lever";
+    newscript->pGOUse = &pGOUse_go_thorim_lever;
     newscript->RegisterSelf();
 }

@@ -225,7 +225,10 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
             case GO_LIGHTNING_FIELD:
                 break;
             case GO_DOOR_LEVER:
-                pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                if (m_auiEncounter[TYPE_THORIM] != DONE)
+                    pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                else
+                    pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                 break;
             // Prison
             case GO_ANCIENT_GATE:
@@ -378,7 +381,7 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
             DoUseDoorOrButton(GO_HODIR_ENTER);
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(GO_HODIR_ICE_WALL);
+                GetSingleGameObjectFromStorage(GO_HODIR_ICE_WALL)->SetGoState(GO_STATE_ACTIVE);
                 DoUseDoorOrButton(GO_HODIR_EXIT);
                 DoRespawnGameObject(m_bRegular ? GO_CACHE_OF_WINTER : GO_CACHE_OF_WINTER_H, 30*MINUTE);
                 // used to make the friendly keeper visible
@@ -390,6 +393,13 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
             break;
         case TYPE_THORIM:
             m_auiEncounter[TYPE_THORIM] = uiData;
+            if (GameObject* pLever =GetSingleGameObjectFromStorage(GO_DOOR_LEVER))
+            {
+                if (pLever->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT))
+                    pLever->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                if (pLever->getLootState() == GO_ACTIVATED)
+                    pLever->SetGoState(GO_STATE_READY);
+            }
             DoUseDoorOrButton(GO_LIGHTNING_FIELD);
             if (uiData == IN_PROGRESS || uiData == NOT_STARTED)
                 DoUseDoorOrButton(GO_DARK_IRON_PORTCULIS);
