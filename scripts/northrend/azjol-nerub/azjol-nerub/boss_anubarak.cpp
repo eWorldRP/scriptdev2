@@ -215,7 +215,7 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
             {
                 for (uint8 i = 0; i < 2; ++i)
                 {
-                    if (Creature *Guardian = m_creature->SummonCreature(NPC_GUARDIAN,SpawnPoint[i].x,SpawnPoint[i].y,SpawnPoint[i].z,0,TEMPSUMMON_CORPSE_TIMED_DESPAWN,30000))
+                    if (Creature *Guardian = m_creature->SummonCreature(NPC_GUARDIAN,SpawnPoint[i].x,SpawnPoint[i].y,SpawnPoint[i].z,0,TEMPSUMMON_CORPSE_DESPAWN,30000))
                     {
                         Guardian->AddThreat(m_creature->getVictim(), 0.0f);
                         Guardian->SetInCombatWithZone();
@@ -232,7 +232,7 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
                     {
                         for (uint8 i = 0; i < 2; ++i)
                         {
-                            if (Creature *Venomancer = m_creature->SummonCreature(NPC_VENOMANCER,SpawnPoint[i].x,SpawnPoint[i].y,SpawnPoint[i].z,0,TEMPSUMMON_CORPSE_TIMED_DESPAWN,30000))
+                            if (Creature *Venomancer = m_creature->SummonCreature(NPC_VENOMANCER,SpawnPoint[i].x,SpawnPoint[i].y,SpawnPoint[i].z,0,TEMPSUMMON_CORPSE_DESPAWN,30000))
                             {
                                 Venomancer->AddThreat(m_creature->getVictim(), 0.0f);
                                 Venomancer->SetInCombatWithZone();
@@ -251,7 +251,7 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
                     {
                         for (uint8 i = 0; i < 2; ++i)
                         {
-                            if (Creature *Datter = m_creature->SummonCreature(NPC_DATTER,SpawnPoint[i].x,SpawnPoint[i].y,SpawnPoint[i].z,0,TEMPSUMMON_CORPSE_TIMED_DESPAWN,30000))
+                            if (Creature *Datter = m_creature->SummonCreature(NPC_DATTER,SpawnPoint[i].x,SpawnPoint[i].y,SpawnPoint[i].z,0,TEMPSUMMON_CORPSE_DESPAWN,30000))
                             {
                                 Datter->AddThreat(m_creature->getVictim(), 0.0f);
                                 Datter->SetInCombatWithZone();
