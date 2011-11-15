@@ -172,7 +172,7 @@ struct MANGOS_DLL_DECL mob_icicleAI : public ScriptedAI
 
     void Reset()
     {
-        DoCast(m_creature, SPELL_ICICLE);
+        DoCast(m_creature, SPELL_ICICLE_DUMMY);
         m_uiSpellDelayTimer = 500;
     }
 
@@ -185,13 +185,6 @@ struct MANGOS_DLL_DECL mob_icicleAI : public ScriptedAI
     { 
         if (m_pInstance->GetData(TYPE_HODIR) != IN_PROGRESS)
             m_creature->ForcedDespawn();
-
-        if(m_uiSpellDelayTimer < diff)
-        {
-            DoCast(m_creature, SPELL_ICICLE_DUMMY);
-            m_uiSpellDelayTimer = 30000;
-        }
-        else m_uiSpellDelayTimer -= diff;
     }
 };
 
@@ -345,6 +338,7 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
         m_bIsCheese             = true;
 
         // respawn friendly npcs
+        lFriends.clear();
         // druids
         GetCreatureListWithEntryInGrid(lFriends, m_creature, 33325, DEFAULT_VISIBILITY_INSTANCE);
         GetCreatureListWithEntryInGrid(lFriends, m_creature, 32901, DEFAULT_VISIBILITY_INSTANCE);
@@ -664,7 +658,8 @@ struct MANGOS_DLL_DECL npc_hodir_druidAI : public ScriptedAI
     ObjectGuid SelectRandomPlayer()
     {
         //This should not appear!
-        if (FriendlyList.empty()){
+        if (FriendlyList.empty())
+        {
             spellTimer = 5000;
             return m_creature->GetObjectGuid();
         }
