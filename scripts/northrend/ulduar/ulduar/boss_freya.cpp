@@ -257,7 +257,7 @@ struct MANGOS_DLL_DECL mob_iron_rootsAI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        if (pVictim) 
+        if (pVictim)
         {
             switch(m_uiCreatureEntry)
             {
@@ -636,7 +636,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
         m_bNature                       = false;
         m_bHasAura                        = false;
 
-        if (m_pInstance) 
+        if (m_pInstance)
         {
             // remove elder auras
             if (Creature* pBrightleaf = m_pInstance->GetSingleCreatureFromStorage(NPC_BRIGHTLEAF))
@@ -662,7 +662,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
         // aura should stack up to 150 when casted, need core support
         DoCast(m_creature, SPELL_ATTUNED_TO_NATURE);
 
-        if (m_pInstance) 
+        if (m_pInstance)
         {
             m_pInstance->SetData(TYPE_FREYA, IN_PROGRESS);
 
@@ -769,7 +769,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
     // for debug only!
     void JustDied(Unit* pKiller)
     {
-        if (m_pInstance) 
+        if (m_pInstance)
         {
             m_pInstance->SetData(TYPE_FREYA, DONE);
             if (m_bIsHardMode)
@@ -779,7 +779,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
 
     void DamageTaken(Unit *done_by, uint32 &uiDamage)
     {
-        if (uiDamage > m_creature->GetHealth() || m_bIsOutro)
+        if (m_creature->GetHealthPercent() < 1.0f || m_bIsOutro)
         {
             uiDamage = 0;
             m_creature->SetHealthPercent(1.0f);
