@@ -112,7 +112,7 @@ struct MANGOS_DLL_DECL boss_gormokAI : public BSWScriptedAI
         if (!m_pInstance)
             return;
 
-        m_pInstance->SetData(TYPE_NORTHREND_BEASTS, GORMOK_DONE);
+        m_pInstance->SetData(TYPE_GORMOK, DONE);
     }
 
     void JustReachedHome()
@@ -120,13 +120,13 @@ struct MANGOS_DLL_DECL boss_gormokAI : public BSWScriptedAI
         if (!m_pInstance)
             return;
 
-        m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+        m_pInstance->SetData(TYPE_GORMOK, FAIL);
         m_creature->ForcedDespawn();
     }
 
     void Aggro(Unit* pWho)
     {
-        m_pInstance->SetData(TYPE_NORTHREND_BEASTS, GORMOK_IN_PROGRESS);
+        m_pInstance->SetData(TYPE_GORMOK, IN_PROGRESS);
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -264,7 +264,7 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
         m_uiSpewTimer = 30000;
         m_creature->SetInCombatWithZone();
         m_creature->SetRespawnDelay(7*DAY);
-        m_pInstance->SetData(TYPE_NORTHREND_BEASTS, ACIDMAW_SUBMERGED);
+        m_pInstance->SetData(TYPE_SNAKES, ACIDMAW_SUBMERGED);
     }
 
     void JustDied(Unit* pKiller)
@@ -275,9 +275,9 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
         if (Creature* pSister = m_pInstance->GetSingleCreatureFromStorage(NPC_DREADSCALE))
         {
             if (!pSister->isAlive())
-                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_DONE);
+                m_pInstance->SetData(TYPE_SNAKES, DONE);
             else 
-                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_SPECIAL);
+                m_pInstance->SetData(TYPE_SNAKES, SPECIAL);
         }
     }
 
@@ -286,14 +286,15 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
         if (!m_pInstance) 
             return;
 
-        if (m_pInstance->GetData(TYPE_BEASTS) == IN_PROGRESS && m_pInstance->GetData(TYPE_NORTHREND_BEASTS) != FAIL)
-            m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+        if (m_pInstance->GetData(TYPE_BEASTS) == IN_PROGRESS && m_pInstance->GetData(TYPE_BEASTS) != FAIL)
+            m_pInstance->SetData(TYPE_SNAKES, FAIL);
         
         m_creature->ForcedDespawn();
     }
 
     void Aggro(Unit* pWho)
     {
+        m_pInstance->SetData(TYPE_SNAKES, IN_PROGRESS);
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -335,7 +336,7 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
                 if (timedQuery(SPELL_SLIME_POOL, uiDiff))
                     m_creature->SummonCreature(NPC_SLIME_POOL, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000);
 
-                if (m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == ACIDMAW_SUBMERGED)
+                if (m_pInstance->GetData(TYPE_SNAKES) == ACIDMAW_SUBMERGED)
                      m_uiStage = 1;
 
                 break;
@@ -364,7 +365,7 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
                 }
                 m_uiAppearTimer = 2000;
                 m_bIsSubmerged = true;
-                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, ACIDMAW_SUBMERGED);
+                m_pInstance->SetData(TYPE_SNAKES, ACIDMAW_SUBMERGED);
                 break;
         case 2:
                 if (m_bIsSubmerged)
@@ -391,7 +392,7 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
 
                 timedCast(SPELL_SWEEP_0, uiDiff);
 
-                if ((timedQuery(SPELL_SUBMERGE_0, uiDiff) && m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == ACIDMAW_SUBMERGED) || m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == DREADSCALE_SUBMERGED)
+                if ((timedQuery(SPELL_SUBMERGE_0, uiDiff) && m_pInstance->GetData(TYPE_SNAKES) == ACIDMAW_SUBMERGED) || m_pInstance->GetData(TYPE_SNAKES) == DREADSCALE_SUBMERGED)
                     m_uiStage = 3;
                 break;
         case 3:
@@ -399,7 +400,7 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
                 m_creature->InterruptNonMeleeSpells(true);
                 doCast(SPELL_SUBMERGE_0);
                 DoScriptText(-1713557,m_creature);
-                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, DREADSCALE_SUBMERGED);
+                m_pInstance->SetData(TYPE_SNAKES, DREADSCALE_SUBMERGED);
                 if (Creature* pSister = m_pInstance->GetSingleCreatureFromStorage(NPC_DREADSCALE))
                 {
                     float fSisx, fSisy, fSisz;
@@ -413,11 +414,11 @@ struct MANGOS_DLL_DECL boss_acidmawAI : public BSWScriptedAI
                 m_uiAppearTimer = 2000;
                 m_bIsSubmerged = true;
                 m_uiStage = 0;
-                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, DREADSCALE_SUBMERGED);
+                m_pInstance->SetData(TYPE_SNAKES, DREADSCALE_SUBMERGED);
                 break;
         }
 
-        if (m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == SNAKES_SPECIAL && !m_bEnraged)
+        if (m_pInstance->GetData(TYPE_SNAKES) == SPECIAL && !m_bEnraged)
         {
             DoScriptText(-1713559,m_creature);
             m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
@@ -477,9 +478,9 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
         
         if (Creature* pSister = m_pInstance->GetSingleCreatureFromStorage(NPC_ACIDMAW))
             if (!pSister->isAlive())
-                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_DONE);
+                m_pInstance->SetData(TYPE_SNAKES, DONE);
             else
-                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_SPECIAL);
+                m_pInstance->SetData(TYPE_SNAKES, SPECIAL);
     }
 
     void JustReachedHome()
@@ -487,14 +488,15 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
         if (!m_pInstance) 
             return;
         
-        if (m_pInstance->GetData(TYPE_BEASTS) == IN_PROGRESS && m_pInstance->GetData(TYPE_NORTHREND_BEASTS) != FAIL)
-            m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+        if (m_pInstance->GetData(TYPE_BEASTS) == IN_PROGRESS && m_pInstance->GetData(TYPE_BEASTS) != FAIL)
+            m_pInstance->SetData(TYPE_SNAKES, FAIL);
         
         m_creature->ForcedDespawn();
     }
 
     void Aggro(Unit* pWho)
     {
+        m_pInstance->SetData(TYPE_SNAKES, IN_PROGRESS);
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -533,7 +535,7 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
                 if (timedQuery(SPELL_SLIME_POOL, uiDiff))
                     m_creature->SummonCreature(NPC_SLIME_POOL, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000);
 
-                if (m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == DREADSCALE_SUBMERGED)
+                if (m_pInstance->GetData(TYPE_SNAKES) == DREADSCALE_SUBMERGED)
                      m_uiStage = 1;
 
                 break;
@@ -545,7 +547,7 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
                 m_uiAppearTimer = 2000;
                 m_bIsSubmerged = true;
                 DoScriptText(-1713557,m_creature);
-                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, DREADSCALE_SUBMERGED);
+                m_pInstance->SetData(TYPE_SNAKES, DREADSCALE_SUBMERGED);
                 break;
         case 2:
                 if (m_bIsSubmerged)
@@ -571,7 +573,7 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
 
                 timedCast(SPELL_SWEEP_0, uiDiff);
 
-                if ((timedQuery(SPELL_SUBMERGE_0, uiDiff) && m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == DREADSCALE_SUBMERGED) || m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == ACIDMAW_SUBMERGED)
+                if ((timedQuery(SPELL_SUBMERGE_0, uiDiff) && m_pInstance->GetData(TYPE_SNAKES) == DREADSCALE_SUBMERGED) || m_pInstance->GetData(TYPE_SNAKES) == ACIDMAW_SUBMERGED)
                     m_uiStage = 3;
                 break;
         case 3:
@@ -579,7 +581,7 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
                 m_creature->InterruptNonMeleeSpells(true);
                 doCast(SPELL_SUBMERGE_0);
                 DoScriptText(-1713559,m_creature);
-                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, ACIDMAW_SUBMERGED);
+                m_pInstance->SetData(TYPE_SNAKES, ACIDMAW_SUBMERGED);
                 m_uiAppearTimer = 2000;
                 m_uiSpewTimer += 1000;
                 m_bIsSubmerged = true;
@@ -587,7 +589,7 @@ struct MANGOS_DLL_DECL boss_dreadscaleAI : public BSWScriptedAI
                 break;
         }
 
-        if (m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == SNAKES_SPECIAL && !m_bEnraged)
+        if (m_pInstance->GetData(TYPE_SNAKES) == SPECIAL && !m_bEnraged)
         {
             DoScriptText(-1713559,m_creature);
             m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
@@ -723,7 +725,7 @@ struct MANGOS_DLL_DECL boss_icehowlAI : public BSWScriptedAI
         if (!m_pInstance)
             return;
 
-        m_pInstance->SetData(TYPE_NORTHREND_BEASTS, ICEHOWL_DONE);
+        m_pInstance->SetData(TYPE_ICEHOWL, DONE);
     }
 
     void MovementInform(uint32 type, uint32 id)
@@ -753,14 +755,14 @@ struct MANGOS_DLL_DECL boss_icehowlAI : public BSWScriptedAI
         if (!m_pInstance)
             return;
 
-        m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+        m_pInstance->SetData(TYPE_ICEHOWL, FAIL);
         m_creature->ForcedDespawn();
     }
 
     void Aggro(Unit* pWho)
     {
         m_creature->SetInCombatWithZone();
-        m_pInstance->SetData(TYPE_NORTHREND_BEASTS, ICEHOWL_IN_PROGRESS);
+        m_pInstance->SetData(TYPE_ICEHOWL, IN_PROGRESS);
     }
 
     void UpdateAI(const uint32 uiDiff)
