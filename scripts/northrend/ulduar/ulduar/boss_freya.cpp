@@ -600,8 +600,14 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
     uint32 m_uiStrenghtenIronRootsTimer;
     uint32 m_uiGroundTremorTimer;
 
+
     uint32 m_uiThreeWaveCheckTimer;
+    uint32 m_uiThreeWaveRespawnTimer;
+    bool m_bThreeWaveCheckTimerStarted;
     bool m_bWaveCheck;
+    ObjectGuid m_uiWaterSpiritGUID;
+    ObjectGuid m_uiStormLasherGUID;
+    ObjectGuid m_uiSnapLasherGUID;
 
     bool m_bIsBrightleafAlive;
     bool m_bIsIronbranchAlive;
@@ -624,9 +630,15 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
         m_uiStrenghtenIronRootsTimer    = 25000 + urand(1000, 5000);
         m_uiGroundTremorTimer           = 20000;
         m_uiNatureBombTimer             = 45000;
-        m_uiThreeWaveCheckTimer         = 1000;
         m_uiAchievProgress              = 10000;
+
+        m_uiThreeWaveCheckTimer         = 1000;
         m_bWaveCheck                    = false;
+        m_bThreeWaveCheckTimerStarted   = false;
+        m_uiThreeWaveRespawnTimer       = 12000;
+        m_uiWaterSpiritGUID.Clear();
+        m_uiStormLasherGUID.Clear();
+        m_uiSnapLasherGUID.Clear();
 
         m_uiOutroTimer                  = 10000;
         m_uiStep                        = 1;
@@ -831,23 +843,29 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
     {
         DoScriptText(SAY_SUMMON2, m_creature);
         m_bWaveCheck = true;
-        m_uiThreeWaveCheckTimer = 2000;
+        m_uiThreeWaveCheckTimer = 1000;
 
-        if (Creature* pSpirit = DoSpawnCreature(NPC_WATER_SPIRIT, 0, 0, 0, 0, TEMPSUMMON_MANUAL_DESPAWN, 13000))
+        if(Creature* pSpirit = DoSpawnCreature(NPC_WATER_SPIRIT, 0, 0, 0, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7*DAY*IN_MILLISECONDS))
         {
+            pSpirit->setFaction(m_creature->getFaction());
+            m_uiWaterSpiritGUID = pSpirit->GetObjectGuid();
             if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pSpirit->AddThreat(pTarget, 1.0f);
         }
 
-        if (Creature* pStormLasher = DoSpawnCreature(NPC_STORM_LASHER, 0, 0, 0, 0, TEMPSUMMON_MANUAL_DESPAWN, 13000))
+        if(Creature* pStormLasher = DoSpawnCreature(NPC_STORM_LASHER, 0, 0, 0, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7*DAY*IN_MILLISECONDS))
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            pStormLasher->setFaction(m_creature->getFaction());
+            m_uiStormLasherGUID = pStormLasher->GetObjectGuid();
+            if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pStormLasher->AddThreat(pTarget, 1.0f);
         }
 
-        if (Creature* pSnapLasher = DoSpawnCreature(NPC_SNAPLASHER, 0, 0, 0, 0, TEMPSUMMON_MANUAL_DESPAWN, 13000))
+        if(Creature* pSnapLasher = DoSpawnCreature(NPC_SNAPLASHER, 0, 0, 0, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7*DAY*IN_MILLISECONDS))
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            pSnapLasher->setFaction(m_creature->getFaction());
+            m_uiSnapLasherGUID = pSnapLasher->GetObjectGuid();
+            if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pSnapLasher->AddThreat(pTarget, 1.0f);
         }
     }
@@ -857,13 +875,8 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
         switch(pSummoned->GetEntry())
         {
             case NPC_WATER_SPIRIT:
-                m_uiWaterSpiritTimer = 12000;
-                break;
             case NPC_STORM_LASHER:
-                m_uiStormLasherTimer = 12000;
-                break;
             case NPC_SNAPLASHER:
-                m_uiSnapLasherTimer = 12000;
                 break;
             case NPC_ANCIENT_CONSERVATOR:
                 if (SpellAuraHolderPtr pNatureAura = m_creature->GetSpellAuraHolder(SPELL_ATTUNED_TO_NATURE))
@@ -912,53 +925,71 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
                 DoCast(m_creature, m_bIsRegularMode ? SPELL_TOUCH_OF_EONAR : SPELL_TOUCH_OF_EONAR_H);
 
             // check if the 3 elementals die at the same time
-            if (m_uiThreeWaveCheckTimer < uiDiff && m_bWaveCheck)
+            if(m_uiThreeWaveCheckTimer < uiDiff && m_bWaveCheck)
             {
-                Creature* pWaterSpirit = m_pInstance->GetSingleCreatureFromStorage(NPC_WATER_SPIRIT);
-                Creature* pStormLasher = m_pInstance->GetSingleCreatureFromStorage(NPC_STORM_LASHER);
-                Creature* pSnapLasher = m_pInstance->GetSingleCreatureFromStorage(NPC_SNAPLASHER);
+                Creature* pWaterSpirit = m_pInstance->instance->GetCreature(m_uiWaterSpiritGUID);
+                Creature* pStormLasher = m_pInstance->instance->GetCreature(m_uiStormLasherGUID);
+                Creature* pSnapLasher = m_pInstance->instance->GetCreature(m_uiSnapLasherGUID);
 
-                if (pWaterSpirit && pStormLasher && pSnapLasher)
+                if(pWaterSpirit && pStormLasher && pSnapLasher)
                 {
-                    if (!pWaterSpirit->isAlive() && !pStormLasher->isAlive() && !pSnapLasher->isAlive())
+                    // if all 3 are dead then mod stack amount
+                    if(!pWaterSpirit->isAlive() && !pStormLasher->isAlive() && !pSnapLasher->isAlive())
                     {
                         m_bWaveCheck = false;
-                        if (SpellAuraHolderPtr pNatureAura = m_creature->GetSpellAuraHolder(SPELL_ATTUNED_TO_NATURE))
+                        m_bThreeWaveCheckTimerStarted = false;
+                        if(SpellAuraHolderPtr natureAura = m_creature->GetSpellAuraHolder(SPELL_ATTUNED_TO_NATURE))
                         {
-                            if (pNatureAura->ModStackAmount(-30))
+                            if(natureAura->ModStackAmount(-30))
                                 m_creature->RemoveAurasDueToSpell(SPELL_ATTUNED_TO_NATURE);
                         }
-                        pWaterSpirit->ForcedDespawn();
-                        pStormLasher->ForcedDespawn();
-                        pSnapLasher->ForcedDespawn();
                     }
-                    else
+                    else if (!m_bThreeWaveCheckTimerStarted)
                     {
-                        // respawn the dead ones
-                        if (!pWaterSpirit->isAlive())
+                        // if at least 1 is alive
+                        if (!pWaterSpirit->isAlive() || !pSnapLasher->isAlive() || !pStormLasher->isAlive())
                         {
-                            if (m_uiWaterSpiritTimer < uiDiff)
-                                pWaterSpirit->Respawn();
-                            else m_uiWaterSpiritTimer -=uiDiff;
-                        }
-                        if (!pSnapLasher->isAlive())
-                        {
-                            if (m_uiSnapLasherTimer < uiDiff)
-                                pSnapLasher->Respawn();
-                            else m_uiSnapLasherTimer -= uiDiff;
-                        }
-                        if (!pStormLasher->isAlive())
-                        {
-                            if (m_uiStormLasherTimer < uiDiff)
-                                pStormLasher->Respawn();
-                            else m_uiStormLasherTimer -= uiDiff;
+                            m_bThreeWaveCheckTimerStarted = true;
+                            m_uiThreeWaveRespawnTimer = 12000;
                         }
                     }
                 }
-                m_uiThreeWaveCheckTimer = 2000;
+                m_uiThreeWaveCheckTimer = 1000;
             }
             else
                 m_uiThreeWaveCheckTimer -= uiDiff;
+
+            // respawn 3 adds after 12 sec from one's death
+            if (m_bThreeWaveCheckTimerStarted)
+            {
+                if (m_uiThreeWaveRespawnTimer <= uiDiff)
+                {
+                    Creature* pWaterSpirit = m_pInstance->instance->GetCreature(m_uiWaterSpiritGUID);
+                    Creature* pStormLasher = m_pInstance->instance->GetCreature(m_uiStormLasherGUID);
+                    Creature* pSnapLasher = m_pInstance->instance->GetCreature(m_uiSnapLasherGUID);
+
+                    if (pWaterSpirit && !pWaterSpirit->isAlive())
+                    {
+                        Unit *pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                        pWaterSpirit->Respawn();
+                        pWaterSpirit->AI()->AttackStart(pTarget ? pTarget : m_creature->getVictim());
+                    }
+                    if (pStormLasher && !pStormLasher->isAlive())
+                    {
+                        Unit *pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                        pStormLasher->Respawn();
+                        pStormLasher->AI()->AttackStart(pTarget ? pTarget : m_creature->getVictim());
+                    }
+                    if (pSnapLasher && !pSnapLasher->isAlive())
+                    {
+                        Unit *pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                        pSnapLasher->Respawn();
+                        pSnapLasher->AI()->AttackStart(pTarget ? pTarget : m_creature->getVictim());
+                    }
+                    m_bThreeWaveCheckTimerStarted = false;
+                    m_uiThreeWaveRespawnTimer = 12000;
+                }else m_uiThreeWaveRespawnTimer -= uiDiff;
+            }
 
             // Hardmode
             if (m_bIsBrightleafAlive)
@@ -1044,7 +1075,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
                     DoCast(m_creature, SPELL_NATURE_BOMB_VISUAL);
                     DoCast(m_creature, SPELL_NATURE_BOMB_SUMMON);
 
-                    int8 count = urand(8,10);
+                    int8 count = urand(8, 10);
                     for (int8 i = 0; i < count; ++i)
                     {
                         float radius = 30* rand_norm_f();
@@ -1054,7 +1085,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
                         float z = m_creature->GetTerrain()->GetHeight(x, y, MAX_HEIGHT);
                         m_creature->SummonCreature(NPC_NATURE_BOMB, x, y, z, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 20000);
                     }
-                    m_uiNatureBombTimer = urand(7000, 12000);
+                    m_uiNatureBombTimer = 10000;
                 }
                 else m_uiNatureBombTimer -= uiDiff;
             }
