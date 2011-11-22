@@ -1645,7 +1645,7 @@ bool GossipHello_npc_argent_mage(Player* pPlayer, Creature* pCreature)
     if(pInstance->GetData(TYPE_ANUBARAK) != DONE )
            return true;
 
-    _message = "I'm are ready, let's teleport me to Dalaran!";
+    _message = "I'm ready, let's teleport me to Dalaran!";
 
     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, _message, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
     pPlayer->SEND_GOSSIP_MENU(MAGE_TEXT_ID, pCreature->GetObjectGuid());
