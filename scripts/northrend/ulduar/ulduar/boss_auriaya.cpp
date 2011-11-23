@@ -102,6 +102,8 @@ struct MANGOS_DLL_DECL mob_seeping_feral_essenceAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
+        if (m_pInstance->GetData(TYPE_AURIAYA) != IN_PROGRESS)
+            m_creature->ForcedDespawn();
     }
 };
 
@@ -222,6 +224,7 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
     uint32 m_uiRush_Finish_Timer;
     uint32 m_uiRush_Delay;
     uint32 m_uiRevive_Delay;
+    uint8 m_uiDeathCounter;
 
     bool m_bIsRush;
     bool m_bIsDead;
@@ -230,6 +233,7 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
 
     void Reset()
     {
+        m_uiDeathCounter        = 0;
         m_uiPounce_Timer        = 5000;
         m_uiRush_Start_Timer    = 9000;
         m_bIsRush               = false;
@@ -253,6 +257,10 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
     {
         if (uiDamage > m_creature->GetHealth())
         {
+            if (m_uiDeathCounter >= 9)
+                return;
+
+            m_uiDeathCounter++;
             uiDamage = 0;
             m_creature->CastStop();
             m_creature->RemoveArenaAuras(true);
@@ -269,7 +277,7 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
                         m_creature->RemoveAurasDueToSpell(SPELL_FERAL_ESSENCE);
                 }
 
-                m_uiRevive_Delay = 35000;
+                m_uiRevive_Delay = 500;
                 m_bIsDead = true;
             }
         }
