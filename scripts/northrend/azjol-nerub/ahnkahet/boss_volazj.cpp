@@ -347,14 +347,14 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
     uint8 m_uiPhase;
 
     // normal-phase spells
-    uint64 m_uiLastShiverTargetGUID;
+    ObjectGuid m_uiLastShiverTargetGUID;
     uint8 m_uiShiverJumpTimer;
     uint32 m_uiShiverTimer;
     uint32 m_uiMindFlayTimer;
     uint32 m_uiShadowBoltTimer;
 
     //Insanity
-    uint64 m_uilPlayerGUIDs[5];
+    ObjectGuid m_uilPlayerGUIDs[5];
     uint32 m_uiInsanityCastTimer;
     uint8 m_uiInsanityCount;
     uint32 m_uiCheckTimer;
@@ -364,12 +364,12 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
     bool m_bClone64;
     bool m_bClone128;
     bool m_bClone256;
-    std::list<uint64> m_lCloneGUIDList; 
-    std::list<uint64> m_lClone16GUIDList;
-    std::list<uint64> m_lClone32GUIDList;
-    std::list<uint64> m_lClone64GUIDList;
-    std::list<uint64> m_lClone128GUIDList;
-    std::list<uint64> m_lClone256GUIDList;
+    std::list<ObjectGuid> m_lCloneGUIDList;
+    std::list<ObjectGuid> m_lClone16GUIDList;
+    std::list<ObjectGuid> m_lClone32GUIDList;
+    std::list<ObjectGuid> m_lClone64GUIDList;
+    std::list<ObjectGuid> m_lClone128GUIDList;
+    std::list<ObjectGuid> m_lClone256GUIDList;
 
     // achievement
     bool m_bStartAchievement;
@@ -431,7 +431,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetObjectGuid())) 
                 DoScriptText(WHISPER_AGGRO,m_creature,target);
 
         m_bStartAchievement = true;
@@ -460,7 +460,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetObjectGuid())) 
                 DoScriptText(textId+6,m_creature,target);
     }
 
@@ -492,11 +492,11 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
         { 
-            if(Unit* target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID()))
+            if(Unit* target = m_creature->GetMap()->GetUnit(itr->getSource()->GetObjectGuid()))
             {
                 if (target->isAlive())
                 {
-                    m_uilPlayerGUIDs[m_uiCount] = target->GetGUID(); // save GUIDs
+                    m_uilPlayerGUIDs[m_uiCount] = target->GetObjectGuid(); // save GUIDs
                     target->CastSpell(target,m_aPhasingSpells[m_uiCount],true); // cast phase shifting spell
                     m_uiCount++;
                 }
@@ -505,13 +505,13 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) // get every player
         { 
-            if(Unit* target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+            if(Unit* target = m_creature->GetMap()->GetUnit(itr->getSource()->GetObjectGuid())) 
             {
                 if (target->isAlive())
                 {
                     for(uint8 i=0;i<m_uiCount;i++) // get all other players
                     {
-                        if (target->GetGUID() == m_uilPlayerGUIDs[i]) // get other players, but not self
+                        if (target->GetObjectGuid() == m_uilPlayerGUIDs[i]) // get other players, but not self
                             continue;
 
                         if(Player* pOtherPlayer = m_creature->GetMap()->GetPlayer(m_uilPlayerGUIDs[i]))
@@ -533,15 +533,15 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                                 pClone->GetMotionMaster()->MoveChase(target);
                                 pClone->AddThreat(target, 10.0f);
                                 pClone->SetPhaseMask(target->GetPhaseMask(),true);
-                                m_lCloneGUIDList.push_back(pClone->GetGUID());
+                                m_lCloneGUIDList.push_back(pClone->GetObjectGuid());
 
                                 switch(pClone->GetPhaseMask())
                                 {
-                                    case 16:  m_lClone16GUIDList.push_back(pClone->GetGUID()); break;
-                                    case 32:  m_lClone32GUIDList.push_back(pClone->GetGUID()); break;
-                                    case 64:  m_lClone64GUIDList.push_back(pClone->GetGUID()); break;
-                                    case 128: m_lClone128GUIDList.push_back(pClone->GetGUID()); break;
-                                    case 256: m_lClone256GUIDList.push_back(pClone->GetGUID()); break;
+                                    case 16:  m_lClone16GUIDList.push_back(pClone->GetObjectGuid()); break;
+                                    case 32:  m_lClone32GUIDList.push_back(pClone->GetObjectGuid()); break;
+                                    case 64:  m_lClone64GUIDList.push_back(pClone->GetObjectGuid()); break;
+                                    case 128: m_lClone128GUIDList.push_back(pClone->GetObjectGuid()); break;
+                                    case 256: m_lClone256GUIDList.push_back(pClone->GetObjectGuid()); break;
                                     default: break;
                                 }
                             } 
@@ -554,7 +554,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
     bool cloneAlive(int phase)
     {
-        std::list<uint64> cloneList;
+        std::list<ObjectGuid> cloneList;
         
         switch(phase)
         {
@@ -568,7 +568,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
         if (!cloneList.empty() && m_pInstance)
         {
-            for (std::list<uint64>::iterator itr = cloneList.begin(); itr != cloneList.end(); ++itr)
+            for (std::list<ObjectGuid>::iterator itr = cloneList.begin(); itr != cloneList.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -600,7 +600,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
         { 
-            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetObjectGuid())) 
             { 
                 if (target->GetPhaseMask() == phase)
                 {
@@ -681,7 +681,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                     Map* pMap = m_creature->GetMap();
                     Map::PlayerList const &players = pMap->GetPlayers();
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-                        if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+                        if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetObjectGuid())) 
                             DoScriptText(WHISPER_INSANITY,m_creature,target);
 
                     return;
@@ -725,7 +725,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                     Map::PlayerList const &players = pMap->GetPlayers();
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
                     { 
-                        if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+                        if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetObjectGuid())) 
                         {
                             for(int i=0;i<5;i++)
                                 target->RemoveAurasDueToSpell(m_aPhasingSpells[i]); // make sure all players are out of their phases

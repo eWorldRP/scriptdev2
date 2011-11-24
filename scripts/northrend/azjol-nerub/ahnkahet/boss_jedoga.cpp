@@ -204,7 +204,7 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
                 pVolunteer->DeleteThreatList();
                 pVolunteer->CastSpell(pVolunteer, SPELL_SPHERE_VISUAL, true);
                 pVolunteer->HandleEmoteCommand(EMOTE_STATE_KNEEL);
-                m_lVolunteerGUIDList.push_back(pVolunteer->GetGUID());
+                m_lVolunteerGUIDList.push_back(pVolunteer->GetObjectGuid());
             } 
         }
     }
@@ -326,8 +326,8 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
 
             if (volunteerDeathTimer < uiDiff)
             {
-                if (pChosenVolunteer && !m_lVolunteerGUIDList.empty() && pChosenVolunteer->GetGUID())
-                    m_lVolunteerGUIDList.remove(pChosenVolunteer->GetGUID());
+                if (pChosenVolunteer && !m_lVolunteerGUIDList.empty() && pChosenVolunteer->GetObjectGuid())
+                    m_lVolunteerGUIDList.remove(pChosenVolunteer->GetObjectGuid());
 
                 if (pChosenVolunteer && pChosenVolunteer->isAlive())
                     pChosenVolunteer->DealDamage(pChosenVolunteer, pChosenVolunteer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -426,7 +426,7 @@ struct MANGOS_DLL_DECL npc_twilight_volunteerAI : public ScriptedAI
     {
         if((pKiller->GetTypeId() == TYPEID_PLAYER) || (pKiller->GetOwner()) && (pKiller->GetOwner()->GetTypeId() == TYPEID_PLAYER))
             if (m_pInstance)
-                if (Creature* pJedoga = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_JEDOGA_SHADOWSEEKER)))
+                if (Creature* pJedoga = m_pInstance->GetSingleCreatureFromStorage(NPC_JEDOGA_SHADOWSEEKER))
                     if (boss_jedogaAI* pJedogaAI = dynamic_cast<boss_jedogaAI*>(pJedoga->AI()))
                     {
                         pJedogaAI->getsAchievement = false;
