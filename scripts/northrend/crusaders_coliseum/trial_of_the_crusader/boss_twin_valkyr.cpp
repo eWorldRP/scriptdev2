@@ -51,25 +51,44 @@ enum BossSpells
 {
     SPELL_TWIN_SPIKE_L     = 66075,
     SPELL_LIGHT_SURGE      = 65766,
-    SPELL_SHIELD_LIGHT     = 65858,
+    // Shield of Light
+    SPELL_SHIELD_LIGHT_N10 = 65858,
+    SPELL_SHIELD_LIGHT_N25 = 67259,
+    SPELL_SHIELD_LIGHT_H10 = 67260,
+    SPELL_SHIELD_LIGHT_H25 = 67261,
+
     SPELL_LIGHT_VORTEX     = 66046,
     SPELL_LIGHT_TOUCH      = 67297,
     SPELL_TWIN_SPIKE_H     = 66069,
     SPELL_DARK_SURGE       = 65768,
-    SPELL_SHIELD_DARK      = 65874,
+    // Shield of Darkness
+    SPELL_SHIELD_DARK_N10  = 65874,
+    SPELL_SHIELD_DARK_N25  = 67256,
+    SPELL_SHIELD_DARK_H10  = 67257,
+    SPELL_SHIELD_DARK_H25  = 67258,
+
+    // Twin's Pact
     SPELL_TWIN_PACT_20_F   = 67306,
     SPELL_TWIN_PACT_50_F   = 67307,
     SPELL_TWIN_PACT_20_E   = 67305,
     SPELL_TWIN_PACT_50_E   = 67304,
+
     SPELL_DARK_VORTEX      = 66058,
     SPELL_DARK_TOUCH       = 67282,
     SPELL_TWIN_POWER       = 65916,
     SPELL_BERSERK          = 64238,
     SPELL_REMOVE_TOUCH     = 68084,
     SPELL_NONE             = 0,
-//
+
     SPELL_UNLEASHED_DARK   = 65808,
     SPELL_UNLEASHED_LIGHT  = 65795,
+    // Power Up
+    SPELL_POWERUP_N10       = 67590,
+    SPELL_POWERUP_N25       = 67603,
+    SPELL_POWERUP_H10       = 67602,
+    SPELL_POWERUP_H25       = 67604,
+
+    // Empowered
     SPELL_EMPOWERED_LIGHT_25N   = 67216,
     SPELL_EMPOWERED_DARK_25N    = 67213,
     SPELL_EMPOWERED_LIGHT_25H   = 67218,
@@ -80,41 +99,63 @@ enum BossSpells
     SPELL_EMPOWERED_DARK_10H    = 67214
 };
 
-int GetRightPactId(Difficulty x, uint32 Entry)
+uint32 GetRightPactId(Difficulty uiDifficulty, uint32 uiEntry)
 {
-    switch(x)
+    switch(uiDifficulty)
     {
         case RAID_DIFFICULTY_10MAN_NORMAL:
         case RAID_DIFFICULTY_25MAN_NORMAL:
-            if(Entry == NPC_DARKBANE)
+            if(uiEntry == NPC_DARKBANE)
                 return SPELL_TWIN_PACT_20_E;
-            else if(Entry == NPC_LIGHTBANE)
+            else if(uiEntry == NPC_LIGHTBANE)
                 return SPELL_TWIN_PACT_20_F;
         case RAID_DIFFICULTY_10MAN_HEROIC:
         case RAID_DIFFICULTY_25MAN_HEROIC:
-            if(Entry == NPC_DARKBANE)
+            if(uiEntry == NPC_DARKBANE)
                 return SPELL_TWIN_PACT_50_E;
-            else if(Entry == NPC_LIGHTBANE)
+            else if(uiEntry == NPC_LIGHTBANE)
                 return SPELL_TWIN_PACT_50_F;
         default:
             return 0;
     }
 }
 
-int GetPoweringId(Difficulty x)
+uint32 GetRightShieldId(Difficulty uiDifficulty, uint32 uiEntry)
 {
-    switch(x)
+    switch(uiEntry)
     {
-        case RAID_DIFFICULTY_10MAN_NORMAL:
-            return 67590;
-        case RAID_DIFFICULTY_25MAN_NORMAL:
-            return 67603;
-        case RAID_DIFFICULTY_10MAN_HEROIC:
-            return 67602;
-        case RAID_DIFFICULTY_25MAN_HEROIC:
-            return 67604;
+        case NPC_LIGHTBANE:
+            switch (uiDifficulty)
+            {
+                case RAID_DIFFICULTY_10MAN_NORMAL: return SPELL_SHIELD_LIGHT_N10;
+                case RAID_DIFFICULTY_25MAN_NORMAL: return SPELL_SHIELD_LIGHT_N25;
+                case RAID_DIFFICULTY_10MAN_HEROIC: return SPELL_SHIELD_LIGHT_H10;
+                case RAID_DIFFICULTY_25MAN_HEROIC: return SPELL_SHIELD_LIGHT_H25;
+                default:                           return 0;
+            }
+        case NPC_DARKBANE:
+            switch (uiDifficulty)
+            {
+                case RAID_DIFFICULTY_10MAN_NORMAL: return SPELL_SHIELD_DARK_N10;
+                case RAID_DIFFICULTY_25MAN_NORMAL: return SPELL_SHIELD_DARK_N25;
+                case RAID_DIFFICULTY_10MAN_HEROIC: return SPELL_SHIELD_DARK_H10;
+                case RAID_DIFFICULTY_25MAN_HEROIC: return SPELL_SHIELD_DARK_H25;
+                default:                           return 0;
+            }
         default:
             return 0;
+    }
+}
+
+uint32 GetPoweringId(Difficulty uiDifficulty)
+{
+    switch(uiDifficulty)
+    {
+        case RAID_DIFFICULTY_10MAN_NORMAL: return SPELL_POWERUP_N10;
+        case RAID_DIFFICULTY_25MAN_NORMAL: return SPELL_POWERUP_N25;
+        case RAID_DIFFICULTY_10MAN_HEROIC: return SPELL_POWERUP_H10;
+        case RAID_DIFFICULTY_25MAN_HEROIC: return SPELL_POWERUP_H25;
+        default:                           return 0;
     }
 }
 
@@ -252,10 +293,9 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
 
         if (m_bIsPact)
         {
-            if (spell->EffectMechanic[0] == MECHANIC_INTERRUPT || spell->EffectMechanic[1] == MECHANIC_INTERRUPT || spell->EffectMechanic[2] == MECHANIC_INTERRUPT
-                || spell->EffectMechanic[0] == MECHANIC_SILENCE || spell->EffectMechanic[1] == MECHANIC_SILENCE || spell->EffectMechanic[2] == MECHANIC_SILENCE)
+            if (spell->EffectMechanic[0] == MECHANIC_INTERRUPT || spell->EffectMechanic[1] == MECHANIC_INTERRUPT || spell->EffectMechanic[2] == MECHANIC_INTERRUPT)
             {
-                if (!m_creature->HasAura(SPELL_SHIELD_LIGHT) && !m_creature->HasAura(67259))
+                if (!m_creature->HasAura(GetRightShieldId(currentDifficulty, m_creature->GetEntry())))
                 {
                     m_creature->InterruptSpell(CURRENT_CHANNELED_SPELL);
                     m_creature->InterruptSpell(CURRENT_GENERIC_SPELL);
@@ -322,7 +362,7 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
                     else
                     {
                         m_creature->InterruptNonMeleeSpells(true);
-                        doCast(SPELL_SHIELD_LIGHT);
+                        DoCast(m_creature, GetRightShieldId(currentDifficulty,m_creature->GetEntry()));
                         m_pInstance->SetData(DATA_CASTING_VALKYRS, GetRightPactId(currentDifficulty, m_creature->GetEntry()));
                         DoScriptText(-1713539,m_creature);
                         stage = 3;
@@ -342,7 +382,7 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
                 stage = 2;
                 break;
          case 2:
-                if (!m_creature->HasAura(SPELL_LIGHT_VORTEX) && timedQuery(SPELL_SHIELD_LIGHT, uiDiff))
+                if (!m_creature->HasAura(SPELL_LIGHT_VORTEX))
                 {
                     m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_NONE);
                     stage = 0;
@@ -355,7 +395,7 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
                 stage = 4;
                 break;
          case 4:
-                if (!m_creature->HasAura(SPELL_SHIELD_LIGHT) && timedQuery(SPELL_SHIELD_LIGHT, uiDiff))
+                if (!m_creature->HasAura(GetRightShieldId(currentDifficulty,m_creature->GetEntry())))
                 {
                     m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_NONE);
                     stage = 0;
@@ -571,10 +611,9 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
             return;
         if( m_bIsPact)
         {
-            if (spell->EffectMechanic[0] == MECHANIC_INTERRUPT || spell->EffectMechanic[1] == MECHANIC_INTERRUPT || spell->EffectMechanic[2] == MECHANIC_INTERRUPT
-                || spell->EffectMechanic[0] == MECHANIC_SILENCE || spell->EffectMechanic[1] == MECHANIC_SILENCE || spell->EffectMechanic[2] == MECHANIC_SILENCE)
+            if (spell->EffectMechanic[0] == MECHANIC_INTERRUPT || spell->EffectMechanic[1] == MECHANIC_INTERRUPT || spell->EffectMechanic[2] == MECHANIC_INTERRUPT)
             {
-                if (!m_creature->HasAura(SPELL_SHIELD_LIGHT) && !m_creature->HasAura(67259))
+                if (!m_creature->HasAura(GetRightShieldId(currentDifficulty, m_creature->GetEntry())))
                 {
                     m_creature->InterruptSpell(CURRENT_CHANNELED_SPELL);
                     m_creature->InterruptSpell(CURRENT_GENERIC_SPELL);
@@ -610,7 +649,8 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
         
         if(m_uiSummonTimer < uiDiff)
         {
-            int8 black, white = 0;
+            int8 black = 0;
+            int8 white = 0;
             for (int i=0; i<20; i++)
             {
                 double offset = urand(0, 17);
@@ -670,7 +710,7 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
                     else
                     {
                         m_creature->InterruptNonMeleeSpells(true);
-                        doCast(SPELL_SHIELD_DARK);
+                        DoCast(m_creature, GetRightShieldId(currentDifficulty,m_creature->GetEntry()));
                         m_pInstance->SetData(DATA_CASTING_VALKYRS, GetRightPactId(currentDifficulty, m_creature->GetEntry()));
                         DoScriptText(-1713539,m_creature);
                         stage = 3;
@@ -690,7 +730,7 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
                 stage = 2;
                 break;
          case 2:
-                if (!m_creature->HasAura(SPELL_DARK_VORTEX) && timedQuery(SPELL_SHIELD_DARK, uiDiff))
+                if (!m_creature->HasAura(SPELL_DARK_VORTEX))
                 {
                     m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_NONE);
                     stage = 0;
@@ -703,7 +743,7 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
                 stage = 4;
                 break;
          case 4:
-                if (!m_creature->HasAura(SPELL_SHIELD_DARK) && timedQuery(SPELL_SHIELD_DARK, uiDiff))
+                if (!m_creature->HasAura(GetRightShieldId(currentDifficulty,m_creature->GetEntry())))
                 {
                     m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_NONE);
                     stage = 0;
@@ -816,7 +856,7 @@ struct MANGOS_DLL_DECL mob_light_essenceAI : public ScriptedAI
             Map::PlayerList const &lPlayers = pMap->GetPlayers();
             for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
             {
-                Unit* pPlayer = itr->getSource();
+                Player* pPlayer = itr->getSource();
                 if (!pPlayer)
                     continue;
                 if (pPlayer->isAlive())
@@ -880,7 +920,7 @@ struct MANGOS_DLL_DECL mob_dark_essenceAI : public ScriptedAI
             Map::PlayerList const &lPlayers = pMap->GetPlayers();
             for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
             {
-                Unit* pPlayer = itr->getSource();
+                Player* pPlayer = itr->getSource();
                 if (!pPlayer)
                     continue;
                 if (pPlayer->isAlive())
