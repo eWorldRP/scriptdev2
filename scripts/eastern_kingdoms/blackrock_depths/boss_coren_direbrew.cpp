@@ -194,7 +194,6 @@ struct MANGOS_DLL_DECL boss_coren_direbrewAI : public ScriptedAI
             // After insulting coren a small noncombat event begins
             if (m_bEventStarted)
             {
-                void GetAntagonists();
                 // Coren Walking in fornt of Antagonists
                 if (m_uiWalkTimer < uiDiff)
                 {
