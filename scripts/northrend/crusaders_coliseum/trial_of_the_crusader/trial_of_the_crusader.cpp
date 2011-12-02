@@ -293,7 +293,10 @@ bool GossipSelect_npc_toc_announcer(Player* pPlayer, Creature* pCreature, uint32
         case GOSSIP_ACTION_INFO_DEF+5:
         {
             if (pInstance->GetData(TYPE_LICH_KING) != DONE)
-                return false;
+            {
+                pInstance->SetData(TYPE_EVENT, 5000);
+                break;
+            }
 
             if (GameObject* pGoFloor = pInstance->GetSingleGameObjectFromStorage(GO_ARGENT_COLISEUM_FLOOR))
             {
