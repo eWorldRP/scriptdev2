@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+ * Copyright (C) 2011 MangosR2
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -75,12 +76,12 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
 {
     boss_taldaramAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ahnkahet* m_pInstance;
     bool m_bIsRegularMode;
 
     bool isInVanish;
@@ -273,12 +274,12 @@ struct MANGOS_DLL_DECL mob_flame_orbAI : public ScriptedAI
 {
     mob_flame_orbAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ahnkahet* m_pInstance;
     bool m_bIsRegularMode;
     bool m_bIsFlying;
     int8 direction;

@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2011 MangosR2
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,9 +18,8 @@
 
 /* ScriptData
 SDName: instance_culling_of_stratholme
-SD%Complete: ?%
-SDComment: by MaxXx2021
-SDCategory: Culling of Stratholme
+SD%Complete: %
+SDComment:
 EndScriptData */
 
 #include "precompiled.h"
@@ -40,8 +40,6 @@ enum
     SAY_MALGANIS_Sleep       = -1594178,
     SAY_MALGANIS_15HP        = -1594179,
 
-    SPELL_MALGANIS_CREDIT    = 58630,
-
     SPELL_SWAMP_N                          = 52720,
     SPELL_SWAMP_H                          = 58852,
     SPELL_MIND_BLAST_N                     = 52722,
@@ -54,99 +52,62 @@ enum
 
 struct MANGOS_DLL_DECL boss_malganisAI : public ScriptedAI
 {
-   boss_malganisAI(Creature *pCreature) : ScriptedAI(pCreature)
-   {
+    boss_malganisAI(Creature *pCreature) : ScriptedAI(pCreature)
+    {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsHeroic = pCreature->GetMap()->IsRaidOrHeroicDungeon();
         m_creature->SetActiveObjectState(true);
         Reset();
-   }
-
-   ScriptedInstance* m_pInstance;
-   bool m_bIsHeroic;
-
-  Unit* pTarget;
-  bool Sleep;
-  bool Vampire;
-  uint32 Phase;
-  Creature* Malganis;
-  Creature* Arthas;
-
-  uint32 Swamp_Timer;
-  uint32 MindBlast_Timer;
-  uint32 Sleep_Timer;
-  uint32 Vampire_Timer;
-
-   void Reset() 
-   { 
-     Sleep = false;
-     Vampire = false;
-     Swamp_Timer = 6300;
-     MindBlast_Timer = 11300;
-     Sleep_Timer = 17300;
-     Vampire_Timer = 30000;
-   }
-
-   void AttackStart(Unit* who)
-   {
-       if(m_pInstance->GetData(TYPE_PHASE) > 9) return;
-
-       if(m_pInstance->GetData(TYPE_MALGANIS) != IN_PROGRESS) return;
-
-       if(!who || who == m_creature)
-           return;
-
-       ScriptedAI::AttackStart(who);
-   }
-
-   void KillCreditMalganis()
-   {
-       Map *map = m_creature->GetMap();
-       Map::PlayerList const& players = map->GetPlayers();
-       if (!players.isEmpty() && map->IsDungeon())
-       {         
-           for(Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-           {
-               if(Player* pPlayer = itr->getSource())
-               {
-                   pPlayer->KilledMonsterCredit(31006, m_creature->GetGUID());
-#ifndef WIN32
-                   pPlayer->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_MALGANIS_CREDIT);
-#endif
-               }
-           }
-       }
-   }
-
-   void EnterEvadeMode()
-   {
-      m_creature->RemoveAllAuras();
-      m_creature->DeleteThreatList();
-      m_creature->CombatStop(true);
-      m_creature->LoadCreatureAddon();
-
-      m_creature->SetLootRecipient(NULL);
-      if(m_pInstance->GetData(TYPE_PHASE) > 9)
-      {
-        KillCreditMalganis();
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        if (Creature* pArthas = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_ARTHAS)))
-           m_creature->SetInCombatWith(pArthas);
-      }
-      else
-         m_creature->ForcedDespawn();
-
     }
 
-   void Aggro(Unit* who)
-   {
-     if(m_pInstance->GetData(TYPE_PHASE) > 9) return;
+    ScriptedInstance* m_pInstance;
+    bool m_bIsHeroic;
 
-     DoScriptText(SAY_MALGANIS_AGGRO, m_creature);
-   }
+    Unit* pTarget;
+    bool Sleep;
+    bool Vampire;
+    Creature* Malganis;
+    Creature* Arthas;
 
-   void KilledUnit(Unit* pVictim)
-   {
+    uint32 m_uiSwamp_Timer;
+    uint32 m_uiMindBlast_Timer;
+    uint32 m_uiSleep_Timer;
+    uint32 m_uiVampire_Timer;
+
+    void Reset()
+    {
+        Sleep = false;
+        Vampire = false;
+        m_uiSwamp_Timer = 6300;
+        m_uiMindBlast_Timer = 11300;
+        m_uiSleep_Timer = 17300;
+        m_uiVampire_Timer = 30000;
+    }
+
+    void AttackStart(Unit* pWho)
+    {
+        if (m_pInstance->GetData(TYPE_PHASE) > 9) return;
+
+        if (m_pInstance->GetData(TYPE_MALGANIS) != IN_PROGRESS) return;
+
+        if (!pWho || pWho == m_creature)
+            return;
+
+        ScriptedAI::AttackStart(pWho);
+    }
+
+    void EnterEvadeMode()
+    {
+        m_creature->ForcedDespawn();
+    }
+
+    void Aggro(Unit* pWho)
+    {
+        DoScriptText(SAY_MALGANIS_AGGRO, m_creature);
+    }
+
+    void KilledUnit(Unit* pVictim)
+    {
         switch(rand()%7)
         {
             case 0: DoScriptText(SAY_MALGANIS_SLAY01, m_creature); break;
@@ -157,82 +118,72 @@ struct MANGOS_DLL_DECL boss_malganisAI : public ScriptedAI
             case 5: DoScriptText(SAY_MALGANIS_SLAY06, m_creature); break;
             case 6: DoScriptText(SAY_MALGANIS_SLAY07, m_creature); break;
         }
-   }
+    }
 
-   void UpdateAI(const uint32 diff)
-   {
-        if(m_pInstance->GetData(TYPE_PHASE) > 9) return;
-
+    void UpdateAI(const uint32 uiDiff)
+    {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        DoMeleeAttackIfReady();
-
-        if (Swamp_Timer < diff)
+        if (m_uiSwamp_Timer < uiDiff)
         {
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
                 DoCast(target, m_bIsHeroic ? SPELL_SWAMP_H : SPELL_SWAMP_N);
+            m_uiSwamp_Timer = 7300;
+        }else m_uiSwamp_Timer -= uiDiff;
 
-            Swamp_Timer = 7300;
-        }else Swamp_Timer -= diff;
-
-        if (MindBlast_Timer < diff)
+        if (m_uiMindBlast_Timer < uiDiff)
         {
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
                 DoCast(target, m_bIsHeroic ? SPELL_MIND_BLAST_H : SPELL_MIND_BLAST_N);
 
-            MindBlast_Timer = 11300;
-        }else MindBlast_Timer -= diff;
+            m_uiMindBlast_Timer = 11300;
+        }else m_uiMindBlast_Timer -= uiDiff;
 
-   if(m_creature->GetHealthPercent() < 40.0f)
-   {
-      if(Sleep == false)
-      {
-        Sleep = true;
-        DoScriptText(SAY_MALGANIS_Sleep, m_creature); 
-      }
-
-        if (Sleep_Timer < diff)
+        if (m_creature->GetHealthPercent() < 40.0f)
         {
-            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
-                DoCast(target, m_bIsHeroic ? SPELL_SLEEP_H : SPELL_SLEEP_N);
-            switch(rand()%2)
+            if (Sleep == false)
             {
-                case 0: DoScriptText(SAY_MALGANIS_SLEEP01, m_creature); break;
-                case 1: DoScriptText(SAY_MALGANIS_SLEEP02, m_creature); break;
+                Sleep = true;
+                DoScriptText(SAY_MALGANIS_Sleep, m_creature);
             }
-
-            Sleep_Timer = 17300;
-        }else Sleep_Timer -= diff;
-   }
-
-   if(m_creature->GetHealthPercent() < 25.0f)
-   {
-        if(Vampire == false)
-        {
-           Vampire = true;
-           DoScriptText(SAY_MALGANIS_15HP, m_creature); 
-           DoCast(m_creature, SPELL_VAMPIRE);
+            if (m_uiSleep_Timer < uiDiff)
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
+                    DoCast(target, m_bIsHeroic ? SPELL_SLEEP_H : SPELL_SLEEP_N);
+                switch(rand()%2)
+                {
+                    case 0: DoScriptText(SAY_MALGANIS_SLEEP01, m_creature); break;
+                    case 1: DoScriptText(SAY_MALGANIS_SLEEP02, m_creature); break;
+                }
+                m_uiSleep_Timer = 17300;
+            }else m_uiSleep_Timer -= uiDiff;
         }
 
-        if (Vampire_Timer < diff)
+        if (m_creature->GetHealthPercent() < 25.0f)
         {
+            if (Vampire == false)
+            {
+                Vampire = true;
+                DoScriptText(SAY_MALGANIS_15HP, m_creature);
                 DoCast(m_creature, SPELL_VAMPIRE);
+            }
+            if (m_uiVampire_Timer < uiDiff)
+            {
+                DoCast(m_creature, SPELL_VAMPIRE);
+                m_uiVampire_Timer = 30000;
+            }else m_uiVampire_Timer -= uiDiff;
+        }
 
-            Vampire_Timer = 30000;
-        }else Vampire_Timer -= diff;
-
-   }
-
-   if(m_creature->GetHealthPercent() < 5.0f)
-   { 
-      m_pInstance->SetData(TYPE_PHASE, 10);
-      m_pInstance->SetData(TYPE_MALGANIS, DONE);
-      DoCastSpellIfCan(m_creature, SPELL_ACHIEV_CHECK, CAST_TRIGGERED);
-      EnterEvadeMode();
-   }
-
-  }
+        if (m_creature->GetHealthPercent() < 5.0f)
+        {
+            m_pInstance->SetData(TYPE_PHASE, 10);
+            m_pInstance->SetData(TYPE_MALGANIS, DONE);
+            DoCastSpellIfCan(m_creature, SPELL_ACHIEV_CHECK, CAST_TRIGGERED);
+            EnterEvadeMode();
+        }
+        DoMeleeAttackIfReady();
+    }
 };
 
 CreatureAI* GetAI_boss_malganis(Creature* pCreature)
@@ -242,11 +193,11 @@ CreatureAI* GetAI_boss_malganis(Creature* pCreature)
 
 void AddSC_boss_malganis()
 {
-    Script *newscript;
+    Script *pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_malganis";
-    newscript->GetAI = &GetAI_boss_malganis;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_malganis";
+    pNewScript->GetAI = &GetAI_boss_malganis;
+    pNewScript->RegisterSelf();
 
 }

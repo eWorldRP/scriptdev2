@@ -415,8 +415,12 @@
 					RelativePath="..\scripts\battlegrounds\battleground.cpp"
 					>
 				</File>
-                <File
+                                <File
 					RelativePath="..\scripts\battlegrounds\battlegroundSA.cpp"
+					>
+				</File>
+                                <File
+					RelativePath="..\scripts\battlegrounds\battlegroundIC.cpp"
 					>
 				</File>
 			</Filter>
@@ -707,6 +711,10 @@
 					Name="deadmines"
 					>
 					<File
+                      RelativePath="..\scripts\eastern_kingdoms\deadmines\boss_mr_smite.cpp"
+                      >
+                    </File>
+                    <File
 						RelativePath="..\scripts\eastern_kingdoms\deadmines\deadmines.cpp"
 						>
 					</File>
@@ -1556,6 +1564,10 @@
 					>
 					<File
 						RelativePath="..\scripts\kalimdor\razorfen_downs\boss_amnennar_the_coldbringer.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\scripts\kalimdor\razorfen_downs\boss_tuten_kash.cpp"
 						>
 					</File>
 					<File
@@ -3072,78 +3084,6 @@
 					>
 				</File>
 			</Filter>
-			<Filter
-				Name="outdoor_pvp"
-				>
-				<File
-					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_eastern_kingdoms.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_eastern_kingdoms.h"
-					>
-				</File>
-				<File
-					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_kalimdor.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_kalimdor.h"
-					>
-				</File>
-				<File
-					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_northrend.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_northrend.h"
-					>
-				</File>
-				<File
-					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_outland.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_outland.h"
-					>
-				</File>
-				<File
-					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_zone_selector.h"
-					>
-				</File>
-				<Filter
-					Name="eastern_kingdoms"
-					>
-					<File
-						RelativePath="..\scripts\outdoor_pvp\eastern_kingdoms\outdoor_pvp_eastern_plaguelands.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\scripts\outdoor_pvp\eastern_kingdoms\outdoor_pvp_eastern_plaguelands.h"
-						>
-					</File>
-				</Filter>
-				<Filter
-					Name="kalimdor"
-					>
-					<File
-						RelativePath="..\scripts\outdoor_pvp\kalimdor\outdoor_pvp_silithus.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\scripts\outdoor_pvp\kalimdor\outdoor_pvp_silithus.h"
-						>
-					</File>
-				</Filter>
-				<Filter
-					Name="outland"
-					>
-				</Filter>
-				<Filter
-					Name="northrend"
-					>
-				</Filter>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="include"
@@ -3222,14 +3162,6 @@
 			</File>
 			<File
 				RelativePath="..\include\sc_instance.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\sc_outdoor_pvp.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\include\sc_outdoor_pvp.h"
 				>
 			</File>
 		</Filter>

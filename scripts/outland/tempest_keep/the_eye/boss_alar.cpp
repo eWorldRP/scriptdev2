@@ -1,642 +1,358 @@
-/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/   
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 /* ScriptData
 SDName: boss_alar
-SD%Complete: 95 (missing proper enrage spell and only partial support of Dive bomb in core)
-SDComment:
+SD%Complete: 70
+SDComment: Dive Bomb event NYI
 SDCategory: Tempest Keep, The Eye
 EndScriptData */
 
 #include "precompiled.h"
 #include "the_eye.h"
-#include "Player.h"
 
-#define SPELL_FLAME_BUFFET            34121 // Flame Buffet - every 1,5 secs in phase 1 if there is no victim in melee range and after Dive Bomb in phase 2 with same conditions
-#define SPELL_FLAME_QUILLS            34229 // Randomly after changing position in phase after watching tonns of movies, set probability 20%
-#define SPELL_REBIRTH                 34342 // Rebirth - beginning of second phase (after loose all health in phase 1)
-#define SPELL_REBIRTH_2               35369 // Rebirth (another, without healing to full HP) - after Dive Bomb in phase 2
-#define SPELL_MELT_ARMOR              35410 // Melt Armor - every 60 sec in phase 2
-#define SPELL_CHARGE                  35412 // Charge - 30 sec cooldown
-#define SPELL_DIVE_BOMB_VISUAL        35367 // Bosskillers says 30 sec cooldown, wowwiki says 30 sec colldown, DBM and BigWigs addons says ~47 sec
-#define SPELL_DIVE_BOMB               35181 // after watching tonns of movies, set cooldown to 40+rand()%5.
-#define SPELL_ENRAGE                  26662 // 10 minutes after phase 2 starts
-
-#define CREATURE_EMBER_OF_ALAR        19551 // Al'ar summons one Ember of Al'ar every position change in phase 1 and two after Dive Bomb. Also in phase 2 when Ember of Al'ar dies, boss loose 3% health.
-#define SPELL_EMBER_BLAST             34133 // When Ember of Al'ar dies, it casts Ember Blast
-
-#define CREATURE_FLAME_PATCH_ALAR     20602 // Flame Patch - every 30 sec in phase 2
-#define SPELL_FLAME_PATCH             35380 //
-
-float waypoint[6][3] = 
+enum
 {
-    {340.15f, 58.65f, 17.71f},
-    {388.09f, 31.54f, 20.18f},
+    // spells
+    // phase 1
+    SPELL_FLAME_BUFFET      = 34121,        // if nobody is in range
+    SPELL_FLAME_QUILLS      = 34229,
+    SPELL_EMBER_BLAST       = 34341,        // usee when the boss dies first time
+    SPELL_REBIRTH           = 34342,
+
+    // phase 2
+    SPELL_MELT_ARMOR        = 35410,
+    SPELL_DIVE_BOMB_VISUAL  = 35367,        // visual transform to fire ball
+    SPELL_DIVE_BOMB         = 35181,        // dive bomb damage spell
+    SPELL_BOMB_REBIRTH      = 35369,        // used after the dive bomb - to transform back to phoenis
+    SPELL_CHARGE            = 35412,        // used while in Dive Bomb form - to charge a target
+    //SPELL_SUMMON_ADDS       = 18814,        // summons 3*19551 - Not sure if the spell is the right id
+    SPELL_BERSERK           = 27680,        // this spell is used only during phase II
+
+    NPC_EMBER_OF_ALAR       = 19551,        // scripted in Acid
+    NPC_FLAME_PATCH         = 20602,
+    SPELL_FLAME_PATCH       = 35380,
+
+    MAX_PLATFORMS           = 4,
+
+    POINT_ID_RESSURRECT     = 0,            // center of the hall
+    POINT_ID_PLATFORM       = 1,            // platform points
+    POINT_ID_QUILLS         = 2,            // center of the hall - in air
+
+    PHASE_ONE               = 1,
+    PHASE_REBIRTH           = 2,
+    PHASE_TWO               = 3,
+};
+
+struct EventLocation
+{
+    float m_fX, m_fY, m_fZ;
+};
+
+// Platform locations from left to right (as standing at the entrance)
+static const EventLocation aPlatformLocation[MAX_PLATFORMS] =
+{
+    {340.15f, 58.65f,  17.71f},
+    {388.09f, 31.54f,  20.18f},
     {388.18f, -32.85f, 20.18f},
-    {340.29f, -60.19f, 17.72f},
+    {340.29f, -60.19f, 17.72f}
+};
+
+static const EventLocation aCenterLocation[] =
+{
     {331.0f, 0.01f, 39.0f},
-    {331.0f, 0.01f, -2.39f}
+    {331.0, 0.01f, -2.39f},
 };
 
 struct MANGOS_DLL_DECL boss_alarAI : public ScriptedAI
 {
-    boss_alarAI(Creature *c) : ScriptedAI(c)
+    boss_alarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        pInstance = ((ScriptedInstance*)c->GetInstanceData());
-        DefaultSize = m_creature->GetFloatValue(OBJECT_FIELD_SCALE_X);
-        DefaultModel = m_creature->GetUInt32Value(UNIT_FIELD_DISPLAYID);
-        DefaultMoveSpeedRate = m_creature->GetSpeedRate(MOVE_RUN);
+        m_pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
         Reset();
     }
-    
-    ScriptedInstance *pInstance;
-    
-    uint32 Platforms_Move_Timer;
-    uint32 FlameBuffet_Timer;
-    uint32 FlameQuillsDuration_Timer;
-    uint32 DiveBomb_Timer;
-    uint32 DiveBombCastDelay_Timer;
-    uint32 CorpseDisappear_Timer;
-    uint32 MeltArmor_Timer;
-    uint32 Charge_Timer;
-    uint32 FlamePatch_Timer;
-    uint32 Enrage_Timer;
-    uint32 ChargeDelay_Timer;
-    int MovementInform_id;
 
-    float DefaultSize;
-    float DefaultMoveSpeedRate;
-    uint32 DefaultModel;
+    ScriptedInstance* m_pInstance;
 
-    bool Moving;
-    bool Charge;
-    bool FlameQuills;
-    bool Phase1;
-    bool FakeDeath;
-    bool Phase2_begin;
-    bool FlameBuffetAfterDiveBomb;
-    int8 cur_wp;
-    float Charge_target_threat;
-    Unit* Charge_target;
+    uint8 m_uiPhase;
+    uint8 m_uiCurrentPlatformId;
+    uint32 m_uiRangeCheckTimer;
+    uint32 m_uiBerserkTimer;
+
+    uint32 m_uiPlatformMoveTimer;
+    uint32 m_uiFlameQuillsTimer;
+    uint32 m_uiFlamePatchTimer;
+    uint32 m_uiDiveBombTimer;
+    uint32 m_uiMeltArmorTimer;
+
+    bool m_bCanSummonEmber;
 
     void Reset()
     {
-        Platforms_Move_Timer = 30000+rand()%5000;
-        FlameQuills = false;
-        cur_wp = 0;
-        FlameBuffet_Timer = 1500;
-        CorpseDisappear_Timer = 9999999;
-        Enrage_Timer = 600000;
-        Moving = false;
-        Phase1 = true;
-        FakeDeath = false;
-        Phase2_begin = false;
-        FlameBuffetAfterDiveBomb = false;
-        Charge_target = NULL;
-        Charge = false;
-        Charge_Timer = 7000;
-        ChargeDelay_Timer = 2000;
-        
-        MovementInform_id = -1;
+        // Start phase one and move to the closest platform
+        m_uiPhase = PHASE_ONE;
+        SetCombatMovement(false);
 
-        m_creature->SetFloatValue(OBJECT_FIELD_SCALE_X, DefaultSize);
-        m_creature->SetUInt32Value(UNIT_FIELD_DISPLAYID, DefaultModel);
-        m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
-        m_creature->SetWalk(false);
+        m_uiRangeCheckTimer     = 0;
+        m_uiCurrentPlatformId   = 0;
+        m_uiPlatformMoveTimer   = 35000;
+        m_uiFlameQuillsTimer    = 170000;                       // at the 5th platform
 
-        if(pInstance)
-            pInstance->SetData(TYPE_ALAR, NOT_STARTED);
-        
-    }
-    
-    void Aggro (Unit *who)
-    {
-        StartEvent();
+        m_uiBerserkTimer        = 10*MINUTE*IN_MILLISECONDS;    // only after phase 2 starts
+        m_uiFlamePatchTimer     = 20000;
+        m_uiDiveBombTimer       = 30000;
+        m_uiMeltArmorTimer      = 10000;
+
+        m_bCanSummonEmber       = true;
     }
 
-    void StartEvent()
+    void Aggro (Unit* pWho)
     {
-        if(pInstance)
-            pInstance->SetData(TYPE_ALAR, IN_PROGRESS);
-        
-        CreaturePointMove(0, waypoint[0][0], waypoint[0][1], waypoint[0][2]);
-    }
- 
-    void JustDied(Unit *victim)
-    {
-        if(pInstance)
-            pInstance->SetData(TYPE_ALAR, DONE);
+        if(m_pInstance)
+            m_pInstance->SetData(TYPE_ALAR, IN_PROGRESS);
+
+        // The boss will always move to the first platform from the left side; also set the movement to idle to stop the DB movement
+        m_creature->GetMotionMaster()->MoveIdle();
+        m_creature->GetMotionMaster()->MovePoint(POINT_ID_PLATFORM, aPlatformLocation[m_uiCurrentPlatformId].m_fX, aPlatformLocation[m_uiCurrentPlatformId].m_fY, aPlatformLocation[m_uiCurrentPlatformId].m_fZ);
     }
 
-    void MoveInLineOfSight(Unit *who)
+    void JustReachedHome()
     {
-        if( !m_creature->getVictim() && who->isTargetableForAttack() && ( m_creature->IsHostileTo( who )) && who->isInAccessablePlaceFor(m_creature) )
+        if(m_pInstance)
+            m_pInstance->SetData(TYPE_ALAR, FAIL);
+    }
+
+    void JustDied(Unit* pKiller)
+    {
+        if(m_pInstance)
+            m_pInstance->SetData(TYPE_ALAR, DONE);
+    }
+
+    void JustSummoned(Creature* pSummoned)
+    {
+        if (pSummoned->GetEntry() == NPC_FLAME_PATCH)
+            pSummoned->CastSpell(pSummoned, SPELL_FLAME_PATCH, true);
+        else
         {
-            if (m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
-                return;
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                pSummoned->AI()->AttackStart(pTarget);
+        }
+    }
 
-            float attackRadius = m_creature->GetAttackDistance(who);
-            if( m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->IsWithinLOSInMap(who) )
-            {
-                if (!who) return;
+    void SummonedCreatureJustDied(Creature* pSummoned)
+    {
+        // drain 3% of boss health when the ember dies
+        if (pSummoned->GetEntry() == NPC_EMBER_OF_ALAR)
+        {
+            // Check first if we have enough health to drain
+            if (m_creature->GetMaxHealth()*.03f > m_creature->GetHealth())
+                m_creature->DealDamage(m_creature, m_creature->GetMaxHealth()*.03f, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        }
+    }
 
-	            if ( m_creature->Attack(who, true) )
-	            {
-					if (Phase1)
-						m_creature->AddThreat(who, 0.0f);
-					else
-	                {
-	                    m_creature->GetMotionMaster()->MoveChase(who);
-	                    m_creature->AddThreat(who, 0.0f);
-	                }
-	            }
-                
-                who->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+    void EnterEvadeMode()
+    {
+        // Don't evade if the boss has the ember blast invisibility aura
+        if (m_creature->HasAura(SPELL_EMBER_BLAST))
+            return;
 
-                if (!m_creature->isInCombat())
+        ScriptedAI::EnterEvadeMode();
+    }
+
+    void MovementInform(uint32 uiMotionType, uint32 uiPointId)
+    {
+        if (uiMotionType != POINT_MOTION_TYPE)
+            return;
+
+        switch (uiPointId)
+        {
+            case POINT_ID_QUILLS:
+                if (DoCastSpellIfCan(m_creature, SPELL_FLAME_QUILLS) == CAST_OK)
                 {
-                    Aggro(who);
+                    // Set the platform id so the boss will move to the last or the first platform
+                    m_uiCurrentPlatformId = urand(0, 1) ? 2 : 3;
+                    m_uiPlatformMoveTimer = 10000;
                 }
-            }
+                break;
+            case POINT_ID_PLATFORM:
+                // When we reach the platform we start the range check and we can summon the embers
+                m_bCanSummonEmber = true;
+                m_uiRangeCheckTimer = 2000;
+                break;
+            case POINT_ID_RESSURRECT:
+                // remove the invisibility aura
+                if (m_creature->HasAura(SPELL_EMBER_BLAST))
+                    m_creature->RemoveAurasDueToSpell(SPELL_EMBER_BLAST);
+
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+
+                // cast rebirth and remove fake death
+                if (DoCastSpellIfCan(m_creature, SPELL_REBIRTH) == CAST_OK)
+                {
+                    DoResetThreat();
+
+                    // start following target
+                    SetCombatMovement(true);
+                    if (m_creature->getVictim())
+                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+
+                    m_uiPhase = PHASE_TWO;
+                }
+                break;
         }
     }
 
-    void AttackStart(Unit* who)
+    void DamageTaken(Unit* pKiller, uint32& uiDamage)
     {
-        if (!who)
+        // Only init fake in phase one
+        if (m_uiPhase != PHASE_ONE)
             return;
 
-        if (who->isTargetableForAttack())
-        {
-            //Begin attack
-            if ( m_creature->Attack(who, true) )
-            {
-				if (Phase1)
-					m_creature->AddThreat(who, 0.0f);
-				else
-               {
-                  m_creature->GetMotionMaster()->MoveChase(who);
-                 m_creature->AddThreat(who, 0.0f);
-                }
-            }
-
-            if (!m_creature->isInCombat())
-            {
-                Aggro(who);
-            }
-        }
-    }
-
-    void DamageTaken(Unit* pKiller, uint32 &damage)
-    {
-        if ((damage < m_creature->GetHealth()) || (!Phase1))
+        if (uiDamage < m_creature->GetHealth())
             return;
 
-        damage = 0;
-        m_creature->InterruptNonMeleeSpells(false);
-        m_creature->SetHealth(0);
+        m_creature->InterruptNonMeleeSpells(true);
+        // We set the health to 1 in order to avoid the forced death stand flag - this way we can have the ressurrect animation
+        m_creature->SetHealth(1);
         m_creature->StopMoving();
         m_creature->ClearComboPointHolders();
         m_creature->RemoveAllAurasOnDeath();
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->ClearAllReactives();
-        m_creature->SetUInt64Value(UNIT_FIELD_TARGET,0); 
-        m_creature->GetMotionMaster()->Clear(); 
+        m_creature->GetMotionMaster()->Clear();
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-        FakeDeath = true;
-        Moving = false;
-        CorpseDisappear_Timer = 4000;
+
+        // Stop damage and stop checking for flame buffet.
+        uiDamage = 0;
+        m_uiRangeCheckTimer = 0;
+
+        if (DoCastSpellIfCan(m_creature, SPELL_EMBER_BLAST, CAST_TRIGGERED) == CAST_OK)
+        {
+            // Move to the center of the hall and ressurrect
+            m_uiPhase = PHASE_REBIRTH;
+            m_creature->GetMotionMaster()->MovePoint(POINT_ID_RESSURRECT, aCenterLocation[1].m_fX, aCenterLocation[1].m_fY, aCenterLocation[1].m_fZ);
+        }
     }
 
-    void CreaturePointMove(uint32 id, float X, float Y, float Z)
+    void UpdateAI(const uint32 uiDiff)
     {
-        Moving = true;
-        m_creature->GetMotionMaster()->Clear();
-        m_creature->SetLevitate(true);
-        m_creature->GetMotionMaster()->MovePoint(id, X, Y, Z);
-    }
-
-    void MovementInform(uint32 type, uint32 id)
-    {
-        if (type == POINT_MOTION_TYPE)
-            MovementInform_id = id;
-        else
-            MovementInform_id = -1;
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        if(!m_creature->SelectHostileTarget() || !m_creature->getVictim() )
+        if(!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (MovementInform_id >= 0)
+        // Platform phase
+        if (m_uiPhase == PHASE_ONE)
         {
-            Moving = false;
-            m_creature->SetLevitate(false);
-            switch (MovementInform_id)
+            if (m_uiFlameQuillsTimer < uiDiff)
             {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                    Platforms_Move_Timer = 30000+rand()%5000;
-                    break;
-                case 4:
-                    DoCast(m_creature, SPELL_FLAME_QUILLS);
-                    FlameQuillsDuration_Timer = 10000;
-                    FlameQuills = true;
-                    break;
-                case 5:
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    m_creature->SetVisibility(VISIBILITY_ON);
-                    DoCast(m_creature, SPELL_REBIRTH);
-                    Phase2_begin = true;
-                    FakeDeath = false;
-                    break;
-                case 6:
-                    m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, false);
-                    m_creature->SetFloatValue(OBJECT_FIELD_SCALE_X, DefaultSize/4.0f);
-                    DoCast(m_creature->getVictim(), SPELL_DIVE_BOMB_VISUAL);
-                    DiveBombCastDelay_Timer = 4000;
-                    
-                    
-                    break;
-                case 7:
-                    m_creature->SetSpeedRate(MOVE_RUN, DefaultMoveSpeedRate);
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    m_creature->SetUInt32Value(UNIT_FIELD_DISPLAYID, DefaultModel);
-                    m_creature->SetVisibility(VISIBILITY_OFF);  // I know, that this sequence of commands looks stupid, but without it visual effect of Rebirth 
-                    m_creature->SetVisibility(VISIBILITY_ON);   // after Dive Bomb looks not perfect (Al'ar appears, and than again disappears and cast Rebirth).
-                    DoCast(m_creature, SPELL_REBIRTH_2);
-                    DiveBombCastDelay_Timer = 9999999;
-                    FlameBuffetAfterDiveBomb = true;
-                    DiveBomb_Timer = 40000+rand()%5000;
-                    FlameBuffet_Timer = 5000;
-                    
-                    m_creature->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
-                    m_creature->ApplySpellImmune(0, IMMUNITY_EFFECT,SPELL_EFFECT_ATTACK_ME, false);
-                    break;
-            }
-            m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MoveIdle();
-            MovementInform_id = -1;
-        }
-
-        if (Charge)
-        {
-            if (ChargeDelay_Timer < diff)
-            {
-                if (Charge_target)
-                {
-                    m_creature->getThreatManager().modifyThreatPercent(Charge_target, -100);
-                    m_creature->getThreatManager().addThreat(Charge_target, Charge_target_threat);
-                }
-                Charge = false;
-                m_creature->SetSpeedRate(MOVE_RUN, DefaultMoveSpeedRate);
-                ChargeDelay_Timer = 2000;
+                // Move to Flame Quills position; stop range check, platform moving and ember summoning
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_QUILLS, aCenterLocation[0].m_fX, aCenterLocation[0].m_fY, aCenterLocation[0].m_fZ);
+                m_uiRangeCheckTimer = 0;
+                m_bCanSummonEmber = false;
+                m_uiPlatformMoveTimer = 0;
+                m_uiFlameQuillsTimer = 180000;
             }
             else
-                ChargeDelay_Timer -= diff;
-                
-            return;
-        }
-        
-        if (!Phase1)
-            if (Enrage_Timer < diff)
+                m_uiFlameQuillsTimer -= uiDiff;
+
+            if (m_uiPlatformMoveTimer)
             {
-                DoCast(m_creature, SPELL_ENRAGE);
-                Enrage_Timer = 600000;
-            }else Enrage_Timer -= diff;
-
-
-        if (Moving)
-            return;
-
-        if (CorpseDisappear_Timer < diff)
-        {
-            m_creature->SetVisibility(VISIBILITY_OFF);
-            m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-            m_creature->SetHealth(m_creature->GetMaxHealth());
-            CreaturePointMove(5, waypoint[5][0], waypoint[5][1], waypoint[5][2]);
-            CorpseDisappear_Timer = 9999999;
-        }else CorpseDisappear_Timer -= diff;
-
-        if (FakeDeath)
-            return;
-
-        if (Phase2_begin)
-        {
-            m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-            MeltArmor_Timer = 60000;
-            Charge_Timer = 7000;
-            DiveBomb_Timer = 40000+rand()%5000;
-            DiveBombCastDelay_Timer = 9999999;
-            FlameBuffet_Timer = 9999999;
-            FlamePatch_Timer = 30000;
-            Phase2_begin = false;
-            Phase1 = false;
-            if(pInstance)
-                pInstance->SetData(TYPE_ALAR, SPECIAL);
-        }
-
-        if (Phase1)
-        {
-            if (FlameQuills) {
-                if (FlameQuillsDuration_Timer < diff)
+                if (m_uiPlatformMoveTimer <= uiDiff)
                 {
-                    switch(rand()%2)
-                    {
-                    case 0:
-                        cur_wp = 0;
-                        break;
-                    case 1:
-                        cur_wp = 3;
-                        break;
-                    }
-                    CreaturePointMove(cur_wp, waypoint[cur_wp][0], waypoint[cur_wp][1], waypoint[cur_wp][2]);
-                    FlameQuills = false;
-                }else FlameQuillsDuration_Timer -= diff;
-                return;
+                    // go to next platform
+                    ++m_uiCurrentPlatformId;
+
+                    if (m_uiCurrentPlatformId == MAX_PLATFORMS)
+                        m_uiCurrentPlatformId = 0;
+
+                    // move to next platform and summon one ember only if moving on platforms (we avoid the summoning during the Flame Quills move)
+                    if (m_bCanSummonEmber)
+                        m_creature->SummonCreature(NPC_EMBER_OF_ALAR, 0, 0, 0, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_PLATFORM, aPlatformLocation[m_uiCurrentPlatformId].m_fX, aPlatformLocation[m_uiCurrentPlatformId].m_fY, aPlatformLocation[m_uiCurrentPlatformId].m_fZ);
+
+                    m_uiRangeCheckTimer = 0;
+                    m_uiPlatformMoveTimer = 35000;
+                }
+                else
+                    m_uiPlatformMoveTimer -= uiDiff;
             }
-            if (Platforms_Move_Timer < diff)
-            {
-                Creature* Summoned = NULL;
-                Summoned = m_creature->SummonCreature(CREATURE_EMBER_OF_ALAR, waypoint[cur_wp][0], waypoint[cur_wp][1], waypoint[cur_wp][2], 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000);
-                if (Summoned)
-                {
-                    Unit* target = NULL;
-                    target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-                    if (target)
-                        Summoned->AI()->AttackStart(target);
-                }
-                if (rand()%100 <= 20)
-                {
-                    cur_wp = 4;
-                    FlameQuills = true;
-                } else
-                {
-                    cur_wp++;
-                    if (cur_wp == 4)
-                        cur_wp = 0;
-                }
-                CreaturePointMove(cur_wp, waypoint[cur_wp][0], waypoint[cur_wp][1], waypoint[cur_wp][2]);
-            }else Platforms_Move_Timer -= diff;
-
-            if (FlameBuffet_Timer < diff)
-            {
-                bool InMeleeRange = false;
-                ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-                for (ThreatList::const_iterator itr = tList.begin();itr != tList.end(); ++itr)
-                {
-                    Unit* pUnit = NULL;
-                    pUnit = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid());
-                    if (pUnit)
-                        if (m_creature->IsWithinDistInMap(pUnit, 5))
-                        {                        
-                            InMeleeRange = true;
-                            m_creature->getThreatManager().addThreat(pUnit, 2.0f);
-                            break;
-                        }else
-                            m_creature->getThreatManager().modifyThreatPercent(pUnit, -100);
-                }
-                if (!InMeleeRange)
-                    DoCast(m_creature, SPELL_FLAME_BUFFET);
-                        
-                FlameBuffet_Timer = 1500;
-            }else FlameBuffet_Timer -= diff;
-        } else
+        }
+        // Combat phase
+        else if (m_uiPhase == PHASE_TWO)
         {
-            if (FlameBuffetAfterDiveBomb)
+            if (m_uiBerserkTimer < uiDiff)
             {
-                if (FlameBuffet_Timer < diff)
-                {
-                    if (m_creature->IsWithinDistInMap(m_creature->getVictim(), 5))
-                    {                        
-                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-                        FlameBuffetAfterDiveBomb = false;
-                        FlameBuffet_Timer = 9999999;
-                    } else
-                    {
-                        DoCast(m_creature, SPELL_FLAME_BUFFET);
-                        FlameBuffet_Timer = 1500;
-                    }
-                } else FlameBuffet_Timer -= diff;
-            } else
-            {
-                if (MeltArmor_Timer < diff)
-                {
-                    DoCast(m_creature->getVictim(), SPELL_MELT_ARMOR);
-                    MeltArmor_Timer = 60000;
-                }else MeltArmor_Timer -= diff;
-
-                if (Charge_Timer < diff)
-                {
-                    Charge_target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
-                    if (Charge_target)
-                    {
-                        m_creature->SetInFront(Charge_target);
-                        Charge_target_threat = m_creature->getThreatManager().getThreat(Charge_target);
-                        m_creature->getThreatManager().addThreat(Charge_target, 100000000.0f);
-                        m_creature->SetSpeedRate(MOVE_RUN, DefaultMoveSpeedRate*5.0f);
-                        DoCast(Charge_target, SPELL_CHARGE);
-                        ChargeDelay_Timer = 2000;
-                        Charge = true;
-                    }
-                    Charge_Timer = 30000;
-                }else Charge_Timer -= diff;
+                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    m_uiBerserkTimer = 10*MINUTE*IN_MILLISECONDS;
             }
+            else
+                m_uiBerserkTimer -= uiDiff;
 
-            if (DiveBomb_Timer < diff)
+            if (m_uiFlamePatchTimer < uiDiff)
             {
-                m_creature->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-                m_creature->ApplySpellImmune(0, IMMUNITY_EFFECT,SPELL_EFFECT_ATTACK_ME, true);
-                    
-                CreaturePointMove(6, waypoint[4][0], waypoint[4][1], waypoint[4][2]);
-                DiveBomb_Timer = 40000+rand()%5000;
-            }else DiveBomb_Timer -= diff;
-
-            if (DiveBombCastDelay_Timer < diff)
-            {
-                m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                m_creature->SetUInt32Value(UNIT_FIELD_DISPLAYID, 11686);
-                Unit* target = NULL;
-                target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-                DoCast(target, SPELL_DIVE_BOMB);
-                m_creature->SetFloatValue(OBJECT_FIELD_SCALE_X, DefaultSize);
-                m_creature->RemoveAurasDueToSpell(SPELL_DIVE_BOMB_VISUAL);
-                m_creature->SetSpeedRate(MOVE_RUN, DefaultMoveSpeedRate*2.0f);
-                if (target)
-                    CreaturePointMove(7, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
-                Creature* Summoned = NULL;
-                for (int8 i=1; i<=2; i++)
-                    if (target)
-                    {
-                        Summoned = m_creature->SummonCreature(CREATURE_EMBER_OF_ALAR, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000);
-                        if (Summoned)
-                        {
-                            Unit* target1 = NULL;
-                            target1 = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-                            if (target1)
-                                Summoned->AI()->AttackStart(target1);
-                        }
-                    }
-                DiveBombCastDelay_Timer = 9999999;
-            }else DiveBombCastDelay_Timer -= diff;
-
-            if (FlamePatch_Timer < diff)
-            {
-                Unit* target = NULL;
-                target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-                if (target)
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    Creature* Summoned = NULL;
-                    Summoned = m_creature->SummonCreature(CREATURE_FLAME_PATCH_ALAR, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 120000);
-                    if (Summoned)
-                    {
-                        Summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        Summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        Summoned->SetFloatValue(OBJECT_FIELD_SCALE_X, Summoned->GetFloatValue(OBJECT_FIELD_SCALE_X)*2.9f);
-                        Summoned->SetUInt32Value(UNIT_FIELD_DISPLAYID, 11686);
-                        Summoned->setFaction(m_creature->getFaction());
-                        Summoned->SetLevel(m_creature->getLevel());
-                        Summoned->CastSpell(Summoned, SPELL_FLAME_PATCH, false);
-                    }
+                    m_creature->SummonCreature(NPC_FLAME_PATCH, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000);
+                    m_uiFlamePatchTimer = 30000;
                 }
-                FlamePatch_Timer = 30000;
-            }else FlamePatch_Timer -= diff;
+            }
+            else
+                m_uiFlamePatchTimer -= uiDiff;
 
+            if (m_uiMeltArmorTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MELT_ARMOR) == CAST_OK)
+                    m_uiMeltArmorTimer = 60000;
+            }
+            else
+                m_uiMeltArmorTimer -= uiDiff;
+        }
+
+        // only cast flame buffet when not in motion
+        if (m_uiRangeCheckTimer)
+        {
+            if (m_uiRangeCheckTimer <= uiDiff)
+            {
+                if (!m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE))
+                    DoCastSpellIfCan(m_creature, SPELL_FLAME_BUFFET);
+                m_uiRangeCheckTimer = 2000;
+            }
+            else
+                m_uiRangeCheckTimer -= uiDiff;
         }
 
         DoMeleeAttackIfReady();
     }
 };
 
-CreatureAI* GetAI_boss_alar(Creature *_Creature)
+CreatureAI* GetAI_boss_alar(Creature *pCreature)
 {
-    return new boss_alarAI (_Creature);
-}
-
-struct MANGOS_DLL_DECL mob_ember_of_alarAI : public ScriptedAI
-{
-    mob_ember_of_alarAI(Creature *c) : ScriptedAI(c)
-    {
-        pInstance = ((ScriptedInstance*)c->GetInstanceData());
-        Reset();
-    }
-
-    ScriptedInstance *pInstance;
-
-    bool Die;
-
-    void Reset()
-    {
-        Die = false;
-    }
-
-    void Aggro (Unit *who)
-    {
-    }
-
-    void DamageTaken(Unit* pKiller, uint32 &damage)
-    {
-        if (damage < m_creature->GetHealth())
-            return;
-
-        damage = 0;
-        DoCast(m_creature, SPELL_EMBER_BLAST);
-        if(pInstance)
-            if (pInstance->GetData(TYPE_ALAR) == SPECIAL)
-            {
-                Unit* Alar = NULL;
-                Alar = m_creature->GetMap()->GetCreature(pInstance->GetData64(NPC_ALAR));
-                if (Alar)
-                {
-                    int AlarHealth = Alar->GetHealth() - Alar->GetMaxHealth()*0.03;
-                    if (AlarHealth > 0)
-                        Alar->SetHealth(AlarHealth);
-                    else
-                        Alar->SetHealth(1);
-                }
-            }
-        Die = true;
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        if (Die) {
-            m_creature->SetHealth(0);
-            m_creature->SetDeathState(JUST_DIED);
-        }
-
-        DoMeleeAttackIfReady();
-    }
-
-};
-
-CreatureAI* GetAI_mob_ember_of_alar(Creature *_Creature)
-{
-    return new mob_ember_of_alarAI (_Creature);
-}
-
-struct MANGOS_DLL_DECL mob_flame_patch_alarAI : public ScriptedAI
-{
-    mob_flame_patch_alarAI(Creature *c) : ScriptedAI(c) {}
-
-    void Reset() {}
-
-    void Aggro (Unit *who) {}
-
-    void AttackStart(Unit* who) {}
-
-    void MoveInLineOfSight(Unit* who) {}
-
-    void UpdateAI(const uint32 diff) {}
-
-};
-
-CreatureAI* GetAI_mob_flame_patch_alar(Creature *_Creature)
-{
-    return new mob_flame_patch_alarAI (_Creature);
+    return new boss_alarAI (pCreature);
 }
 
 void AddSC_boss_alar()
 {
-    Script *newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_alar";
-    newscript->GetAI = &GetAI_boss_alar;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
-    newscript->Name = "mob_ember_of_alar";
-    newscript->GetAI = &GetAI_mob_ember_of_alar;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
-    newscript->Name = "mob_flame_patch_alar";
-    newscript->GetAI = &GetAI_mob_flame_patch_alar;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_alar";
+    pNewScript->GetAI = &GetAI_boss_alar;
+    pNewScript->RegisterSelf();
 }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2011 MangosR2
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,9 +18,8 @@
 
 /* ScriptData
 SDName: instance_culling_of_stratholme
-SD%Complete: ?%
-SDComment: by MaxXx2021
-SDCategory: Culling of Stratholme
+SD%Complete: %
+SDComment:
 EndScriptData */
 
 #include "precompiled.h"
@@ -31,7 +31,7 @@ enum
     SPELL_TIME_STOP                = 58848,
     SPELL_TIME_WARP                = 52766,
     SPELL_SPIKE_N                  = 52771,
-    SPELL_SPIKE_H                  = 58830,  
+    SPELL_SPIKE_H                  = 58830,
 
     SAY_EPOCH_DEATH        = -1594119,
     SAY_EPOCH_SLAY01       = -1594120,
@@ -44,34 +44,34 @@ enum
 
 struct MANGOS_DLL_DECL boss_lord_epochAI : public ScriptedAI
 {
-   boss_lord_epochAI(Creature *pCreature) : ScriptedAI(pCreature)
-   {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsHeroic = pCreature->GetMap()->IsRaidOrHeroicDungeon();
-        m_creature->SetActiveObjectState(true);
-        Reset();
-   }
+    boss_lord_epochAI(Creature *pCreature) : ScriptedAI(pCreature)
+    {
+         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+         m_bIsHeroic = pCreature->GetMap()->IsRaidOrHeroicDungeon();
+         m_creature->SetActiveObjectState(true);
+         Reset();
+    }
 
-   ScriptedInstance* m_pInstance;
-   bool m_bIsHeroic;
+    ScriptedInstance* m_pInstance;
+    bool m_bIsHeroic;
 
-   uint32 Spike_Timer;
-   uint32 Warp_Timer;
-   uint32 Stop_Timer;
-   uint32 Course_Timer;
+    uint32 m_uiSpike_Timer;
+    uint32 m_uiWarp_Timer;
+    uint32 m_uiStop_Timer;
+    uint32 m_uiCourse_Timer;
 
-   void Reset() 
-   {
-     Course_Timer = 9300;
-     Stop_Timer = 21300;
-     Warp_Timer = 25300;
-     Spike_Timer = 5300;
-   }
+    void Reset()
+    {
+        m_uiCourse_Timer = 9300;
+        m_uiStop_Timer = 21300;
+        m_uiWarp_Timer = 25300;
+        m_uiSpike_Timer = 5300;
+    }
 
-   void JustDied(Unit *killer)
-   {
-       DoScriptText(SAY_EPOCH_DEATH, m_creature);
-   }
+    void JustDied(Unit *pKiller)
+    {
+        DoScriptText(SAY_EPOCH_DEATH, m_creature);
+    }
 
     void KilledUnit(Unit* pVictim)
     {
@@ -83,50 +83,50 @@ struct MANGOS_DLL_DECL boss_lord_epochAI : public ScriptedAI
         }
     }
 
-   void UpdateAI(const uint32 diff)
-   {
+    void UpdateAI(const uint32 uiDiff)
+    {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        DoMeleeAttackIfReady();
-
-        if (Course_Timer < diff)
+        if (m_uiCourse_Timer < uiDiff)
         {
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
                 DoCast(target, SPELL_COURSE);
 
-            Course_Timer = 9300;
-        }else Course_Timer -= diff;
+            m_uiCourse_Timer = 9300;
+        }else m_uiCourse_Timer -= uiDiff;
 
-        if (Spike_Timer < diff)
+        if (m_uiSpike_Timer < uiDiff)
         {
 
             DoCast(m_creature->getVictim(),m_bIsHeroic ? SPELL_SPIKE_H : SPELL_SPIKE_N);
 
-            Spike_Timer = 5300;
-        }else Spike_Timer -= diff;
+            m_uiSpike_Timer = 5300;
+        }else m_uiSpike_Timer -= uiDiff;
 
-        if (Stop_Timer < diff)
+        if (m_uiStop_Timer < uiDiff)
         {
              if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
                 DoCast(target, SPELL_TIME_STOP);
 
-            Stop_Timer = 21300;
-        }else Stop_Timer -= diff;
+            m_uiStop_Timer = 21300;
+        }else m_uiStop_Timer -= uiDiff;
 
-        if (Warp_Timer < diff)
+        if (m_uiWarp_Timer < uiDiff)
         {
              if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
                 DoCast(target, SPELL_TIME_WARP);
-        switch(rand()%3)
-        {
-            case 0: DoScriptText(SAY_EPOCH_WARP01, m_creature); break;
-            case 1: DoScriptText(SAY_EPOCH_WARP02, m_creature); break;
-            case 2: DoScriptText(SAY_EPOCH_WARP03, m_creature); break;
-        }
+                switch(rand()%3)
+                {
+                    case 0: DoScriptText(SAY_EPOCH_WARP01, m_creature); break;
+                    case 1: DoScriptText(SAY_EPOCH_WARP02, m_creature); break;
+                    case 2: DoScriptText(SAY_EPOCH_WARP03, m_creature); break;
+                }
 
-            Warp_Timer = 25300;
-        }else Warp_Timer -= diff;
+            m_uiWarp_Timer = 25300;
+        }else m_uiWarp_Timer -= uiDiff;
+
+        DoMeleeAttackIfReady();
 
   }
 };
@@ -138,10 +138,10 @@ CreatureAI* GetAI_boss_lord_epoch(Creature* pCreature)
 
 void AddSC_boss_lord_epoch()
 {
-    Script *newscript;
+    Script *pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_lord_epoch";
-    newscript->GetAI = &GetAI_boss_lord_epoch;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_lord_epoch";
+    pNewScript->GetAI = &GetAI_boss_lord_epoch;
+    pNewScript->RegisterSelf();
 }

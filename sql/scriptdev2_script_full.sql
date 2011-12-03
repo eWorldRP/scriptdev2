@@ -178,7 +178,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1000207,'You have my blessing',0,0,0,0,'ashyen_and_keleth SAY_REWARD_BLESS'),
 
-(-1000208,'Frenzyheart kill you if you come back. You no welcome here no more!',0,0,0,0,'vekjik SAY_TEXTID_VEKJIK1'),
+(-1000208,'REUSE ME',0,0,0,0,'REUSE ME'),
 
 (-1000209,'Very well. Let\'s see what you have to show me, $N.',0,0,1,0,'anvilward SAY_ANVIL1'),
 (-1000210,'What manner of trick is this, $R? If you seek to ambush me, I warn you I will not go down quietly!',0,0,1,0,'anvilward SAY_ANVIL2'),
@@ -868,8 +868,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 036 000 DEADMINES
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1036000,'You there, check out that noise.',5775,6,7,0,'smite INST_SAY_ALARM1'),
-(-1036001,'We\'re under attack! A vast, ye swabs! Repel the invaders!',5777,6,7,0,'smite INST_SAY_ALARM2'),
+(-1036000,'You there! Check out that noise.',5775,6,7,0,'smite INST_SAY_ALARM1'),
+(-1036001,'We\'re under attack!  A vast, ye swabs! Repel the invaders!',5777,6,7,0,'smite INST_SAY_ALARM2'),
 (-1036002,'You land lubbers are tougher than I thought! I\'ll have to improvise!',5778,0,0,21,'smite SAY_PHASE_2'),
 (-1036003,'D\'ah! Now you\'re making me angry!',5779,0,0,15,'smite SAY_PHASE_3');
 
@@ -2686,7 +2686,20 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1580091,'I will channel my power into the orbs, be ready!',12440,1,0,0,'kalecgos SAY_KALECGOS_ORB_1'),
 (-1580092,'I have empowered another orb! Use it quickly!',12441,1,0,0,'kalecgos SAY_KALECGOS_ORB_2'),
 (-1580093,'Another orb is ready! Make haste!',12442,1,0,0,'kalecgos SAY_KALECGOS_ORB_3'),
-(-1580094,'I have channeled all I can! The power is in your hands!',12443,1,0,0,'kalecgos SAY_KALECGOS_ORB_4');
+(-1580094,'I have channeled all I can! The power is in your hands!',12443,1,0,0,'kalecgos SAY_KALECGOS_ORB_4'),
+
+(-1580095,'Mortal heroes - your victory here today was foretold long ago. My brother\'s anguished cry of defeat will echo across the universe - bringing renewed hope to all those who still stand against the Burning Crusade.',12515,1,0,0,'velen SAY_OUTRO_1'),
+(-1580096,'As the Legion\'s final defeat draws ever-nearer, stand proud in the knowledge that you have saved worlds without number from the flame.',12516,1,0,0,'velen SAY_OUTRO_2'),
+(-1580097,'Just as this day marks an ending, so too does it herald a new beginning...',12517,1,0,0,'velen SAY_OUTRO_3'),
+(-1580098,'The creature Entropius, whom you were forced to destroy, was once the noble naaru, M\'uru. In life, M\'uru channeled vast energies of LIGHT and HOPE. For a time, a misguided few sought to steal those energies...',12518,1,0,0,'velen SAY_OUTRO_4'),
+(-1580099,'Our arrogance was unpardonable. We damned one of the most noble beings of all. We may never atone for this sin.',12524,1,0,0,'liadrin SAY_OUTRO_5'),
+(-1580100,'Than fortunate it is, that I have reclaimed the noble naaru\'s spark from where it fell! Where faith dwells, hope is never lost, young blood elf.',12519,1,0,0,'velen SAY_OUTRO_6'),
+(-1580101,'Can it be ?',12525,1,0,0,'liadrin SAY_OUTRO_7'),
+(-1580102,'Gaz now, mortals - upon the HEART OF M\'URU! Umblemished. Bathed by the light of Creation - just as it was at the Dawn.',12520,1,0,0,'velen SAY_OUTRO_8'),
+(-1580103,'In time, the light and hope held within - will rebirth more than this mere fount of power... Mayhap, they will rebirth the soul of a nation.',12521,1,0,0,'velen SAY_OUTRO_9'),
+(-1580104,'Blessed ancestors! I feel it... so much love... so much grace... there are... no words... impossible to describe...',12526,1,0,0,'liadrin SAY_OUTRO_10'),
+(-1580105,'Salvation, young one. It waits for us all.',12522,1,0,0,'velen SAY_OUTRO_11'),
+(-1580106,'Farewell...!',12523,1,0,0,'velen SAY_OUTRO_12');
 
 -- -1 585 000 MAGISTER'S TERRACE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -3611,7 +3624,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1631103,'Such wondrous power! The Darkfallen Orb has made me INVINCIBLE!',16727,1,0,0,'keleseth SAY_KELESETH_INVOCATION'),
 (-1631104,'Blood will flow!',16728,1,0,0,'keleseth SAY_KELESETH_SPECIAL'),
 (-1631105,'Were you ever a threat?',16723,1,0,0,'keleseth SAY_KELESETH_SLAY_1'),
-(-1631106,'Truth is found in death.',16724,1,0,0,'keleseth SAY_SKELESETH_SLAY_2'),
+(-1631106,'Truth is found in death.',16724,1,0,0,'keleseth SAY_KELESETH_SLAY_2'),
 (-1631107,'%s cackles maniacally!',16726,2,0,0,'keleseth SAY_KELESETH_BERSERK'), -- TODO Can be wrong
 (-1631108,'My queen... they come...',16725,1,0,0,'keleseth SAY_KELESETH_DEATH'),
 

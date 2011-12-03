@@ -118,6 +118,8 @@ struct MANGOS_DLL_DECL boss_thaddiusAI : public Scripted_NoMovementAI
         m_uiChainLightningTimer = 8*IN_MILLISECONDS;
         m_uiBallLightningTimer = 1*IN_MILLISECONDS;
         m_uiBerserkTimer = 6*MINUTE*IN_MILLISECONDS;
+
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
     void Aggro(Unit* pWho)
@@ -130,7 +132,7 @@ struct MANGOS_DLL_DECL boss_thaddiusAI : public Scripted_NoMovementAI
         }
     }
 
-    void EnterEvadeMode()
+    void JustReachedHome()
     {
         if (m_pInstance)
         {

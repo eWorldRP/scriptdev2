@@ -109,13 +109,13 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
             {
                 // Make executioner attackable only after the final boss is dead
-                if (Creature* pExecutioner = GetSingleCreatureFromStorage(NPC_EXECUTIONER))
+                if (Creature* pExecutioner = GetSingleCreatureFromStorage(NPC_EXECUTIONER, true))
                     pExecutioner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             }
             break;
         case TYPE_EXECUTION:
             m_auiEncounter[uiType] = uiData;
-            if (uiData == IN_PROGRESS)
+            if (uiData == IN_PROGRESS && !GetSingleCreatureFromStorage(NPC_EXECUTIONER, true))
             {
                 if (Player* pPlayer = GetPlayerInMap())
                 {
@@ -124,7 +124,7 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
                         pPlayer->SummonCreature(m_uiTeam == ALLIANCE ? aSoldiersLocs[i].m_uiAllianceEntry : aSoldiersLocs[i].m_uiHordeEntry, aSoldiersLocs[i].m_fX, aSoldiersLocs[i].m_fY, aSoldiersLocs[i].m_fZ, aSoldiersLocs[i].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
 
                     // Summon the executioner for 80 min; ToDo: set the flags in DB
-                    if (Creature* pExecutioner = pPlayer->SummonCreature(NPC_EXECUTIONER, afExecutionerLoc[0], afExecutionerLoc[1], afExecutionerLoc[2], afExecutionerLoc[3], TEMPSUMMON_TIMED_DESPAWN, 80*MINUTE*IN_MILLISECONDS, true))
+                    if (Creature* pExecutioner = pPlayer->SummonCreature(NPC_EXECUTIONER, afExecutionerLoc[0], afExecutionerLoc[1], afExecutionerLoc[2], afExecutionerLoc[3], TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 80*MINUTE*IN_MILLISECONDS, true))
                         pExecutioner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
 
                     // cast the execution spell

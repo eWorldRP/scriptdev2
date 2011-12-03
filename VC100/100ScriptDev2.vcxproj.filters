@@ -333,13 +333,13 @@
     <ClCompile Include="..\include\sc_instance.cpp">
       <Filter>include</Filter>
     </ClCompile>
-    <ClCompile Include="..\include\sc_outdoor_pvp.cpp">
-      <Filter>include</Filter>
-    </ClCompile>
     <ClCompile Include="..\scripts\battlegrounds\battleground.cpp">
       <Filter>scripts\battlegrounds</Filter>
     </ClCompile>
     <ClCompile Include="..\scripts\battlegrounds\battlegroundSA.cpp">
+      <Filter>scripts\battlegrounds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\scripts\battlegrounds\battlegroundIC.cpp">
       <Filter>scripts\battlegrounds</Filter>
     </ClCompile>
     <ClCompile Include="..\scripts\custom\npc_arena_honor.cpp">
@@ -991,6 +991,9 @@
       <Filter>scripts\kalimdor</Filter>
     </ClCompile>
     <ClCompile Include="..\scripts\kalimdor\razorfen_downs\boss_amnennar_the_coldbringer.cpp">
+      <Filter>scripts\kalimdor\razorfen_downs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\scripts\kalimdor\razorfen_downs\boss_tuten_kash.cpp">
       <Filter>scripts\kalimdor\razorfen_downs</Filter>
     </ClCompile>
     <ClCompile Include="..\scripts\kalimdor\razorfen_downs\razorfen_downs.cpp">
@@ -1857,12 +1860,6 @@
     <ClCompile Include="..\system\system.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="..\scripts\outdoor_pvp\eastern_kingdoms\outdoor_pvp_eastern_plaguelands.cpp" />
-    <ClCompile Include="..\scripts\outdoor_pvp\kalimdor\outdoor_pvp_silithus.cpp" />
-    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_eastern_kingdoms.cpp" />
-    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_kalimdor.cpp" />
-    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_northrend.cpp" />
-    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_outland.cpp" />
     <ClCompile Include="..\ScriptMgr.cpp" />
     <ClCompile Include="..\scripts\world\pet_scripts.cpp" />
     <ClCompile Include="..\scripts\world\npc_companion_handler.cpp">
@@ -1910,9 +1907,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\sc_instance.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\sc_outdoor_pvp.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\scripts\eastern_kingdoms\blackrock_depths\blackrock_depths.h">
@@ -2123,13 +2117,6 @@
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="..\config.h" />
-    <ClInclude Include="..\scripts\outdoor_pvp\eastern_kingdoms\outdoor_pvp_eastern_plaguelands.h" />
-    <ClInclude Include="..\scripts\outdoor_pvp\kalimdor\outdoor_pvp_silithus.h" />
-    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_eastern_kingdoms.h" />
-    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_kalimdor.h" />
-    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_northrend.h" />
-    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_outland.h" />
-    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_zone_selector.h" />
     <ClInclude Include="..\sd2_revision_nr.h" />
     <ClInclude Include="..\sd2_revision_sql.h" />
     <ClInclude Include="..\ScriptMgr.h" />

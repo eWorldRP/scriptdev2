@@ -238,7 +238,7 @@ UPDATE instance_template SET ScriptName='instance_azjol-nerub' WHERE map=601;
 UPDATE creature_template SET ScriptName='npc_rizzle_sprysprocket' WHERE entry=23002;
 UPDATE creature_template SET ScriptName='npc_depth_charge' WHERE entry=23025;
 UPDATE gameobject_template SET ScriptName='go_southfury_moonstone' WHERE entry=185566;
-UPDATE creature_template SET ScriptName='mobs_spitelashes' WHERE entry IN (6190,6193,6194,6195,6196,7885,7886,12204,12205);
+UPDATE creature_template SET ScriptName='mobs_spitelashes' WHERE entry IN (6190,6193,6194,6195,6196);
 UPDATE creature_template SET ScriptName='npc_loramus_thalipedes' WHERE entry=7783;
 
 /* AZUREMYST ISLE */
@@ -589,7 +589,6 @@ UPDATE creature_template SET ScriptName='npc_screecher_spirit' WHERE entry=8612;
 UPDATE creature_template SET ScriptName='npc_blood_knight_dawnstar' WHERE entry=17832;
 UPDATE creature_template SET ScriptName='npc_budd_nedreck' WHERE entry=23559;
 UPDATE creature_template SET ScriptName='npc_ranger_lilatha' WHERE entry=16295;
-UPDATE creature_template SET ScriptName='npc_rathis_tomber' WHERE entry=16224;
 
 /* GNOMEREGAN */
 UPDATE creature_template SET ScriptName='boss_thermaplugg' WHERE entry=7800;
@@ -883,7 +882,6 @@ UPDATE instance_template SET ScriptName='instance_onyxias_lair' WHERE map=249;
 UPDATE creature_template SET ScriptName='boss_onyxia' WHERE entry=10184;
 
 /* ORGRIMMAR */
-UPDATE creature_template SET ScriptName='npc_neeru_fireblade' WHERE entry=3216;
 UPDATE creature_template SET ScriptName='npc_shenthul' WHERE entry=3401;
 UPDATE creature_template SET ScriptName='npc_thrall_warchief' WHERE entry=4949;
 
@@ -942,7 +940,6 @@ INSERT INTO scripted_event_id VALUES
 (5623,'event_spell_gandling_shadow_portal');
 
 /* SEARING GORGE */
-UPDATE creature_template SET ScriptName='npc_kalaran_windblade' WHERE entry=8479;
 UPDATE creature_template SET ScriptName='npc_lothos_riftwaker' WHERE entry=14387;
 UPDATE creature_template SET ScriptName='npc_zamael_lunthistle' WHERE entry=8436;
 
@@ -983,7 +980,6 @@ UPDATE creature_template SET ScriptName='npc_shattrathflaskvendors' WHERE entry 
 UPDATE creature_template SET ScriptName='npc_helice' WHERE entry=28787;
 UPDATE creature_template SET ScriptName='npc_injured_rainspeaker' WHERE entry=28217;
 UPDATE creature_template SET ScriptName='npc_mosswalker_victim' WHERE entry=28113;
-UPDATE creature_template SET ScriptName='npc_vekjik' WHERE entry=28315;
 
 /* SILITHUS */
 UPDATE creature_template SET ScriptName='npc_highlord_demitrian' WHERE entry=14347;
@@ -1065,6 +1061,11 @@ INSERT INTO scripted_areatrigger VALUES (4853,'at_madrigosa');
 UPDATE creature_template SET ScriptName='boss_alythess' WHERE entry=25166;
 UPDATE creature_template SET ScriptName='boss_sacrolash' WHERE entry=25165;
 UPDATE creature_template SET ScriptName='npc_shadow_image' WHERE entry=25214;
+UPDATE creature_template SET ScriptName='boss_muru' WHERE entry=25741;
+UPDATE creature_template SET ScriptName='boss_entropius' WHERE entry=25840;
+UPDATE creature_template SET ScriptName='npc_portal_target' WHERE entry=25770;
+UPDATE creature_template SET ScriptName='npc_void_sentinel_summoner' WHERE entry=25782;
+UPDATE creature_template SET ScriptName='boss_kiljaeden' WHERE entry=25315;
 
 /* SWAMP OF SORROWS */
 UPDATE creature_template SET ScriptName='npc_galen_goodward' WHERE entry=5391;
@@ -1110,6 +1111,8 @@ UPDATE creature_template SET ScriptName='npc_millhouse_manastorm' WHERE entry=20
 UPDATE instance_template SET ScriptName='instance_the_eye' WHERE map=550;
 /* The Eye Trash Mobs */
 UPDATE creature_template SET ScriptName='mob_crystalcore_devastator' WHERE entry=20040;
+/* Al'ar event */
+UPDATE creature_template SET ScriptName='boss_alar' WHERE entry=19514;
 /* Void Reaver event */
 UPDATE creature_template SET ScriptName='boss_void_reaver' WHERE entry=19516;
 /* Astromancer event */
