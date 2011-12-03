@@ -35,7 +35,7 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
     uint32 m_auiEncounter[MAX_ENCOUNTERS+1];
     uint32 m_auiEventTimer;
     uint32 m_auiEventNPCId;
-    uint32 m_auiNorthrendBeasts;
+    uint32 m_auiNorthrendBeasts[3];
     uint8 Difficulty;
     std::string m_strInstData;
     bool needsave;
@@ -53,11 +53,14 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
         for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
                 m_auiEncounter[i] = NOT_STARTED;
 
-                m_auiEncounter[0] = 0;
-                m_auiEncounter[7] = 50;
-                m_auiEncounter[8] = 0;
+        m_auiEncounter[0] = 0;
+        m_auiEncounter[7] = 50;
+        m_auiEncounter[8] = 0;
 
-        m_auiNorthrendBeasts = NOT_STARTED;
+        m_auiNorthrendBeasts[0] = NOT_STARTED;
+        m_auiNorthrendBeasts[1] = NOT_STARTED;
+        m_auiNorthrendBeasts[2] = NOT_STARTED;
+
         m_auiEventTimer = 1000;
         m_auiCrusadersCount = 6;
         m_uiTributeChest = 0;
@@ -210,7 +213,15 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
         case TYPE_COUNTER:   m_auiEncounter[7] = uiData; uiData = DONE; break;
         case TYPE_EVENT:     m_auiEncounter[8] = uiData; uiData = NOT_STARTED; break;
         case TYPE_EVENT_TIMER:      m_auiEventTimer = uiData; uiData = NOT_STARTED; break;
-        case TYPE_NORTHREND_BEASTS: m_auiNorthrendBeasts = uiData; break;
+        case TYPE_GORMOK:
+             m_auiNorthrendBeasts[0] = uiData;
+             break;
+        case TYPE_SNAKES:
+             m_auiNorthrendBeasts[1] = uiData;
+             break;
+        case TYPE_ICEHOWL :
+             m_auiNorthrendBeasts[2] = uiData;
+            break;
         case DATA_HEALTH_FJOLA:     m_uiDataDamageFjola = uiData; uiData = NOT_STARTED; break;
         case DATA_HEALTH_EYDIS:     m_uiDataDamageEydis = uiData; uiData = NOT_STARTED; break;
         case DATA_CASTING_VALKYRS:  m_uiValkyrsCasting = uiData; uiData = NOT_STARTED; break;
@@ -270,7 +281,9 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
             case TYPE_COUNTER:   return m_auiEncounter[7];
             case TYPE_EVENT:     return m_auiEncounter[8];
             case TYPE_DIFFICULTY:   return Difficulty;
-            case TYPE_NORTHREND_BEASTS:    return m_auiNorthrendBeasts;
+            case TYPE_GORMOK:  return m_auiNorthrendBeasts[0];
+            case TYPE_SNAKES:  return m_auiNorthrendBeasts[1];
+            case TYPE_ICEHOWL: return m_auiNorthrendBeasts[2];
             case TYPE_EVENT_TIMER:  return m_auiEventTimer;
             case TYPE_CRUSADERS_COUNT:  return m_auiCrusadersCount;
             case TYPE_EVENT_NPC: switch (m_auiEncounter[8]) 

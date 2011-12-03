@@ -364,6 +364,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
         {
+            itr->getSource()->KilledMonsterCredit(NPC_MALYGOS);
             itr->getSource()->CompletedAchievement(SpellweaversDownfall);
             if(m_bIsInTimeAchiev)
                 itr->getSource()->CompletedAchievement(YouDontHaveEternity);

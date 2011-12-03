@@ -526,16 +526,16 @@ struct MANGOS_DLL_DECL npc_time_lost_proto_drakeAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-		if (m_bNeedInvisible)
+        if (m_bNeedInvisible)
         {
             if (m_uiTime2Spawn <= uiDiff)
-			{
+            {
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_creature->SetVisibility(VISIBILITY_ON);
                 m_bNeedInvisible = false;
                 m_bWasVisible = true;
-			}
-			else 
+            }
+            else 
                 m_uiTime2Spawn -= uiDiff;
         }
     }

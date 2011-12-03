@@ -20,6 +20,10 @@ enum
     TYPE_EVENT                  = 8,
     MAX_ENCOUNTERS              = 9,
 
+    TYPE_GORMOK                 = 11,
+    TYPE_SNAKES                 = 12,
+    TYPE_ICEHOWL                = 13,
+
     NPC_BARRENT                 = 34816,
     NPC_TIRION                  = 34996,
     NPC_FIZZLEBANG              = 35458,
@@ -103,7 +107,6 @@ enum
     TYPE_DIFFICULTY             = 101,
     TYPE_EVENT_TIMER            = 102,
     TYPE_EVENT_NPC              = 103,
-    TYPE_NORTHREND_BEASTS       = 104,
     TYPE_CRUSADERS_COUNT        = 105,
 
     DATA_HEALTH_EYDIS           = 201,
@@ -155,17 +158,10 @@ enum uiWorldStates
     UPDATE_STATE_UI_COUNT           = 4389,
 };
 
-enum NorthrendBeasts
+enum Snakes
 {
-    GORMOK_IN_PROGRESS              = 1000,
-    GORMOK_DONE                     = 1001,
-    SNAKES_IN_PROGRESS              = 2000,
-    DREADSCALE_SUBMERGED            = 2001,
-    ACIDMAW_SUBMERGED               = 2002,
-    SNAKES_SPECIAL                  = 2003,
-    SNAKES_DONE                     = 2004,
-    ICEHOWL_IN_PROGRESS             = 3000,
-    ICEHOWL_DONE                    = 3001,
+    DREADSCALE_SUBMERGED     = 5,
+    ACIDMAW_SUBMERGED        = 6,
 };
 
 enum AnnounserMessages

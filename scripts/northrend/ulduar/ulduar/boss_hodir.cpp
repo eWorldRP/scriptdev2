@@ -58,6 +58,8 @@ enum
     EMOTE_FLASH_FREEZE      = -1603360,
     EMOTE_FROZEN_BLOWS      = -1603361,
 
+    SPELL_HODIR_CREDIT      = 64899,
+
     ACHIEV_RARE_CACHE       = 3182,
     ACHIEV_RARE_CACHE_H     = 3184,
     ACHIEV_COOLEST_FRIEND   = 2963,
@@ -110,7 +112,7 @@ struct MANGOS_DLL_DECL mob_flashFreezeAI : public ScriptedAI
     }
 
     bool m_bIsRegularMode;
-    uint64 m_uiVictimGUID;
+    ObjectGuid m_uiVictimGUID;
 
     void Reset()
     {
@@ -126,7 +128,7 @@ struct MANGOS_DLL_DECL mob_flashFreezeAI : public ScriptedAI
         pWho->SetInCombatWith(m_creature);
         DoCast(pWho, SPELL_FLASH_FREEZE_STUN);
         pWho->CastSpell(pWho, SPELL_FLASH_FREEZE_STUN, false);
-        m_uiVictimGUID = pWho->GetGUID();
+        m_uiVictimGUID = pWho->GetObjectGuid();
         // kill targets that are frozen
         if(pWho->HasAura(SPELL_FREEZE, EFFECT_INDEX_0))
         {
@@ -160,15 +162,17 @@ struct MANGOS_DLL_DECL mob_icicleAI : public ScriptedAI
     {
         pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         SetCombatMovement(false);
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         pCreature->setFaction(14);
         Reset();
     }
 
+    ScriptedInstance* m_pInstance;
     uint32 m_uiSpellDelayTimer;
 
     void Reset()
     {
-        DoCast(m_creature, SPELL_ICICLE);
+        DoCast(m_creature, SPELL_ICICLE_DUMMY);
         m_uiSpellDelayTimer = 500;
     }
 
@@ -179,12 +183,8 @@ struct MANGOS_DLL_DECL mob_icicleAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     { 
-        if(m_uiSpellDelayTimer < diff)
-        {
-            DoCast(m_creature, SPELL_ICICLE_DUMMY);
-            m_uiSpellDelayTimer = 30000;
-        }
-        else m_uiSpellDelayTimer -= diff;
+        if (m_pInstance->GetData(TYPE_HODIR) != IN_PROGRESS)
+            m_creature->ForcedDespawn();
     }
 };
 
@@ -338,6 +338,7 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
         m_bIsCheese             = true;
 
         // respawn friendly npcs
+        lFriends.clear();
         // druids
         GetCreatureListWithEntryInGrid(lFriends, m_creature, 33325, DEFAULT_VISIBILITY_INSTANCE);
         GetCreatureListWithEntryInGrid(lFriends, m_creature, 32901, DEFAULT_VISIBILITY_INSTANCE);
@@ -406,6 +407,16 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
 
             if (m_bIsCheese)
                 m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_CHEESE_FREEZE : ACHIEV_CHEESE_FREEZE_H);
+        }
+
+        Map* pMap = m_creature->GetMap();
+        Map::PlayerList const &lPlayers = pMap->GetPlayers();
+        for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+        {
+            Player* pPlayer = itr->getSource();
+            if (!pPlayer)
+                continue;
+            pPlayer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, SPELL_HODIR_CREDIT);
         }
         m_creature->ForcedDespawn();
     }
@@ -610,7 +621,7 @@ struct MANGOS_DLL_DECL npc_hodir_druidAI : public ScriptedAI
     ScriptedInstance *pInstance;
 
     uint32 spellTimer;
-    std::list<uint64> FriendlyList;
+    std::list<ObjectGuid> FriendlyList;
 
     void Reset()
     {
@@ -626,8 +637,8 @@ struct MANGOS_DLL_DECL npc_hodir_druidAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho)
     {
         // friendly list
-        if (!m_creature->IsHostileTo(pWho) && !ListContains(FriendlyList, pWho->GetGUID()) && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 40, true))
-            FriendlyList.push_back(pWho->GetGUID());
+        if (!m_creature->IsHostileTo(pWho) && !ListContains(FriendlyList, pWho->GetObjectGuid()) && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 40, true))
+            FriendlyList.push_back(pWho->GetObjectGuid());
     }
 
     void AttackStart(Unit* pWho)
@@ -644,26 +655,27 @@ struct MANGOS_DLL_DECL npc_hodir_druidAI : public ScriptedAI
         }
     }
 
-    uint64 SelectRandomPlayer()
+    ObjectGuid SelectRandomPlayer()
     {
         //This should not appear!
-        if (FriendlyList.empty()){
+        if (FriendlyList.empty())
+        {
             spellTimer = 5000;
-            return m_creature->GetGUID();
+            return m_creature->GetObjectGuid();
         }
 
-        std::list<uint64>::iterator iter = FriendlyList.begin();
+        std::list<ObjectGuid>::iterator iter = FriendlyList.begin();
         advance(iter, urand(0, FriendlyList.size()-1));
 
         return *iter;
     }
 
-    bool ListContains(std::list<uint64> &plist, uint64 element)
+    bool ListContains(std::list<ObjectGuid> &plist, ObjectGuid element)
     {
         if (plist.empty())
             return false;
 
-        std::list<uint64>::iterator i;
+        std::list<ObjectGuid>::iterator i;
         for (i = plist.begin(); i!=plist.end(); ++i)
         {
             if ((*i) == element)
@@ -714,7 +726,7 @@ struct MANGOS_DLL_DECL npc_hodir_shamanAI : public ScriptedAI
     ScriptedInstance *pInstance;
 
     uint32 spellTimer;
-    std::list<uint64> FriendlyList;
+    std::list<ObjectGuid> FriendlyList;
 
     void Reset()
     {
@@ -730,8 +742,8 @@ struct MANGOS_DLL_DECL npc_hodir_shamanAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho)
     {
         // friendly list
-        if (!m_creature->IsHostileTo(pWho) && !ListContains(FriendlyList, pWho->GetGUID()) && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 40, true))
-            FriendlyList.push_back(pWho->GetGUID());
+        if (!m_creature->IsHostileTo(pWho) && !ListContains(FriendlyList, pWho->GetObjectGuid()) && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 40, true))
+            FriendlyList.push_back(pWho->GetObjectGuid());
     }
 
     void AttackStart(Unit* pWho)
@@ -748,26 +760,26 @@ struct MANGOS_DLL_DECL npc_hodir_shamanAI : public ScriptedAI
         }
     }
 
-    uint64 SelectRandomPlayer()
+    ObjectGuid SelectRandomPlayer()
     {
         //This should not appear!
         if (FriendlyList.empty()){
             spellTimer = 5000;
-            return m_creature->GetGUID();
+            return m_creature->GetObjectGuid();
         }
 
-        std::list<uint64>::iterator iter = FriendlyList.begin();
+        std::list<ObjectGuid>::iterator iter = FriendlyList.begin();
         advance(iter, urand(0, FriendlyList.size()-1));
 
         return *iter;
     }
 
-    bool ListContains(std::list<uint64> &plist, uint64 element)
+    bool ListContains(std::list<ObjectGuid> &plist, ObjectGuid element)
     {
         if (plist.empty())
             return false;
 
-        std::list<uint64>::iterator i;
+        std::list<ObjectGuid>::iterator i;
         for (i = plist.begin(); i!=plist.end(); ++i)
         {
             if ((*i) == element)
@@ -816,7 +828,7 @@ struct MANGOS_DLL_DECL npc_hodir_mageAI : public ScriptedAI
     ScriptedInstance *pInstance;
 
     uint32 spellTimer;
-    std::list<uint64> FriendlyList;
+    std::list<ObjectGuid> FriendlyList;
 
     void Reset()
     {
@@ -832,8 +844,8 @@ struct MANGOS_DLL_DECL npc_hodir_mageAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho)
     {
         // friendly list
-        if (!m_creature->IsHostileTo(pWho) && !ListContains(FriendlyList, pWho->GetGUID()) && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 40, true))
-            FriendlyList.push_back(pWho->GetGUID());
+        if (!m_creature->IsHostileTo(pWho) && !ListContains(FriendlyList, pWho->GetObjectGuid()) && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 40, true))
+            FriendlyList.push_back(pWho->GetObjectGuid());
     }
 
     void AttackStart(Unit* pWho)
@@ -850,26 +862,26 @@ struct MANGOS_DLL_DECL npc_hodir_mageAI : public ScriptedAI
         }
     }
 
-    uint64 SelectRandomPlayer()
+    ObjectGuid SelectRandomPlayer()
     {
         //This should not appear!
         if (FriendlyList.empty()){
             spellTimer = 5000;
-            return m_creature->GetGUID();
+            return m_creature->GetObjectGuid();
         }
 
-        std::list<uint64>::iterator iter = FriendlyList.begin();
+        std::list<ObjectGuid>::iterator iter = FriendlyList.begin();
         advance(iter, urand(0, FriendlyList.size()-1));
 
         return *iter;
     }
 
-    bool ListContains(std::list<uint64> &plist, uint64 element)
+    bool ListContains(std::list<ObjectGuid> &plist, ObjectGuid element)
     {
         if (plist.empty())
             return false;
 
-        std::list<uint64>::iterator i;
+        std::list<ObjectGuid>::iterator i;
         for (i = plist.begin(); i!=plist.end(); ++i)
         {
             if ((*i) == element)
@@ -927,7 +939,7 @@ struct MANGOS_DLL_DECL npc_hodir_priestAI : public ScriptedAI
     ScriptedInstance *pInstance;
 
     uint32 spellTimer;
-    std::list<uint64> FriendlyList;
+    std::list<ObjectGuid> FriendlyList;
 
     void Reset()
     {
@@ -943,8 +955,8 @@ struct MANGOS_DLL_DECL npc_hodir_priestAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho)
     {
         // friendly list
-        if (!m_creature->IsHostileTo(pWho) && !ListContains(FriendlyList, pWho->GetGUID()) && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 40, true))
-            FriendlyList.push_back(pWho->GetGUID());
+        if (!m_creature->IsHostileTo(pWho) && !ListContains(FriendlyList, pWho->GetObjectGuid()) && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 40, true))
+            FriendlyList.push_back(pWho->GetObjectGuid());
     }
 
     void AttackStart(Unit* pWho)
@@ -961,26 +973,26 @@ struct MANGOS_DLL_DECL npc_hodir_priestAI : public ScriptedAI
         }
     }
 
-    uint64 SelectRandomPlayer()
+    ObjectGuid SelectRandomPlayer()
     {
         //This should not appear!
         if (FriendlyList.empty()){
             spellTimer = 5000;
-            return m_creature->GetGUID();
+            return m_creature->GetObjectGuid();
         }
 
-        std::list<uint64>::iterator iter = FriendlyList.begin();
+        std::list<ObjectGuid>::iterator iter = FriendlyList.begin();
         advance(iter, urand(0, FriendlyList.size()-1));
 
         return *iter;
     }
 
-    bool ListContains(std::list<uint64> &plist, uint64 element)
+    bool ListContains(std::list<ObjectGuid> &plist, ObjectGuid element)
     {
         if (plist.empty())
             return false;
 
-        std::list<uint64>::iterator i;
+        std::list<ObjectGuid>::iterator i;
         for (i = plist.begin(); i!=plist.end(); ++i)
         {
             if ((*i) == element)

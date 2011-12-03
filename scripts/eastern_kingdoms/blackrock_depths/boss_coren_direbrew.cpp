@@ -166,7 +166,7 @@ struct MANGOS_DLL_DECL boss_coren_direbrewAI : public ScriptedAI
         Despawn(m_Antagonist2Guid);
         Despawn(m_Antagonist3Guid);
         if (m_pInstance)
-			if (GameObject* pMinionSummoner = m_pInstance->GetSingleGameObjectFromStorage(GO_MINIONSUMMONER))
+            if (GameObject* pMinionSummoner = m_pInstance->GetSingleGameObjectFromStorage(GO_MINIONSUMMONER))
                 pMinionSummoner->SetGoState(GO_STATE_READY);
     }
 
@@ -195,11 +195,10 @@ struct MANGOS_DLL_DECL boss_coren_direbrewAI : public ScriptedAI
             // After insulting coren a small noncombat event begins
             if (m_bEventStarted)
             {
-                void GetAntagonists();
                 // Coren Walking in fornt of Antagonists
                 if (m_uiWalkTimer < uiDiff)
                 {
-					m_creature->SetSpeedRate(MOVE_WALK, 1.0f);
+                    m_creature->SetSpeedRate(MOVE_WALK, 1.0f);
                     switch(m_uiWalk)
                     {
                         case 0:
@@ -267,7 +266,7 @@ struct MANGOS_DLL_DECL boss_coren_direbrewAI : public ScriptedAI
                         SaySay(m_Antagonist3Guid, SAY_ANTAGONIST4);
                         DoScriptText(SAY_PAY, m_creature);
                         m_creature->setFaction(16);
-						m_creature->SetInCombatWithZone();
+                        m_creature->SetInCombatWithZone();
                         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         AttackStart(m_pInsulter);
                         break;
@@ -299,7 +298,7 @@ struct MANGOS_DLL_DECL boss_coren_direbrewAI : public ScriptedAI
                 }
             }
 
-			if (!m_bUrsulaSpawned && m_creature->GetHealthPercent() <= 33.0f)
+            if (!m_bUrsulaSpawned && m_creature->GetHealthPercent() <= 33.0f)
             {
                 Creature* pUrsula = m_creature->SummonCreature(MOB_URSULA, Coord[5][0], Coord[5][1], Coord[5][2], 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000);
                 if (pUrsula && m_creature->getVictim())// i know if(victim) was checked at the top but once got crash with multithreaded mangos
@@ -314,7 +313,7 @@ struct MANGOS_DLL_DECL boss_coren_direbrewAI : public ScriptedAI
             {
                 if (m_pInstance)
                 {
-				    if (GameObject* pMinionSummoner = m_pInstance->GetSingleGameObjectFromStorage(GO_MINIONSUMMONER))
+                    if (GameObject* pMinionSummoner = m_pInstance->GetSingleGameObjectFromStorage(GO_MINIONSUMMONER))
                     {
                         switch(m_uiMinionSummoningPhase)
                         {
@@ -393,7 +392,7 @@ bool GossipSelect_boss_coren_direbrew(Player* pPlayer, Creature* pCreature, uint
                     temp = NULL;
                 }
                 pCorenAI->m_bEventStarted = true;
-				pCorenAI->m_pInsulter = pPlayer;
+                pCorenAI->m_pInsulter = pPlayer;
             }
         }
     }
@@ -442,12 +441,12 @@ struct MANGOS_DLL_DECL mob_ilsaAI : public ScriptedAI
                         ItemPosCountVec dest;
                         uint8 msg = m_pBrewed->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_BREWMAIDEN_BREW, 1, NULL);
                         if (msg == EQUIP_ERR_OK)
-					    {
+                        {
                             m_pBrewed->StoreNewItem(dest, ITEM_BREWMAIDEN_BREW, 1, true);
-							m_bCheck = true;
+                            m_bCheck = true;
                             m_uiCheckTimer = 6000;
-					    }
-					}
+                        }
+                    }
                 }
             }
             m_uiLaunchTimer = urand(8000, 10000);
@@ -458,9 +457,9 @@ struct MANGOS_DLL_DECL mob_ilsaAI : public ScriptedAI
         {
             if (m_uiCheckTimer < uiDiff)
             {
-				m_bCheck = false;
-				if (m_pBrewed->HasItemCount(ITEM_BREWMAIDEN_BREW, 1))
-					m_pBrewed->CastSpell(m_pBrewed, SPELL_STUN, false);
+                m_bCheck = false;
+                if (m_pBrewed->HasItemCount(ITEM_BREWMAIDEN_BREW, 1))
+                    m_pBrewed->CastSpell(m_pBrewed, SPELL_STUN, false);
                 m_pBrewed = NULL;
             }
             else m_uiCheckTimer -= uiDiff;
@@ -500,7 +499,7 @@ struct MANGOS_DLL_DECL mob_ursulaAI : public ScriptedAI
         {
             if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
-				m_creature->CastSpell(pTarget, SPELL_BARRELED, false);
+                m_creature->CastSpell(pTarget, SPELL_BARRELED, false);
             }
             m_uiBarrelTimer = urand(8000, 10000);
         }
@@ -519,7 +518,7 @@ void AddSC_boss_coren_direbrew()
     newscript = new Script;
     newscript->Name = "boss_coren_direbrew";
     newscript->GetAI = &GetAI_boss_coren_direbrew;
-	newscript->pGossipSelect = &GossipSelect_boss_coren_direbrew;
+    newscript->pGossipSelect = &GossipSelect_boss_coren_direbrew;
     newscript->RegisterSelf();
 
     newscript = new Script;

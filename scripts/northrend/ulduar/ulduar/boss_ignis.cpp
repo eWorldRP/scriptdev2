@@ -157,16 +157,16 @@ struct MANGOS_DLL_DECL mob_iron_constructAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-    // remove 1 stack of the buff from Ignis, hacky way, should be done by spell
-        if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_IGNIS)))
+        // remove 1 stack of the buff from Ignis, hacky way, should be done by spell
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_IGNIS))
         {
             if (pTemp->isAlive())
             {
                 if (pTemp->HasAura(BUFF_STRENGHT_OF_CREATOR))
                 {
-                     if(SpellAuraHolderPtr strenght = pTemp->GetSpellAuraHolder(BUFF_STRENGHT_OF_CREATOR))
+                     if(SpellAuraHolderPtr pStrenght = pTemp->GetSpellAuraHolder(BUFF_STRENGHT_OF_CREATOR))
                      {
-                         if(strenght->ModStackAmount(-1))
+                         if(pStrenght->ModStackAmount(-1))
                               pTemp->RemoveAurasDueToSpell(BUFF_STRENGHT_OF_CREATOR);
                      }
                 }
@@ -212,7 +212,7 @@ struct MANGOS_DLL_DECL mob_iron_constructAI : public ScriptedAI
             m_creature->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
         m_bIsInCombat = true;
 
-        if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_IGNIS)))
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_IGNIS))
         {
             if (pTemp->isAlive())
             {
@@ -302,17 +302,17 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
     bool m_bIsRegularMode;
 
-    std::list<uint64> m_lIronConstructGUIDList;
+    std::list<ObjectGuid> m_lIronConstructGUIDList;
 
     uint32 m_uiFlame_Jets_Timer;
     uint32 m_uiSlag_Pot_Timer;
-    uint32 m_uiSlag_Pot_Dmg_Timer;
+    uint32 m_uiSlag_Pot_Veichle_Timer;
     uint32 m_uiScorch_Timer;
     uint32 m_uiSummon_Timer;
     uint32 m_uiPotDmgCount;
     uint32 m_uiEnrageTimer;
 
-    uint64 m_uiPotTargetGUID;
+    ObjectGuid m_uiPotTargetGUID;
     std::list<Creature*> lConstructs;
 
     uint32 m_uiEncounterTimer;
@@ -324,7 +324,7 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
 
         m_uiFlame_Jets_Timer    = 20000;
         m_uiSlag_Pot_Timer      = 25000;
-        m_uiSlag_Pot_Dmg_Timer  = 26000;
+        m_uiSlag_Pot_Veichle_Timer = 26000;
         m_uiScorch_Timer        = 13000;
         m_uiSummon_Timer        = 10000;
         m_uiEnrageTimer         = 600000;   // 10 MIN
@@ -455,37 +455,30 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
                 {
                     DoCast(target, m_bIsRegularMode ? SPELL_SLAG_POT : SPELL_SLAG_POT_H);
-                    m_uiPotTargetGUID = target->GetGUID();
+                    m_uiPotTargetGUID = target->GetObjectGuid();
                     if(m_creature->GetVehicleKit())
                         target->EnterVehicle(m_creature->GetVehicleKit(), 0);
                 }
                 m_uiSlag_Pot_Timer      = 30000;
-                m_uiSlag_Pot_Dmg_Timer  = 1000;
+                m_uiSlag_Pot_Veichle_Timer  = 10000;
                 m_bHasSlagPotCasted     = true;
                 m_uiPotDmgCount         = 0;
             }
         }else m_uiSlag_Pot_Timer -= uiDiff;  
 
-        // hacky way of doing damage
-        if (m_uiSlag_Pot_Dmg_Timer < uiDiff && m_bHasSlagPotCasted)
+        // hacky way of removing veichle
+        if (m_uiSlag_Pot_Veichle_Timer < uiDiff && m_bHasSlagPotCasted)
         {
-            if (Unit* pPotTarget = m_creature->GetMap()->GetUnit( m_uiPotTargetGUID))
+            if (Unit* pPotTarget = m_creature->GetMap()->GetUnit(m_uiPotTargetGUID))
             {
-                if (m_uiPotDmgCount < 10)
-                    DoCast(pPotTarget, m_bIsRegularMode ? SPELL_SLAG_POT_DMG : SPELL_SLAG_POT_DMG_H);
-                else if (m_uiPotDmgCount == 10)
+                if(pPotTarget->isAlive())
                 {
-                    if(pPotTarget->isAlive())
-                    {
-                        pPotTarget->CastSpell(pPotTarget, SPELL_HASTE, false);
-                        pPotTarget->ExitVehicle();
-                    }
-                    m_bHasSlagPotCasted = false;
+                    pPotTarget->CastSpell(pPotTarget, SPELL_HASTE, false);
+                    pPotTarget->ExitVehicle();
                 }
+                m_bHasSlagPotCasted = false;
             }
-            ++m_uiPotDmgCount;
-            m_uiSlag_Pot_Dmg_Timer = 1000;
-        }else m_uiSlag_Pot_Dmg_Timer -= uiDiff;
+        }else m_uiSlag_Pot_Veichle_Timer -= uiDiff;
 
         // call the golems
         if (m_uiSummon_Timer < uiDiff)

@@ -82,8 +82,7 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
     uint32 m_uiSimphonTimer;
     uint32 m_uiEndSimphonTimer;
     uint32 m_uiSummonAnimusTimer;
-    uint64 m_uiAnimusGUID;
-    uint64 m_uiMarkTargetGUID;
+    ObjectGuid m_uiMarkTargetGUID;
     uint32 m_uiMarkCheckTimer;
     uint32 m_uiMarkEndTimer;
 
@@ -111,7 +110,6 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
         m_uiCrashTimer          = 10000;
         m_uiSimphonTimer        = 1000;
         m_uiEndSimphonTimer     = 10000;
-        m_uiAnimusGUID          = 0;
         m_uiMarkTargetGUID      = 0;
 
         lVapors.clear();
@@ -151,7 +149,7 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
                 m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_MORNING_SARONITE : ACHIEV_MORNING_SARONITE_H);
                 // hack used when the hard mode loot is within the Animus corpse
                 // PLEASE REMOVE FOR REVISION
-                if(Creature* pAnimus = m_pInstance->instance->GetCreature(m_uiAnimusGUID))
+                if(Creature* pAnimus = m_pInstance->GetSingleCreatureFromStorage(NPC_SARONITE_ANIMUS))
                     pAnimus->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }
         }
@@ -202,7 +200,6 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
         if(Creature* pAnimus = m_creature->SummonCreature(NPC_SARONITE_ANIMUS, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 900000))
         {
             pAnimus->SetInCombatWithZone();
-            m_uiAnimusGUID = pAnimus->GetGUID();
         }
 
         if (!lVapors.empty())
@@ -220,26 +217,26 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
 
     // hacky way for the mark of the faceless, needs core support
     // PLEASE REMOVE FOR REVISION!
-    void CheckForMark(uint64 m_uiTargetGUID)
+    void CheckForMark(ObjectGuid m_uiTargetGUID)
     {
-        if(m_uiTargetGUID == 0)
+        if(!m_uiTargetGUID)
             return;
 
         m_bHasSimphon = false;
-        Map *map = m_creature->GetMap();
-        Unit* pTarget = m_creature->GetMap()->GetUnit( m_uiTargetGUID);
-        if (map->IsDungeon())
+        Map *pMap = m_creature->GetMap();
+        Unit* pTarget = pMap->GetUnit(m_uiTargetGUID);
+        if (pMap->IsDungeon())
         {
-            Map::PlayerList const &PlayerList = map->GetPlayers();
+            Map::PlayerList const &PlayerList = pMap->GetPlayers();
 
             if (PlayerList.isEmpty())
                 return;
 
-            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
             {
-                if(pTarget && pTarget->isAlive() && !m_bHasSimphon && m_uiTargetGUID != i->getSource()->GetGUID())
+                if(pTarget && pTarget->isAlive() && !m_bHasSimphon && m_uiTargetGUID != itr->getSource()->GetObjectGuid())
                 {
-                    if (i->getSource()->isAlive() && pTarget->GetDistance2d(i->getSource()) < 10.0f)
+                    if (itr->getSource()->isAlive() && pTarget->GetDistance2d(itr->getSource()) < 10.0f)
                     {
                         DoCast(pTarget, SPELL_MARK_SIMPHON);
                         m_bHasSimphon = true;
@@ -298,7 +295,7 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
-                m_uiMarkTargetGUID = pTarget->GetGUID();
+                m_uiMarkTargetGUID = pTarget->GetObjectGuid();
                 DoCast(pTarget, SPELL_MARK_OF_FACELESS);
             }
             m_bHasMark = true;
@@ -368,7 +365,7 @@ struct MANGOS_DLL_DECL mob_saronite_animusAI : public ScriptedAI
     {
         if(m_pInstance)
         {
-            if (Creature* pVezax = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_VEZAX)))
+            if (Creature* pVezax = m_pInstance->GetSingleCreatureFromStorage(NPC_VEZAX))
             {
                 if (pVezax->isAlive())
                 {
@@ -379,7 +376,7 @@ struct MANGOS_DLL_DECL mob_saronite_animusAI : public ScriptedAI
         }
         // used for hard mode loot
         // REMOVE THIS FOR REVISION
-        //m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+        m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -412,10 +409,12 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
 
     uint32 m_uiDieTimer;
+    bool m_bDie;
 
     void Reset()
     {
-        m_uiDieTimer = 600000;
+        m_bDie = false;
+        m_uiDieTimer = 30000;
         m_creature->SetRespawnDelay(DAY);
     }
 
@@ -435,8 +434,15 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
         if(uiDamage >= m_creature->GetHealth())
         {
             uiDamage = 0;
-            m_uiDieTimer = 500;
-            DoCast(m_creature, SPELL_SARONITE_VAPORS);
+            if (!m_bDie)
+            {
+                m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
+                m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+                m_creature->GetMotionMaster()->MoveIdle();
+                SetCombatMovement(false);
+                m_bDie = true;
+                DoCast(m_creature, SPELL_SARONITE_VAPORS);
+            }
         }
     }
 
@@ -445,9 +451,12 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
         if (m_pInstance && m_pInstance->GetData(TYPE_VEZAX) != IN_PROGRESS) 
             m_creature->ForcedDespawn();
 
-        if (m_uiDieTimer < diff)
-            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-        else m_uiDieTimer -= diff;
+        if (m_bDie)
+        {
+            if (m_uiDieTimer < diff)
+                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            else m_uiDieTimer -= diff;
+        }
     }
 };
 

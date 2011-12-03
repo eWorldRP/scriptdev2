@@ -36,6 +36,7 @@ npc_slim
 go_veil_skith_cage
 npc_captive_child
 npc_isla_starmane
+go_ancient_skull_pile
 EndContentData */
 
 #include "precompiled.h"
@@ -1076,6 +1077,23 @@ CreatureAI* GetAI_npc_isla_starmane(Creature* pCreature)
     return new npc_isla_starmaneAI(pCreature);
 }
 
+/*#####
+# go_ancient_skull_pile
+#####*/
+enum
+{
+    SPELL_SUMMON_TEROKK     = 41004,
+    ITEM_TIME_LOST_OFFERING = 32720,
+};
+
+bool GOUse_go_ancient_skull_pile(Player* pPlayer, GameObject* pGObject)
+{
+
+    pPlayer->CastSpell(pPlayer, SPELL_SUMMON_TEROKK, false);
+
+    return true;
+}
+
 void AddSC_terokkar_forest()
 {
     Script* pNewScript;
@@ -1152,5 +1170,10 @@ void AddSC_terokkar_forest()
     pNewScript->Name = "npc_isla_starmane";
     pNewScript->GetAI = &GetAI_npc_isla_starmane;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_isla_starmane;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_ancient_skull_pile";
+    pNewScript->pGOUse = &GOUse_go_ancient_skull_pile;
     pNewScript->RegisterSelf();
 }

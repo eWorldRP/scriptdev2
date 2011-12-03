@@ -266,6 +266,7 @@ struct MANGOS_DLL_DECL mob_legion_flameAI : public BSWScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->SetInCombatWithZone();
+        m_creature->SetDisplayId(27625);
         m_creature->SetRespawnDelay(DAY);
         m_uiRangeCheckTimer = 1000;
     }
@@ -452,7 +453,6 @@ CreatureAI* GetAI_mob_fel_infernal(Creature* pCreature)
 /*#####
 # Nether Portal
 #####*/
-#define SPELL_PORTAL_VISUAL 68424
 
 struct MANGOS_DLL_DECL mob_nether_portalAI : public BSWScriptedAI
 {
@@ -472,8 +472,7 @@ struct MANGOS_DLL_DECL mob_nether_portalAI : public BSWScriptedAI
         m_uiTimer = 15000;
         m_bHasSummoned = false;
         m_creature->SetRespawnDelay(DAY);
-        m_creature->SetDisplayId(22862);
-        m_creature->CastSpell(m_creature, SPELL_PORTAL_VISUAL, false);
+        m_creature->SetDisplayId(29074);
         if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
         {
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
