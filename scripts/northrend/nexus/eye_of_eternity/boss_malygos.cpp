@@ -969,7 +969,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
                 if (m_uiTimer <= uiDiff)
                 {
                     if (m_pInstance)
-                        if (GameObject* pPlatform = m_pInstance->instance->GetGameObject(m_pInstance->GetData64(GO_PLATFORM)))
+                        if (GameObject* pPlatform = m_pInstance->GetSingleGameObjectFromStorage(GO_PLATFORM))
                             pPlatform->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
 
 
