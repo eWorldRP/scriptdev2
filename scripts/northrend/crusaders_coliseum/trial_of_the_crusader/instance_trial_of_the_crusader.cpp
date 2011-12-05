@@ -28,7 +28,7 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
 {
     instance_trial_of_the_crusader(Map* pMap) : BSWScriptedInstance(pMap) 
     { 
-        Difficulty = pMap->GetDifficulty();
+        m_uiDifficulty = pMap->GetDifficulty();
         Initialize(); 
     }
 
@@ -36,7 +36,7 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
     uint32 m_auiEventTimer;
     uint32 m_auiEventNPCId;
     uint32 m_auiNorthrendBeasts[3];
-    uint8 Difficulty;
+    uint8 m_uiDifficulty;
     std::string m_strInstData;
     bool needsave;
 
@@ -78,7 +78,7 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
 
     void OnPlayerEnter(Player *m_player)
     {
-        if (Difficulty == RAID_DIFFICULTY_10MAN_HEROIC || Difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+        if (m_uiDifficulty >= RAID_DIFFICULTY_10MAN_HEROIC)
         {
             m_player->SendUpdateWorldState(UPDATE_STATE_UI_SHOW,1);
             m_player->SendUpdateWorldState(UPDATE_STATE_UI_COUNT, GetData(TYPE_COUNTER));
@@ -181,7 +181,7 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
         case TYPE_ANUBARAK:  m_auiEncounter[6] = uiData; 
                             if (uiData == DONE)
                             {
-                                if (Difficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+                                if (m_uiDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
                                 {
                                     if (m_auiEncounter[7] == 50)
                                         m_uiTributeChest = GO_TRIBUTE_CHEST_10H_50;
@@ -192,7 +192,7 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
                                     else
                                         m_uiTributeChest = GO_TRIBUTE_CHEST_10H_99;
                                 }
-                                if (Difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+                                if (m_uiDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
                                 {
                                     if (m_auiEncounter[7] == 50)
                                         m_uiTributeChest = GO_TRIBUTE_CHEST_25H_50;
@@ -219,7 +219,7 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
         case TYPE_SNAKES:
              m_auiNorthrendBeasts[1] = uiData;
              break;
-        case TYPE_ICEHOWL :
+        case TYPE_ICEHOWL:
              m_auiNorthrendBeasts[2] = uiData;
             break;
         case DATA_HEALTH_FJOLA:     m_uiDataDamageFjola = uiData; uiData = NOT_STARTED; break;
@@ -240,12 +240,25 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
             DoOpenDoor(GO_SOUTH_PORTCULLIS);
         }
 
-        if (uiData == FAIL && uiType != TYPE_STAGE && uiType != TYPE_EVENT && uiType != TYPE_COUNTER && uiType != TYPE_EVENT_TIMER)
+        if (uiData == FAIL)
         {
-            if (IsRaidWiped())
+            switch (uiType)
             {
-                --m_auiEncounter[7];
-                needsave = true;
+                case TYPE_BEASTS:
+                case TYPE_JARAXXUS:
+                case TYPE_CRUSADERS:
+                case TYPE_VALKIRIES:
+                case TYPE_ANUBARAK:
+                    --m_auiEncounter[7];
+                    needsave = true;
+                    if (m_uiDifficulty >= RAID_DIFFICULTY_10MAN_HEROIC)
+                    {
+                        DoUpdateWorldState(UPDATE_STATE_UI_SHOW, 1);
+                        DoUpdateWorldState(UPDATE_STATE_UI_COUNT, m_auiEncounter[7]);
+                    }
+                    break;
+                default:
+                    break;
             }
             uiData = NOT_STARTED;
         }
@@ -280,7 +293,7 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
             case TYPE_ANUBARAK:  return m_auiEncounter[6];
             case TYPE_COUNTER:   return m_auiEncounter[7];
             case TYPE_EVENT:     return m_auiEncounter[8];
-            case TYPE_DIFFICULTY:   return Difficulty;
+            case TYPE_DIFFICULTY:   return m_uiDifficulty;
             case TYPE_GORMOK:  return m_auiNorthrendBeasts[0];
             case TYPE_SNAKES:  return m_auiNorthrendBeasts[1];
             case TYPE_ICEHOWL: return m_auiNorthrendBeasts[2];

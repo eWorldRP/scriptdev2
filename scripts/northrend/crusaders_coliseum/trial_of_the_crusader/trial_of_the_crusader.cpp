@@ -114,7 +114,7 @@ struct MANGOS_DLL_DECL npc_toc_announcerAI : public ScriptedAI
                     {
                         pInstance->SetData(TYPE_STAGE, 0);
                         pInstance->SetData(TYPE_EVENT, 666);
-                        pInstance->SetData(TYPE_BEASTS, NOT_STARTED);
+                        pInstance->SetData(TYPE_BEASTS, FAIL);
                     }
                     break;
                 case 2:
@@ -131,7 +131,7 @@ struct MANGOS_DLL_DECL npc_toc_announcerAI : public ScriptedAI
                     {
                         pInstance->SetData(TYPE_STAGE, 0);
                         pInstance->SetData(TYPE_EVENT, 666);
-                        pInstance->SetData(TYPE_BEASTS, NOT_STARTED);
+                        pInstance->SetData(TYPE_BEASTS, FAIL);
                     }
                     break;
                 case 3:
@@ -145,7 +145,7 @@ struct MANGOS_DLL_DECL npc_toc_announcerAI : public ScriptedAI
                     {
                         pInstance->SetData(TYPE_STAGE, 0);
                         pInstance->SetData(TYPE_EVENT, 666);
-                        pInstance->SetData(TYPE_BEASTS, NOT_STARTED);
+                        pInstance->SetData(TYPE_BEASTS, FAIL);
                     }
                     break;
                 case 4:
