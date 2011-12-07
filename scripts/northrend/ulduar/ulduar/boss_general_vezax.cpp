@@ -414,7 +414,7 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
     void Reset()
     {
         m_bDie = false;
-        m_uiDieTimer = 30000;
+        m_uiDieTimer = 36000;
         m_creature->SetRespawnDelay(DAY);
     }
 
