@@ -116,115 +116,147 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
 
     void SetData(uint32 uiType, uint32 uiData)
     {
+
+        if (uiData == FAIL)
+        {
+            switch (uiType)
+            {
+                case TYPE_BEASTS:
+                case TYPE_JARAXXUS:
+                case TYPE_CRUSADERS:
+                case TYPE_VALKIRIES:
+                case TYPE_ANUBARAK:
+                    if (m_auiEncounter[uiType] != FAIL)
+                    {
+                        if (m_uiDifficulty >= RAID_DIFFICULTY_10MAN_HEROIC)
+                        {
+                            --m_auiEncounter[7];
+                            needsave = true;
+                            DoUpdateWorldState(UPDATE_STATE_UI_SHOW, 1);
+                            DoUpdateWorldState(UPDATE_STATE_UI_COUNT, m_auiEncounter[7]);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+            uiData = NOT_STARTED;
+        }
+
         switch(uiType)
         {
-        case TYPE_STAGE:    m_auiEncounter[0] = uiData; break;
-        case TYPE_BEASTS:   m_auiEncounter[1] = uiData; break;
-        case TYPE_JARAXXUS: m_auiEncounter[2] = uiData; break;
-        case TYPE_CRUSADERS:if (uiData == FAIL && (m_auiEncounter[3] == FAIL || m_auiEncounter[3] == NOT_STARTED))
-                            m_auiEncounter[3] = NOT_STARTED;
-                            else
-                                m_auiEncounter[3] = uiData;
-                            if (uiData == DONE) 
-                            {
-                               uint32 uiCacheEntry = GO_CRUSADERS_CACHE_10; 
+            case TYPE_STAGE:    m_auiEncounter[0] = uiData; break;
+            case TYPE_BEASTS:   m_auiEncounter[1] = uiData; break;
+            case TYPE_JARAXXUS: m_auiEncounter[2] = uiData; break;
+            case TYPE_CRUSADERS:
+                if (uiData == FAIL && (m_auiEncounter[3] == FAIL || m_auiEncounter[3] == NOT_STARTED))
+                    m_auiEncounter[3] = NOT_STARTED;
+                else
+                    m_auiEncounter[3] = uiData;
 
-                               switch (instance->GetDifficulty()) 
-                               { 
-                                   case RAID_DIFFICULTY_10MAN_HEROIC: 
-                                       uiCacheEntry = GO_CRUSADERS_CACHE_10_H; 
-                                       break; 
-                                   case RAID_DIFFICULTY_25MAN_NORMAL: 
-                                       uiCacheEntry = GO_CRUSADERS_CACHE_25; 
-                                       break; 
-                                   case RAID_DIFFICULTY_25MAN_HEROIC: 
-                                       uiCacheEntry = GO_CRUSADERS_CACHE_25_H; 
-                                       break; 
-                               } 
-                               if (GameObject* pChest = GetSingleGameObjectFromStorage(uiCacheEntry)) 
-                                   if (!pChest->isSpawned()) 
-                                       pChest->SetRespawnTime(7*DAY);
-                            }
+                if (uiData == DONE)
+                {
+                    uint32 uiCacheEntry = GO_CRUSADERS_CACHE_10;
+
+                    switch (instance->GetDifficulty())
+                    {
+                        case RAID_DIFFICULTY_10MAN_HEROIC:
+                            uiCacheEntry = GO_CRUSADERS_CACHE_10_H;
                             break;
-        case TYPE_CRUSADERS_COUNT:  if (uiData == 0) --m_auiCrusadersCount;
-                                         else m_auiCrusadersCount = uiData;
-                                    break;
-        case TYPE_VALKIRIES:
-                        if (m_auiEncounter[4] == SPECIAL && uiData == SPECIAL) 
-                            uiData = DONE;
+                        case RAID_DIFFICULTY_25MAN_NORMAL:
+                            uiCacheEntry = GO_CRUSADERS_CACHE_25;
+                            break;
+                        case RAID_DIFFICULTY_25MAN_HEROIC:
+                            uiCacheEntry = GO_CRUSADERS_CACHE_25_H;
+                            break;
+                    }
+                    if (GameObject* pChest = GetSingleGameObjectFromStorage(uiCacheEntry))
+                        if (!pChest->isSpawned())
+                            pChest->SetRespawnTime(7*DAY);
+                }
+                break;
+            case TYPE_CRUSADERS_COUNT:
+                if (uiData == 0)
+                    --m_auiCrusadersCount;
+                else
+                    m_auiCrusadersCount = uiData;
+                break;
+            case TYPE_VALKIRIES:
+                if (m_auiEncounter[4] == SPECIAL && uiData == SPECIAL)
+                    uiData = DONE;
 
-                        // remove light/dark essence and poweringup on success/wipe
-                        if(uiData == DONE || uiData == FAIL)
+                // remove light/dark essence and poweringup on success/wipe
+                if(uiData == DONE || uiData == FAIL)
+                {
+                    Map::PlayerList const &players = instance->GetPlayers();
+
+                    for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                    {
+                        if(Player* pPlayer = i->getSource())
                         {
-                            Map::PlayerList const &players = instance->GetPlayers();
-
-                            for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                            if(pPlayer && pPlayer->isAlive())
                             {
-                                if(Player* pPlayer = i->getSource())
-                                {
-                                    if(pPlayer && pPlayer->isAlive())
-                                    {
-                                        pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
-                                        pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE);
-                                        // powered up buffs
-                                        pPlayer->RemoveAurasDueToSpell(67590);
-                                        pPlayer->RemoveAurasDueToSpell(67602);
-                                        pPlayer->RemoveAurasDueToSpell(67603);
-                                        pPlayer->RemoveAurasDueToSpell(67604);
-                                    }
-                                }
+                                pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
+                                pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE);
+                                // powered up buffs
+                                pPlayer->RemoveAurasDueToSpell(67590);
+                                pPlayer->RemoveAurasDueToSpell(67602);
+                                pPlayer->RemoveAurasDueToSpell(67603);
+                                pPlayer->RemoveAurasDueToSpell(67604);
                             }
                         }
-                        m_auiEncounter[4] = uiData; 
-                        break;
-        case TYPE_LICH_KING: m_auiEncounter[5] = uiData; break;
-        case TYPE_ANUBARAK:  m_auiEncounter[6] = uiData; 
-                            if (uiData == DONE)
-                            {
-                                if (m_uiDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
-                                {
-                                    if (m_auiEncounter[7] == 50)
-                                        m_uiTributeChest = GO_TRIBUTE_CHEST_10H_50;
-                                    else if (m_auiEncounter[7] >= 45)
-                                        m_uiTributeChest = GO_TRIBUTE_CHEST_10H_45;
-                                    else if (m_auiEncounter[7] >= 25)
-                                        m_uiTributeChest = GO_TRIBUTE_CHEST_10H_25;
-                                    else
-                                        m_uiTributeChest = GO_TRIBUTE_CHEST_10H_99;
-                                }
-                                if (m_uiDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
-                                {
-                                    if (m_auiEncounter[7] == 50)
-                                        m_uiTributeChest = GO_TRIBUTE_CHEST_25H_50;
-                                    else if (m_auiEncounter[7] >= 45)
-                                        m_uiTributeChest = GO_TRIBUTE_CHEST_25H_45;
-                                    else if (m_auiEncounter[7] >= 25)
-                                        m_uiTributeChest = GO_TRIBUTE_CHEST_25H_25;
-                                    else
-                                        m_uiTributeChest = GO_TRIBUTE_CHEST_25H_99;
-                                }
-                            // reward for clearing TOC instance
-                                if (m_uiTributeChest)
-                                {
-                                    DoRespawnGameObject(GetSingleGameObjectFromStorage(m_uiTributeChest)->GetObjectGuid(), DAY);
-                                }
-                            }
-                            break;
-        case TYPE_COUNTER:   m_auiEncounter[7] = uiData; uiData = DONE; break;
-        case TYPE_EVENT:     m_auiEncounter[8] = uiData; uiData = NOT_STARTED; break;
-        case TYPE_EVENT_TIMER:      m_auiEventTimer = uiData; uiData = NOT_STARTED; break;
-        case TYPE_GORMOK:
-             m_auiNorthrendBeasts[0] = uiData;
-             break;
-        case TYPE_SNAKES:
-             m_auiNorthrendBeasts[1] = uiData;
-             break;
-        case TYPE_ICEHOWL:
-             m_auiNorthrendBeasts[2] = uiData;
-            break;
-        case DATA_HEALTH_FJOLA:     m_uiDataDamageFjola = uiData; uiData = NOT_STARTED; break;
-        case DATA_HEALTH_EYDIS:     m_uiDataDamageEydis = uiData; uiData = NOT_STARTED; break;
-        case DATA_CASTING_VALKYRS:  m_uiValkyrsCasting = uiData; uiData = NOT_STARTED; break;
+                    }
+                }
+                m_auiEncounter[4] = uiData;
+                break;
+            case TYPE_LICH_KING: m_auiEncounter[5] = uiData; break;
+            case TYPE_ANUBARAK:  m_auiEncounter[6] = uiData;
+                if (uiData == DONE)
+                {
+                    if (m_uiDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+                    {
+                        if (m_auiEncounter[7] == 50)
+                            m_uiTributeChest = GO_TRIBUTE_CHEST_10H_50;
+                        else if (m_auiEncounter[7] >= 45)
+                            m_uiTributeChest = GO_TRIBUTE_CHEST_10H_45;
+                        else if (m_auiEncounter[7] >= 25)
+                            m_uiTributeChest = GO_TRIBUTE_CHEST_10H_25;
+                        else
+                            m_uiTributeChest = GO_TRIBUTE_CHEST_10H_99;
+                    }
+                    if (m_uiDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+                    {
+                        if (m_auiEncounter[7] == 50)
+                            m_uiTributeChest = GO_TRIBUTE_CHEST_25H_50;
+                        else if (m_auiEncounter[7] >= 45)
+                            m_uiTributeChest = GO_TRIBUTE_CHEST_25H_45;
+                        else if (m_auiEncounter[7] >= 25)
+                            m_uiTributeChest = GO_TRIBUTE_CHEST_25H_25;
+                        else
+                            m_uiTributeChest = GO_TRIBUTE_CHEST_25H_99;
+                    }
+                    // reward for clearing TOC instance
+                    if (m_uiTributeChest)
+                    {
+                        DoRespawnGameObject(GetSingleGameObjectFromStorage(m_uiTributeChest)->GetObjectGuid(), DAY);
+                    }
+                }
+                break;
+            case TYPE_COUNTER:   m_auiEncounter[7] = uiData; uiData = DONE; break;
+            case TYPE_EVENT:     m_auiEncounter[8] = uiData; uiData = NOT_STARTED; break;
+            case TYPE_EVENT_TIMER:      m_auiEventTimer = uiData; uiData = NOT_STARTED; break;
+            case TYPE_GORMOK:
+                m_auiNorthrendBeasts[0] = uiData;
+                break;
+            case TYPE_SNAKES:
+                m_auiNorthrendBeasts[1] = uiData;
+                break;
+            case TYPE_ICEHOWL:
+                m_auiNorthrendBeasts[2] = uiData;
+                break;
+            case DATA_HEALTH_FJOLA:     m_uiDataDamageFjola = uiData; uiData = NOT_STARTED; break;
+            case DATA_HEALTH_EYDIS:     m_uiDataDamageEydis = uiData; uiData = NOT_STARTED; break;
+            case DATA_CASTING_VALKYRS:  m_uiValkyrsCasting = uiData; uiData = NOT_STARTED; break;
         }
 
         if (IsEncounterInProgress())
@@ -238,29 +270,6 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
             DoOpenDoor(GO_EAST_PORTCULLIS);
             DoOpenDoor(GO_NORTH_PORTCULLIS);
             DoOpenDoor(GO_SOUTH_PORTCULLIS);
-        }
-
-        if (uiData == FAIL)
-        {
-            switch (uiType)
-            {
-                case TYPE_BEASTS:
-                case TYPE_JARAXXUS:
-                case TYPE_CRUSADERS:
-                case TYPE_VALKIRIES:
-                case TYPE_ANUBARAK:
-                    --m_auiEncounter[7];
-                    needsave = true;
-                    if (m_uiDifficulty >= RAID_DIFFICULTY_10MAN_HEROIC)
-                    {
-                        DoUpdateWorldState(UPDATE_STATE_UI_SHOW, 1);
-                        DoUpdateWorldState(UPDATE_STATE_UI_COUNT, m_auiEncounter[7]);
-                    }
-                    break;
-                default:
-                    break;
-            }
-            uiData = NOT_STARTED;
         }
 
         if ((uiData == DONE && uiType != TYPE_STAGE && uiType != TYPE_EVENT && uiType != TYPE_EVENT_TIMER) || needsave == true)
