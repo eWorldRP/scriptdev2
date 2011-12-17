@@ -76,6 +76,7 @@ enum BossSpells
     SPELL_DARK_VORTEX      = 66058,
     SPELL_DARK_TOUCH       = 67282,
     SPELL_TWIN_POWER       = 65916,
+    SPELL_QUIKNESS         = 65949,
     SPELL_BERSERK          = 64238,
     SPELL_REMOVE_TOUCH     = 68084,
     SPELL_NONE             = 0,
@@ -273,14 +274,6 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
             return;
         }
 
-        if (pDoneBy->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (pDoneBy->HasAura(SPELL_LIGHT_ESSENCE))
-                uiDamage /= 2;
-            else if (pDoneBy->HasAura(SPELL_DARK_ESSENCE))
-                uiDamage += uiDamage/2;
-        }
-
         m_pInstance->SetData(DATA_HEALTH_FJOLA, m_creature->GetHealth() >= uiDamage ? m_creature->GetHealth() - uiDamage : 0);
     }
 
@@ -304,7 +297,7 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
                     if (pSis && pSis->isAlive())
                     {
                         pSis->RemoveAurasDueToSpell(SPELL_TWIN_POWER);
-                        pSis->RemoveAurasDueToSpell(65949);
+                        pSis->RemoveAurasDueToSpell(SPELL_QUIKNESS);
                     }
 
                     m_bIsPact = false;
@@ -436,7 +429,7 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
                 }
 
                 pSis->RemoveAurasDueToSpell(SPELL_TWIN_POWER);
-                pSis->RemoveAurasDueToSpell(65949);
+                pSis->RemoveAurasDueToSpell(SPELL_QUIKNESS);
 
                 m_bIsPact = false;
                 m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_NONE);
@@ -592,14 +585,6 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
             return;
         }
 
-        if(pDoneBy->GetTypeId() == TYPEID_PLAYER)
-        {
-            if(pDoneBy->HasAura(SPELL_DARK_ESSENCE))
-                uiDamage /= 2;
-            else if(pDoneBy->HasAura(SPELL_LIGHT_ESSENCE))
-                uiDamage += uiDamage/2;
-        }
-
         m_pInstance->SetData(DATA_HEALTH_EYDIS, m_creature->GetHealth() >= uiDamage ? m_creature->GetHealth() - uiDamage : 0);
     }
 
@@ -622,7 +607,7 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
                     if (pSis && pSis->isAlive())
                     {
                         pSis->RemoveAurasDueToSpell(SPELL_TWIN_POWER);
-                        pSis->RemoveAurasDueToSpell(65949);
+                        pSis->RemoveAurasDueToSpell(SPELL_QUIKNESS);
                     }
 
                     m_bIsPact = false;
@@ -710,9 +695,9 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
                     else
                     {
                         m_creature->InterruptNonMeleeSpells(true);
-                        DoCast(m_creature, GetRightShieldId(currentDifficulty,m_creature->GetEntry()));
+                        DoCast(m_creature, GetRightShieldId(currentDifficulty, m_creature->GetEntry()));
                         m_pInstance->SetData(DATA_CASTING_VALKYRS, GetRightPactId(currentDifficulty, m_creature->GetEntry()));
-                        DoScriptText(-1713539,m_creature);
+                        DoScriptText(-1713539, m_creature);
                         stage = 3;
                     }
                     m_uiSpecialAbilityTimer = 70000;
@@ -784,7 +769,7 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
                 }
                 
                 pSis->RemoveAurasDueToSpell(SPELL_TWIN_POWER);
-                pSis->RemoveAurasDueToSpell(65949);
+                pSis->RemoveAurasDueToSpell(SPELL_QUIKNESS);
 
                 m_bIsPact = false;
                 m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_NONE);
@@ -882,7 +867,6 @@ bool GossipHello_mob_light_essence(Player *player, Creature* pCreature)
 
     player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetObjectGuid());
     player->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE);
-    player->RemoveAurasDueToSpell(GetPoweringId(pCreature->GetMap()->GetDifficulty()));
 //        player->CastSpell(player,SPELL_REMOVE_TOUCH,false); // Not worked now
     player->CastSpell(player,SPELL_LIGHT_ESSENCE,false);
     player->RemoveAurasDueToSpell(SPELL_LIGHT_TOUCH); // Override for REMOVE_TOUCH
@@ -944,7 +928,6 @@ bool GossipHello_mob_dark_essence(Player *player, Creature* pCreature)
         return true;
     player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetObjectGuid());
     player->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
-    player->RemoveAurasDueToSpell(pCreature->GetMap()->GetDifficulty());
 //        player->CastSpell(player,SPELL_REMOVE_TOUCH,false); // Not worked now
     player->CastSpell(player,SPELL_DARK_ESSENCE,false);
     player->RemoveAurasDueToSpell(SPELL_DARK_TOUCH); // Override for REMOVE_TOUCH
