@@ -140,7 +140,6 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
                 default:
                     break;
             }
-            uiData = NOT_STARTED;
         }
 
         switch(uiType)
