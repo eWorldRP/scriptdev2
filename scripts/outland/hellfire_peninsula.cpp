@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Hellfire_Peninsula
 SD%Complete: 100
-SDComment: Quest support: 9375, 9410, 9418, 10838
+SDComment: Quest support: 9375, 9410, 9418, 10629, 10838
 SDCategory: Hellfire Peninsula
 EndScriptData */
 
@@ -27,6 +27,7 @@ npc_ancestral_wolf
 npc_demoniac_scryer
 npc_tracy_proudwell
 npc_wounded_blood_elf
+npc_felguard_hound
 EndContentData */
 
 #include "precompiled.h"
@@ -474,6 +475,68 @@ bool QuestAccept_npc_wounded_blood_elf(Player* pPlayer, Creature* pCreature, con
     return true;
 }
 
+/*####
+## npc_felguard_hound
+####*/
+
+#define SPELL_POO               37688
+#define NPC_DERANGED_HELBOAR    16863
+
+struct MANGOS_DLL_DECL npc_felguard_houndAI : public ScriptedAI
+{
+    npc_felguard_houndAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
+    }
+
+    bool m_bCreatedByPlayer;
+    uint32 m_uiCheckTimer;
+
+    void Reset ()
+    {
+        m_bCreatedByPlayer = false;
+        if (Unit* pCreator = m_creature->GetCreator())
+        {
+            if (pCreator->GetTypeId() == TYPEID_PLAYER)
+            {
+                m_creature->GetMotionMaster()->MoveFollow(pCreator, 3.0f, 1.57f);
+                m_bCreatedByPlayer = true;
+                m_uiCheckTimer = 100;
+            }
+        }
+    }
+
+    void UpdateAI (const uint32 uiDiff)
+    {
+        if (m_bCreatedByPlayer)
+        {
+            if (m_uiCheckTimer < uiDiff)
+            {
+                std::list<Creature*> lBoarList;
+                GetCreatureListWithEntryInGrid(lBoarList, m_creature, NPC_DERANGED_HELBOAR, 10.0f);
+                if (!lBoarList.empty())
+                {
+                    for (std::list<Creature*>::iterator iter = lBoarList.begin(); iter != lBoarList.end(); ++iter)
+                    {
+                        if ((*iter) && !(*iter)->isAlive())
+                        {
+                            DoCast(m_creature, SPELL_POO);
+                            (*iter)->ForcedDespawn();
+                        }
+                    }
+                }
+                m_uiCheckTimer = 1000;
+            }
+            else m_uiCheckTimer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_felguard_hound(Creature* pCreature)
+{
+    return new npc_felguard_houndAI(pCreature);
+}
+
 void AddSC_hellfire_peninsula()
 {
     Script* pNewScript;
@@ -505,5 +568,10 @@ void AddSC_hellfire_peninsula()
     pNewScript->Name = "npc_wounded_blood_elf";
     pNewScript->GetAI = &GetAI_npc_wounded_blood_elf;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_wounded_blood_elf;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_felguard_hound";
+    pNewScript->GetAI = &GetAI_npc_felguard_hound;
     pNewScript->RegisterSelf();
 }
