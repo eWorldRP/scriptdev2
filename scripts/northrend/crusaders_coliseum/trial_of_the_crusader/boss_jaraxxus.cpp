@@ -326,7 +326,7 @@ struct MANGOS_DLL_DECL mob_infernal_volcanoAI : public BSWScriptedAI
         m_uiTimer = 5000;
         m_creature->SetRespawnDelay(DAY);
         m_uiCount = 0;
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL) 
+        if (currentDifficulty <= RAID_DIFFICULTY_25MAN_NORMAL)
         {
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
@@ -361,7 +361,7 @@ struct MANGOS_DLL_DECL mob_infernal_volcanoAI : public BSWScriptedAI
         if (m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
             m_creature->ForcedDespawn();
 
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
+        if (currentDifficulty <= RAID_DIFFICULTY_25MAN_NORMAL)
         {
             if (m_uiCount >= 3)
             {
@@ -473,7 +473,7 @@ struct MANGOS_DLL_DECL mob_nether_portalAI : public BSWScriptedAI
         m_bHasSummoned = false;
         m_creature->SetRespawnDelay(DAY);
         m_creature->SetDisplayId(29074);
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
+        if (currentDifficulty <= RAID_DIFFICULTY_25MAN_NORMAL)
         {
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
@@ -509,7 +509,7 @@ struct MANGOS_DLL_DECL mob_nether_portalAI : public BSWScriptedAI
         if (m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS )
             m_creature->ForcedDespawn();
 
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL)
+        if (currentDifficulty <= RAID_DIFFICULTY_25MAN_NORMAL)
         {
             if (m_bHasSummoned)
             {
@@ -592,7 +592,7 @@ struct MANGOS_DLL_DECL mob_mistress_of_painAI : public BSWScriptedAI
 
         timedCast(SPELL_SPINNING_STRIKE, uiDiff);
 
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+        if (currentDifficulty >= RAID_DIFFICULTY_10MAN_HEROIC)
             timedCast(SPELL_MISTRESS_KISS, uiDiff);
 
         DoMeleeAttackIfReady();

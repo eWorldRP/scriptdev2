@@ -46,30 +46,41 @@ enum BossSpells
     SPELL_LEECHING_HEAL     = 66125,
     SPELL_LEECHING_DAMAGE   = 66240,
     SPELL_IMPALE            = 65920,
+    SPELL_SPIKE_PERMA       = 66181,
     SPELL_SPIKE_CALL        = 66169,
     SPELL_POUND             = 66012,
     SPELL_SHOUT             = 67730,
     SPELL_SUBMERGE_0        = 53421,
     SPELL_SUBMERGE_1        = 67322,
     SPELL_SUMMON_BEATLES    = 66339,
+    SPELL_BERSERK           = 26662,
+
+    // Scarabs' Spell
     SPELL_DETERMINATION     = 66092,
     SPELL_ACID_MANDIBLE     = 67861,
+
+    //Burrowers' Spells
     SPELL_SPIDER_FRENZY     = 66129,
     SPELL_SHADOW_STRIKE     = 66134,
     SPELL_EXPOSE_WEAKNESS   = 67847,
+
     SUMMON_SCARAB           = NPC_SCARAB,
     SUMMON_BORROWER         = NPC_BURROWER,
-    SPELL_BERSERK           = 26662,
-    SPELL_PERMAFROST        = 66193,
+
+    // Permafrost
+    SPELL_PERMAFROST_N10    = 66193,
+    SPELL_PERMAFROST_N25    = 67855,
+    SPELL_PERMAFROST_H10    = 67856,
+    SPELL_PERMAFROST_H25    = 67857,
     SPELL_PERMAFROST_VISUAL = 65882,
 };
 
 bool HasPermafrostAura(Unit* pWho)
 {
-    if(pWho->HasAura(67855) 
-    || pWho->HasAura(67856) 
-    || pWho->HasAura(67857)
-    || pWho->HasAura(66193))
+    if(pWho->HasAura(SPELL_PERMAFROST_N25)
+    || pWho->HasAura(SPELL_PERMAFROST_H10)
+    || pWho->HasAura(SPELL_PERMAFROST_H25)
+    || pWho->HasAura(SPELL_PERMAFROST_N10))
         return true;
 
     return false;
@@ -77,10 +88,10 @@ bool HasPermafrostAura(Unit* pWho)
 
 void RemovePermafrostAura(Unit* pWho)
 {
-    pWho->RemoveAurasDueToSpell(67855);
-    pWho->RemoveAurasDueToSpell(67856);
-    pWho->RemoveAurasDueToSpell(67857);
-    pWho->RemoveAurasDueToSpell(66193);
+    pWho->RemoveAurasDueToSpell(SPELL_PERMAFROST_N25);
+    pWho->RemoveAurasDueToSpell(SPELL_PERMAFROST_H10);
+    pWho->RemoveAurasDueToSpell(SPELL_PERMAFROST_H25);
+    pWho->RemoveAurasDueToSpell(SPELL_PERMAFROST_N10);
 }
 /*#####
 # Anub'Arak
@@ -126,7 +137,7 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
         DoScriptText(-1713563,m_creature);
     }
 
-    void MoveInLineOfSight(Unit* pWho) 
+    void MoveInLineOfSight(Unit* pWho)
     {
         if (!m_bIntro)
             return;
@@ -148,7 +159,7 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
     {
         if (!m_pInstance)
             return;
-        DoScriptText(-1713564,m_creature);
+        DoScriptText(-1713564, m_creature);
         m_pInstance->SetData(TYPE_ANUBARAK, DONE);
     }
 
@@ -195,7 +206,7 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
                     m_pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
 //                         doCast(SPELL_SPIKE_CALL);
 //                         This summon not supported in database. Temporary override.
-                    Unit* pSpike = doSummon(NPC_SPIKE, TEMPSUMMON_TIMED_DESPAWN, 8000);
+                    Unit* pSpike = doSummon(NPC_SPIKE, TEMPSUMMON_TIMED_DESPAWN, 15000);
                     if (pSpike)
                     {
                         pSpike->AddThreat(m_pTarget, 100000.0f);
@@ -232,7 +243,6 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
                 m_uiStage = 5;
                 break;
             case 5:
-
                 timedCast(SPELL_POUND, uiDiff);
                 timedCast(SPELL_COLD, uiDiff);
                 break;
@@ -243,14 +253,14 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
         {
             timedCast(NPC_FROST_SPHERE_10, uiDiff);
 
-            //if heroic increase de sphere count
-            if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            //if heroic increase the sphere count
+            if (currentDifficulty >= RAID_DIFFICULTY_10MAN_HEROIC)
                 m_uiFrostSpheres++;
         }
 
         if (m_uiBurrowerSummonTimer < uiDiff)
         {
-            if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            if (currentDifficulty >= RAID_DIFFICULTY_10MAN_HEROIC)
             {
                 //two Burrower in each phase in hero mode
                 m_uiBurrowerSummonTimer = 90000;
@@ -260,7 +270,7 @@ struct MANGOS_DLL_DECL boss_anubarak_trialAI : public BSWScriptedAI
             }
             else
             {
-                if (m_uiStage != 4 || m_uiStage != 5)
+                if (m_uiStage != 5)
                 {
                     //one Burrower in the firsts phases in normal mode
                     m_uiBurrowerSummonTimer = 90000;
@@ -328,7 +338,7 @@ struct MANGOS_DLL_DECL mob_swarm_scarabAI : public BSWScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (m_pInstance && m_pInstance->GetData(TYPE_ANUBARAK) != IN_PROGRESS) 
+        if (m_pInstance && m_pInstance->GetData(TYPE_ANUBARAK) != IN_PROGRESS)
             m_creature->ForcedDespawn();
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -416,14 +426,14 @@ struct MANGOS_DLL_DECL mob_nerubian_borrowerAI : public BSWScriptedAI
         }
         else m_uiRangeCheckTimer -= uiDiff;
 
-        if (m_creature->GetHealthPercent() < 20.0f && timedQuery(SPELL_SUBMERGE_1, uiDiff) && !m_bSubmerged)
+        if (!m_bSubmerged && m_creature->GetHealthPercent() < 20.0f && timedQuery(SPELL_SUBMERGE_1, uiDiff))
         {
             doCast(SPELL_SUBMERGE_1);
             m_bSubmerged = true;
             DoScriptText(-1713557, m_creature);
         }
 
-        if (m_creature->GetHealthPercent() > 50.0f && m_bSubmerged)
+        if (m_bSubmerged && m_creature->GetHealthPercent() > 50.0f)
         {
              doRemove(SPELL_SUBMERGE_1, m_creature);
              m_bSubmerged = false;
@@ -431,7 +441,7 @@ struct MANGOS_DLL_DECL mob_nerubian_borrowerAI : public BSWScriptedAI
          }
 
         // only hero ability and only if not-submerged
-        if (!m_bSubmerged && (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC))
+        if (!m_bSubmerged && (currentDifficulty >= RAID_DIFFICULTY_10MAN_HEROIC))
         {
             if (m_uiStrikeTimer < uiDiff)
             {
@@ -442,6 +452,7 @@ struct MANGOS_DLL_DECL mob_nerubian_borrowerAI : public BSWScriptedAI
             }
             else m_uiStrikeTimer -= uiDiff;
         }
+
         DoMeleeAttackIfReady();
     }
 };
@@ -464,7 +475,6 @@ struct MANGOS_DLL_DECL mob_frost_sphereAI : public BSWScriptedAI
     }
 
     ScriptedInstance* m_pInstance;
-    bool m_bMustDie;
     bool m_bCanCast;
     bool m_bFirstTime;
 
@@ -501,17 +511,18 @@ struct MANGOS_DLL_DECL mob_frost_sphereAI : public BSWScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!m_pInstance || m_pInstance->GetData(TYPE_ANUBARAK) != IN_PROGRESS) 
+        if (!m_pInstance || m_pInstance->GetData(TYPE_ANUBARAK) != IN_PROGRESS)
            m_creature->ForcedDespawn();
 
         if (m_bCanCast && m_bFirstTime)
         {
             DoCast(m_creature, SPELL_PERMAFROST_VISUAL);
             uint32 PermafrostId = 0;
-            if (currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL || currentDifficulty == RAID_DIFFICULTY_25MAN_NORMAL) 
-                PermafrostId = 66193;
+            if (currentDifficulty <= RAID_DIFFICULTY_25MAN_NORMAL)
+                PermafrostId = SPELL_PERMAFROST_N10;
             else
-                PermafrostId = 67856;
+                PermafrostId = SPELL_PERMAFROST_H10;
+
             DoCast(m_creature, PermafrostId, true);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -537,7 +548,7 @@ struct MANGOS_DLL_DECL mob_anubarak_spikeAI : public BSWScriptedAI
     }
 
     ScriptedInstance* m_pInstance;
-    Unit* defaultTarget;
+    Unit* pDefaultTarget;
 
     void Reset()
     {
@@ -545,20 +556,23 @@ struct MANGOS_DLL_DECL mob_anubarak_spikeAI : public BSWScriptedAI
         m_creature->SetSpeedRate(MOVE_RUN, 0.5f);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        defaultTarget = NULL;
+        pDefaultTarget = NULL;
     }
 
-    void Aggro(Unit *who)
+    void Aggro(Unit *pWho)
     {
-        if (!m_pInstance) return;
-        doCast(SPELL_IMPALE);
-        defaultTarget = who;
+        if (!m_pInstance)
+            return;
+
+        DoCast(m_creature, SPELL_IMPALE);
+        pDefaultTarget = pWho;
     }
     
     void DamageDeal(Unit* pDoneTo, uint32& uiDamage) 
     {
         if (HasPermafrostAura(pDoneTo))
         {
+            DoCast(m_creature, SPELL_SPIKE_PERMA);
             uiDamage = 0;
             m_creature->ForcedDespawn();
             if(Creature* pTemp = GetClosestCreatureWithEntry(pDoneTo, NPC_FROST_SPHERE_10, 10.0f))
@@ -570,11 +584,14 @@ struct MANGOS_DLL_DECL mob_anubarak_spikeAI : public BSWScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (m_pInstance && m_pInstance->GetData(TYPE_ANUBARAK) != IN_PROGRESS) 
+        if (m_pInstance && m_pInstance->GetData(TYPE_ANUBARAK) != IN_PROGRESS)
             m_creature->ForcedDespawn();
-        if (defaultTarget)
-            if (!defaultTarget->isAlive() || !hasAura(SPELL_MARK,defaultTarget))
+
+        if (pDefaultTarget)
+        {
+            if (!pDefaultTarget->isAlive() || !hasAura(SPELL_MARK, pDefaultTarget))
                  m_creature->ForcedDespawn();
+        }
 
         if(HasPermafrostAura(m_creature))
         {
