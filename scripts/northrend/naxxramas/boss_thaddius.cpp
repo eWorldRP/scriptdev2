@@ -94,9 +94,9 @@ enum
 ************/
 
 // Actually this boss behaves like a NoMovement Boss (SPELL_BALL_LIGHTNING) - but there are some movement packages used, unknown what this means!
-struct MANGOS_DLL_DECL boss_thaddiusAI : public Scripted_NoMovementAI
+struct MANGOS_DLL_DECL boss_thaddiusAI : public ScriptedAI
 {
-    boss_thaddiusAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    boss_thaddiusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
@@ -143,13 +143,13 @@ struct MANGOS_DLL_DECL boss_thaddiusAI : public Scripted_NoMovementAI
             Creature* pStalagg = m_pInstance->GetSingleCreatureFromStorage(NPC_STALAGG);
             if (pFeugen)
             {
-                pFeugen->ForcedDespawn();
-                pFeugen->Respawn();
+                if (pFeugen->isDead())
+                    pFeugen->Respawn();
             }
             if (pStalagg)
             {
-                pStalagg->ForcedDespawn();
-                pStalagg->Respawn();
+                if (pStalagg->isDead())
+                    pStalagg->Respawn();
             }
         }
 
@@ -199,6 +199,28 @@ struct MANGOS_DLL_DECL boss_thaddiusAI : public Scripted_NoMovementAI
         }
     }
 
+    void SpellHit(Unit* who, const SpellEntry* pSpell)
+    {
+        switch (pSpell->Id)
+        {
+            case SPELL_SHOCK_OVERLOAD:
+                // Only do something to Thaddius, and on the first hit.
+                if (!m_creature->HasAura(SPELL_THADIUS_SPAWN))
+                    return;
+                // remove Stun and then Cast
+                m_creature->RemoveAurasDueToSpell(SPELL_THADIUS_SPAWN);
+                m_creature->CastSpell(m_creature, SPELL_THADIUS_LIGHTNING_VISUAL, false);
+                break;
+            case SPELL_THADIUS_LIGHTNING_VISUAL:
+                // Make Attackable
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetInCombatWithZone();
+                break;
+            default:
+                break;
+        }
+    }
+
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_pInstance)
@@ -241,8 +263,9 @@ struct MANGOS_DLL_DECL boss_thaddiusAI : public Scripted_NoMovementAI
 
         // Ball Lightning if target not in melee range
         // TODO: Verify, likely that the boss should attack any enemy in melee range before starting to cast
-        if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+        if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim(), 10.0f))
         {
+            SetCombatMovement(false);
             if (m_uiBallLightningTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BALL_LIGHTNING) == CAST_OK)
@@ -252,7 +275,10 @@ struct MANGOS_DLL_DECL boss_thaddiusAI : public Scripted_NoMovementAI
                 m_uiBallLightningTimer -= uiDiff;
         }
         else
+        {
+            SetCombatMovement(true);
             DoMeleeAttackIfReady();
+        }
     }
 };
 
@@ -261,35 +287,6 @@ CreatureAI* GetAI_boss_thaddius(Creature* pCreature)
     return new boss_thaddiusAI(pCreature);
 }
 
-bool EffectDummyNPC_spell_thaddius_encounter(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget)
-{
-    switch (uiSpellId)
-    {
-        case SPELL_SHOCK_OVERLOAD:
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                // Only do something to Thaddius, and on the first hit.
-                if (pCreatureTarget->GetEntry() != NPC_THADDIUS || !pCreatureTarget->HasAura(SPELL_THADIUS_SPAWN))
-                    return true;
-                // remove Stun and then Cast
-                pCreatureTarget->RemoveAurasDueToSpell(SPELL_THADIUS_SPAWN);
-                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_THADIUS_LIGHTNING_VISUAL, false);
-            }
-            return true;
-        case SPELL_THADIUS_LIGHTNING_VISUAL:
-            if (uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_THADDIUS)
-            {
-                if (instance_naxxramas* pInstance = (instance_naxxramas*)pCreatureTarget->GetInstanceData())
-                {
-                    // Make Attackable
-                    pCreatureTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    pCreatureTarget->SetInCombatWithZone();
-                }
-            }
-            return true;
-    }
-    return false;
-}
 
 /************
 ** npc_tesla_coil
@@ -404,10 +401,13 @@ struct MANGOS_DLL_DECL npc_tesla_coilAI : public Scripted_NoMovementAI
             if (m_uiOverloadTimer <=  uiDiff)
             {
                 m_uiOverloadTimer = 0;
-                m_creature->RemoveAurasDueToSpell(m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE);
-                DoCastSpellIfCan(m_creature,  SPELL_SHOCK_OVERLOAD, CAST_INTERRUPT_PREVIOUS);
-                DoScriptText(EMOTE_TESLA_OVERLOAD, m_creature);
-                m_pInstance->DoUseDoorOrButton(m_bToFeugen ? GO_CONS_NOX_TESLA_FEUGEN : GO_CONS_NOX_TESLA_STALAGG);
+                if (Creature* pThaddius = m_pInstance->GetSingleCreatureFromStorage(NPC_THADDIUS))
+                {
+                    m_creature->RemoveAurasDueToSpell(m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE);
+                    DoCastSpellIfCan(pThaddius,  SPELL_SHOCK_OVERLOAD, CAST_INTERRUPT_PREVIOUS);
+                    DoScriptText(EMOTE_TESLA_OVERLOAD, m_creature);
+                    m_pInstance->DoUseDoorOrButton(m_bToFeugen ? GO_CONS_NOX_TESLA_FEUGEN : GO_CONS_NOX_TESLA_STALAGG);
+                }
             }
             else
                 m_uiOverloadTimer -= uiDiff;
@@ -504,7 +504,9 @@ struct MANGOS_DLL_DECL boss_thaddiusAddsAI : public ScriptedAI
             if (Creature* pTesla = m_pInstance->instance->GetCreature(*itr))
             {
                 if (npc_tesla_coilAI* pTeslaAI = dynamic_cast<npc_tesla_coilAI*> (pTesla->AI()))
+                {
                     pTeslaAI->ReApplyChain(m_creature->GetEntry());
+                }
             }
         }
     }
@@ -548,7 +550,7 @@ struct MANGOS_DLL_DECL boss_thaddiusAddsAI : public ScriptedAI
     void PauseCombatMovement()
     {
         SetCombatMovement(false);
-        m_uiHoldTimer = 1500;
+        m_uiHoldTimer = 3000;
     }
 
     virtual void UpdateAddAI(const uint32 uiDiff) {}        // Used for Add-specific spells
@@ -765,7 +767,6 @@ void AddSC_boss_thaddius()
     pNewScript = new Script;
     pNewScript->Name = "boss_thaddius";
     pNewScript->GetAI = &GetAI_boss_thaddius;
-    pNewScript->pEffectDummyNPC = &EffectDummyNPC_spell_thaddius_encounter;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -781,6 +782,5 @@ void AddSC_boss_thaddius()
     pNewScript = new Script;
     pNewScript->Name = "npc_tesla_coil";
     pNewScript->GetAI = &GetAI_npc_tesla_coil;
-    pNewScript->pEffectDummyNPC = &EffectDummyNPC_spell_thaddius_encounter;
     pNewScript->RegisterSelf();
 }
