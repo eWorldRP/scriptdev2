@@ -320,7 +320,7 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
             m_creature->getThreatManager().addThreat(m_creature->getVictim(), -sisThreat);
         }
 
-        if (m_creature->GetHealth() >= m_pInstance->GetData(DATA_HEALTH_EYDIS) && m_pInstance->GetData(DATA_HEALTH_EYDIS) != 0)
+        if (m_creature->GetHealth() >= m_pInstance->GetData(DATA_HEALTH_EYDIS))
             m_creature->SetHealth(m_pInstance->GetData(DATA_HEALTH_EYDIS));
 
         switch (stage)
@@ -328,7 +328,7 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
          case 0:
                 timedCast(SPELL_TWIN_SPIKE_L, uiDiff);
 
-                if(currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+                if(currentDifficulty >= RAID_DIFFICULTY_10MAN_HEROIC)
                 {
                     if (timedQuery(SPELL_LIGHT_TOUCH, uiDiff))
                     {
@@ -628,7 +628,7 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
             m_creature->getThreatManager().addThreat(m_creature->getVictim(), -sisThreat);
         }
 
-        if (m_creature->GetHealth() >= m_pInstance->GetData(DATA_HEALTH_FJOLA) && m_pInstance->GetData(DATA_HEALTH_FJOLA) != 0)
+        if (m_creature->GetHealth() >= m_pInstance->GetData(DATA_HEALTH_FJOLA))
             m_creature->SetHealth(m_pInstance->GetData(DATA_HEALTH_FJOLA));
 
         
@@ -668,7 +668,7 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
          case 0:
                 timedCast(SPELL_TWIN_SPIKE_H, uiDiff);
                 
-                if(currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+                if(currentDifficulty >= RAID_DIFFICULTY_10MAN_HEROIC)
                 {
                     if (timedQuery(SPELL_DARK_TOUCH, uiDiff))
                     {

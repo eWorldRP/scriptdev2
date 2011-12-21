@@ -64,6 +64,29 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
         m_auiEventTimer = 1000;
         m_auiCrusadersCount = 6;
         m_uiTributeChest = 0;
+
+        uint32 uiTwinHealt;
+        switch (m_uiDifficulty)
+        {
+            case RAID_DIFFICULTY_10MAN_NORMAL:
+                uiTwinHealt = 6066075;
+                break;
+            case RAID_DIFFICULTY_25MAN_NORMAL:
+                uiTwinHealt = 8367000;
+                break;
+            case RAID_DIFFICULTY_10MAN_HEROIC:
+                uiTwinHealt = 27890000;
+                break;
+            case RAID_DIFFICULTY_25MAN_HEROIC:
+                uiTwinHealt = 39046000;
+                break;
+            default:
+                uiTwinHealt = 5000000;
+                break;
+        }
+        m_uiDataDamageFjola = uiTwinHealt;
+        m_uiDataDamageEydis = uiTwinHealt;
+
         needsave = false;
     }
 
@@ -204,6 +227,31 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
                                 pPlayer->RemoveAurasDueToSpell(67604);
                             }
                         }
+                    }
+
+                    if (uiData == FAIL)
+                    {
+                        uint32 uiTwinHealt;
+                        switch (m_uiDifficulty)
+                        {
+                        case RAID_DIFFICULTY_10MAN_NORMAL:
+                            uiTwinHealt = 6066075;
+                            break;
+                        case RAID_DIFFICULTY_25MAN_NORMAL:
+                            uiTwinHealt = 8367000;
+                            break;
+                        case RAID_DIFFICULTY_10MAN_HEROIC:
+                            uiTwinHealt = 27890000;
+                            break;
+                        case RAID_DIFFICULTY_25MAN_HEROIC:
+                            uiTwinHealt = 39046000;
+                            break;
+                        default:
+                            uiTwinHealt = 5000000;
+                            break;
+                        }
+                        m_uiDataDamageFjola = uiTwinHealt;
+                        m_uiDataDamageEydis = uiTwinHealt;
                     }
                 }
                 m_auiEncounter[4] = uiData;
