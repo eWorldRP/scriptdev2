@@ -85,8 +85,8 @@ enum BossSpells
     SPELL_UNLEASHED_LIGHT  = 65795,
     // Power Up
     SPELL_POWERUP_N10       = 67590,
-    SPELL_POWERUP_N25       = 67603,
-    SPELL_POWERUP_H10       = 67602,
+    SPELL_POWERUP_N25       = 67602,
+    SPELL_POWERUP_H10       = 67603,
     SPELL_POWERUP_H25       = 67604,
 
     // Empowered
