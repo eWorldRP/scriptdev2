@@ -218,13 +218,29 @@ struct MANGOS_DLL_DECL instance_trial_of_the_crusader : public BSWScriptedInstan
                         {
                             if(pPlayer && pPlayer->isAlive())
                             {
-                                pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
-                                pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE);
-                                // powered up buffs
-                                pPlayer->RemoveAurasDueToSpell(67590);
-                                pPlayer->RemoveAurasDueToSpell(67602);
-                                pPlayer->RemoveAurasDueToSpell(67603);
-                                pPlayer->RemoveAurasDueToSpell(67604);
+                                switch(m_uiDifficulty)
+                                {
+                                    case RAID_DIFFICULTY_10MAN_NORMAL:
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE);
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_POWERUP_N10);
+                                        break;
+                                    case RAID_DIFFICULTY_25MAN_NORMAL:
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE_N25);
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE_N25);
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_POWERUP_N25);
+                                        break;
+                                    case RAID_DIFFICULTY_10MAN_HEROIC:
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE_H10);
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE_H10);
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_POWERUP_H10);
+                                        break;
+                                    case RAID_DIFFICULTY_25MAN_HEROIC:
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE_H25);
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE_H25);
+                                        pPlayer->RemoveAurasDueToSpell(SPELL_POWERUP_H25);
+                                        break;
+                                }
                             }
                         }
                     }

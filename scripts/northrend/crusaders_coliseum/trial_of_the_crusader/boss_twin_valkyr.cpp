@@ -83,11 +83,6 @@ enum BossSpells
 
     SPELL_UNLEASHED_DARK   = 65808,
     SPELL_UNLEASHED_LIGHT  = 65795,
-    // Power Up
-    SPELL_POWERUP_N10       = 67590,
-    SPELL_POWERUP_N25       = 67602,
-    SPELL_POWERUP_H10       = 67603,
-    SPELL_POWERUP_H25       = 67604,
 
     // Empowered
     SPELL_EMPOWERED_LIGHT_25N   = 67216,
@@ -174,13 +169,9 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
 
     ScriptedInstance* m_pInstance;
     uint8 stage;
-    uint32 m_uiVortexTimer;
-    uint32 m_uiIncrease;
     uint32 m_uiPactTimer;
     uint32 m_uiSpecialAbilityTimer;
-    uint8 m_uiReply;
     bool m_bVortexOrPact;
-    bool m_bIsVortex;
     bool m_bIsPact;
 
     void Reset()
@@ -189,8 +180,7 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
             return;
 
         m_pInstance->SetData(DATA_HEALTH_FJOLA, m_creature->GetMaxHealth());
-        
-        m_uiVortexTimer = 1000;
+
 
         SetEquipmentSlots(false, EQUIP_MAIN_1, EQUIP_OFFHAND_1, EQUIP_RANGED_1);
         m_creature->SetRespawnDelay(7*DAY);
@@ -198,12 +188,7 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
         stage = 0;
         m_uiSpecialAbilityTimer = 45000;
         m_bVortexOrPact = true;
-        m_bIsVortex = false;
         m_bIsPact = false;
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL)
-            m_uiIncrease = 6;
-        else
-            m_uiIncrease = 9;
     }
 
     void JustReachedHome()
@@ -307,6 +292,58 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
         }
     }
 
+    Unit* SelectOppositeColorTarget()
+    {
+        Map* pMap = m_creature->GetMap();
+        Map::PlayerList const &pList = pMap->GetPlayers();
+        if (pList.isEmpty()) return NULL;
+
+        std::vector<Unit*> lTargetable;
+        lTargetable.clear();
+
+        uint32 uiOppositeColor;
+        switch (currentDifficulty)
+        {
+            case RAID_DIFFICULTY_10MAN_NORMAL:
+                uiOppositeColor = SPELL_DARK_ESSENCE;
+                    break;
+            case RAID_DIFFICULTY_25MAN_NORMAL:
+                uiOppositeColor = SPELL_DARK_ESSENCE_N25;
+                break;
+            case RAID_DIFFICULTY_10MAN_HEROIC:
+                uiOppositeColor = SPELL_DARK_ESSENCE_H10;
+                break;
+            case RAID_DIFFICULTY_25MAN_HEROIC:
+                uiOppositeColor = SPELL_DARK_ESSENCE_H25;
+                break;
+            default:
+                uiOppositeColor = 0;
+                break;
+        }
+        if (!uiOppositeColor)
+            return NULL;
+
+        for(Map::PlayerList::const_iterator i = pList.begin(); i != pList.end(); ++i)
+        {
+            if (Player* pPlayer = i->getSource())
+            {
+                if (pPlayer->isGameMaster())
+                    continue;
+
+                if (pPlayer->isAlive() && pPlayer->IsWithinDistInMap(m_creature, 50.0f))
+                {
+                    if (pPlayer->HasAura(uiOppositeColor))
+                        lTargetable.push_back((Unit*)pPlayer);
+                }
+            }
+        }
+
+        if (lTargetable.empty())
+            return NULL;
+        else
+            return lTargetable[urand(0, lTargetable.size() - 1)];
+    }
+
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_pInstance)
@@ -332,7 +369,7 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
                 {
                     if (timedQuery(SPELL_LIGHT_TOUCH, uiDiff))
                     {
-                        if (Unit* pTarget = doSelectRandomPlayer(SPELL_LIGHT_ESSENCE, false, 50.0f))
+                        if (Unit* pTarget = SelectOppositeColorTarget())
                             doCast(SPELL_LIGHT_TOUCH, pTarget);
                     }
                 }
@@ -349,8 +386,6 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
                         m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_LIGHT_VORTEX);
                         DoScriptText(-1713538,m_creature);
                         stage = 1;
-                        m_uiReply = 5;
-                        m_uiVortexTimer = 8000;
                     }
                     else
                     {
@@ -371,7 +406,6 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
                 break;
          case 1:
                 doCast(SPELL_LIGHT_VORTEX);
-                m_bIsVortex = true;
                 stage = 2;
                 break;
          case 2:
@@ -438,30 +472,6 @@ struct MANGOS_DLL_DECL boss_fjolaAI : public BSWScriptedAI
             else m_uiPactTimer -= uiDiff;
         }
 
-        if(m_bIsVortex)
-        {
-            if (m_uiVortexTimer < uiDiff)
-            {
-                Map* pMap = m_creature->GetMap();
-                Map::PlayerList const &lPlayers = pMap->GetPlayers();
-                for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                {
-                    Unit* pPlayer = itr->getSource();
-                    if (!pPlayer)
-                        continue;
-                    if (pPlayer->isAlive() && pPlayer->HasAura(SPELL_LIGHT_ESSENCE))
-                        for(uint8 i=0; i < m_uiIncrease ; i++)
-                            pPlayer->CastSpell(pPlayer, GetPoweringId(currentDifficulty), true);
-                }
-                m_uiVortexTimer = 1000;
-
-                m_uiReply--;
-                if (m_uiReply == 0)
-                    m_bIsVortex = false;
-            }
-            else m_uiVortexTimer -= uiDiff;
-        }
-
         DoMeleeAttackIfReady();
     }
 };
@@ -487,13 +497,9 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
     ScriptedInstance* m_pInstance;
     uint8 stage;
     uint32 m_uiSummonTimer;
-    uint32 m_uiVortexTimer;
-    uint32 m_uiIncrease;
     uint32 m_uiPactTimer;
     uint32 m_uiSpecialAbilityTimer;
-    uint8 m_uiReply;
     bool m_bVortexOrPact;
-    bool m_bIsVortex;
     bool m_bIsPact;
 
     void Reset() 
@@ -504,7 +510,6 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
         m_pInstance->SetData(DATA_HEALTH_EYDIS, m_creature->GetMaxHealth());
         
         m_uiSummonTimer = 45000;
-        m_uiVortexTimer = 1000;
 
         SetEquipmentSlots(false, EQUIP_MAIN_2, EQUIP_OFFHAND_2, EQUIP_RANGED_2);
         m_creature->SetRespawnDelay(7*DAY);
@@ -512,12 +517,7 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
         stage = 0;
         m_uiSpecialAbilityTimer = 80000;
         m_bVortexOrPact = true;
-        m_bIsVortex = false;
         m_bIsPact = false;
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL)
-            m_uiIncrease = 6;
-        else
-            m_uiIncrease = 9;
     }
 
     void JustReachedHome()
@@ -617,6 +617,58 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
         }
     }
 
+    Unit* SelectOppositeColorTarget()
+    {
+        Map* pMap = m_creature->GetMap();
+        Map::PlayerList const &pList = pMap->GetPlayers();
+        if (pList.isEmpty()) return NULL;
+
+        std::vector<Unit*> lTargetable;
+        lTargetable.clear();
+
+        uint32 uiOppositeColor;
+        switch (currentDifficulty)
+        {
+            case RAID_DIFFICULTY_10MAN_NORMAL:
+                uiOppositeColor = SPELL_LIGHT_ESSENCE;
+                    break;
+            case RAID_DIFFICULTY_25MAN_NORMAL:
+                uiOppositeColor = SPELL_LIGHT_ESSENCE_N25;
+                break;
+            case RAID_DIFFICULTY_10MAN_HEROIC:
+                uiOppositeColor = SPELL_LIGHT_ESSENCE_H10;
+                break;
+            case RAID_DIFFICULTY_25MAN_HEROIC:
+                uiOppositeColor = SPELL_LIGHT_ESSENCE_H25;
+                break;
+            default:
+                uiOppositeColor = 0;
+                break;
+        }
+        if (!uiOppositeColor)
+            return NULL;
+
+        for(Map::PlayerList::const_iterator i = pList.begin(); i != pList.end(); ++i)
+        {
+            if (Player* pPlayer = i->getSource())
+            {
+                if (pPlayer->isGameMaster())
+                    continue;
+
+                if (pPlayer->isAlive() && pPlayer->IsWithinDistInMap(m_creature, 50.0f))
+                {
+                    if (pPlayer->HasAura(uiOppositeColor))
+                        lTargetable.push_back((Unit*)pPlayer);
+                }
+            }
+        }
+
+        if (lTargetable.empty())
+            return NULL;
+        else
+            return lTargetable[urand(0, lTargetable.size() - 1)];
+    }
+
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -672,7 +724,7 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
                 {
                     if (timedQuery(SPELL_DARK_TOUCH, uiDiff))
                     {
-                        if (Unit* pTarget = doSelectRandomPlayer(SPELL_DARK_ESSENCE, false, 50.0f))
+                        if (Unit* pTarget = SelectOppositeColorTarget())
                             doCast(SPELL_DARK_TOUCH, pTarget);
                     }
                 }
@@ -689,8 +741,6 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
                         m_pInstance->SetData(DATA_CASTING_VALKYRS, SPELL_DARK_VORTEX);
                         DoScriptText(-1713540,m_creature);
                         stage = 1;
-                        m_uiReply = 5;
-                        m_uiVortexTimer = 8000;
                     }
                     else
                     {
@@ -711,7 +761,6 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
                 break;
          case 1:
                 doCast(SPELL_DARK_VORTEX);
-                m_bIsVortex = true;
                 stage = 2;
                 break;
          case 2:
@@ -778,30 +827,6 @@ struct MANGOS_DLL_DECL boss_eydisAI : public BSWScriptedAI
             else m_uiPactTimer -= uiDiff;
         }
 
-        if(m_bIsVortex)
-        {
-            if (m_uiVortexTimer < uiDiff)
-            {
-                Map* pMap = m_creature->GetMap();
-                Map::PlayerList const &lPlayers = pMap->GetPlayers();
-                for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                {
-                    Unit* pPlayer = itr->getSource();
-                    if (!pPlayer)
-                        continue;
-                    if (pPlayer->isAlive() && pPlayer->HasAura(SPELL_DARK_ESSENCE))
-                        for(uint8 i=0; i < m_uiIncrease ; i++)
-                            pPlayer->CastSpell(pPlayer, GetPoweringId(currentDifficulty), true);
-                }
-                m_uiVortexTimer = 1000;
-
-                m_uiReply--;
-                if (m_uiReply == 0)
-                    m_bIsVortex = false;
-            }
-            else m_uiVortexTimer -= uiDiff;
-        }
-
         DoMeleeAttackIfReady();
     }
 };
@@ -824,7 +849,7 @@ struct MANGOS_DLL_DECL mob_light_essenceAI : public ScriptedAI
 
     ScriptedInstance* m_pInstance;
 
-    void Reset() 
+    void Reset()
     {
         m_creature->SetRespawnDelay(DAY);
         m_creature->SetWalk(true);
@@ -836,21 +861,7 @@ struct MANGOS_DLL_DECL mob_light_essenceAI : public ScriptedAI
             m_creature->ForcedDespawn();
 
         if (m_pInstance->GetData(TYPE_VALKIRIES) != IN_PROGRESS)
-        {
-            Map* pMap = m_creature->GetMap();
-            Map::PlayerList const &lPlayers = pMap->GetPlayers();
-            for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-            {
-                Player* pPlayer = itr->getSource();
-                if (!pPlayer)
-                    continue;
-                if (pPlayer->isAlive())
-                    pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
-            }
-
             m_creature->ForcedDespawn();
-        }
-        return;
     }
 };
 
@@ -887,7 +898,7 @@ struct MANGOS_DLL_DECL mob_dark_essenceAI : public ScriptedAI
 
     ScriptedInstance* m_pInstance;
 
-    void Reset() 
+    void Reset()
     {
         m_creature->SetRespawnDelay(DAY);
         m_creature->SetWalk(true);
@@ -899,20 +910,7 @@ struct MANGOS_DLL_DECL mob_dark_essenceAI : public ScriptedAI
             m_creature->ForcedDespawn();
 
         if (m_pInstance->GetData(TYPE_VALKIRIES) != IN_PROGRESS)
-        {
-            Map* pMap = m_creature->GetMap();
-            Map::PlayerList const &lPlayers = pMap->GetPlayers();
-            for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-            {
-                Player* pPlayer = itr->getSource();
-                if (!pPlayer)
-                    continue;
-                if (pPlayer->isAlive())
-                    pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE);
-            }
             m_creature->ForcedDespawn();
-        }
-        return;
     }
 };
 
@@ -949,7 +947,6 @@ struct MANGOS_DLL_DECL mob_dark_orbAI : public ScriptedAI
 
     ScriptedInstance* m_pInstance;
     uint32 m_uiRangeCheck_Timer;
-    uint32 m_uiIncrease;
     uint32 m_uiDespawnDelay;
     Difficulty currentDifficulty;
 
@@ -959,10 +956,6 @@ struct MANGOS_DLL_DECL mob_dark_orbAI : public ScriptedAI
         SetCombatMovement(false);
         m_uiDespawnDelay = 45000;
         m_uiRangeCheck_Timer = 500;
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL)
-            m_uiIncrease = 8;
-        else
-            m_uiIncrease = 9;
 
         double offset = urand(0, 360);
         float x = SpawnLoc[1].x + (RAGGIO_ARENA -5) * cos(offset);
@@ -987,7 +980,12 @@ struct MANGOS_DLL_DECL mob_dark_orbAI : public ScriptedAI
     {
         if (!m_pInstance || m_pInstance->GetData(TYPE_VALKIRIES) != IN_PROGRESS) 
               m_creature->ForcedDespawn();
- 
+
+        if(m_uiDespawnDelay <= uiDiff)
+            m_creature->ForcedDespawn();
+        else
+            m_uiDespawnDelay -= uiDiff;
+
         if (m_uiRangeCheck_Timer < uiDiff)
         {
             bool bContactPositive = false;
@@ -1001,43 +999,18 @@ struct MANGOS_DLL_DECL mob_dark_orbAI : public ScriptedAI
                     continue;
                 if (pPlayer->isAlive() && pPlayer->IsWithinDistInMap(m_creature, 2.0f))
                 {
-                    if (pPlayer->HasAura(SPELL_DARK_ESSENCE))
-                        bContactPositive = true;
                     bContact = true;
                     break;
                 }
             }
             if (bContact)
             {
-                if (!bContactPositive)
-                    m_creature->CastSpell(m_creature, SPELL_UNLEASHED_DARK, true);
-
-                for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                {
-                    Player* pPlayer = itr->getSource();
-                    if (!pPlayer)
-                        continue;
-                    if (pPlayer->isAlive() && pPlayer->IsWithinDistInMap(m_creature, 6.0f))
-                    {
-                        if (pPlayer->HasAura(SPELL_DARK_ESSENCE))
-                            for(uint8 i=0; i < m_uiIncrease ; i++)
-                                pPlayer->CastSpell(pPlayer, GetPoweringId(currentDifficulty), true);
-                    }
-                }
-                if (!bContactPositive)
-                    m_uiDespawnDelay = 500;
-                else
-                    m_creature->ForcedDespawn();
+                m_creature->CastSpell(m_creature, SPELL_UNLEASHED_DARK, true);
+                m_uiDespawnDelay = 500;
             }
             m_uiRangeCheck_Timer = 500;
         }
         else m_uiRangeCheck_Timer -= uiDiff;
-
-        if(m_uiDespawnDelay <= uiDiff)
-            m_creature->ForcedDespawn();
-        else 
-            m_uiDespawnDelay -= uiDiff;
-
     }
 
 };
@@ -1062,7 +1035,6 @@ struct MANGOS_DLL_DECL mob_light_orbAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
     uint32 m_uiRangeCheck_Timer;
     uint32 m_uiDespawnDelay;
-    uint32 m_uiIncrease;
     Difficulty currentDifficulty;
 
     void Reset()
@@ -1071,11 +1043,7 @@ struct MANGOS_DLL_DECL mob_light_orbAI : public ScriptedAI
         SetCombatMovement(false);
         m_uiDespawnDelay = 45000;
         m_uiRangeCheck_Timer = 500;
-        if (currentDifficulty == RAID_DIFFICULTY_10MAN_HEROIC || currentDifficulty == RAID_DIFFICULTY_10MAN_NORMAL)
-            m_uiIncrease = 8;
-        else
-            m_uiIncrease = 9;
-        
+
         double offset = urand(0, 360);
         float x = SpawnLoc[1].x + (RAGGIO_ARENA -5) * cos(offset);
         float y = SpawnLoc[1].y + (RAGGIO_ARENA -5) * sin(offset);
@@ -1099,10 +1067,14 @@ struct MANGOS_DLL_DECL mob_light_orbAI : public ScriptedAI
     {
         if (!m_pInstance || m_pInstance->GetData(TYPE_VALKIRIES) != IN_PROGRESS) 
               m_creature->ForcedDespawn();
- 
+
+        if(m_uiDespawnDelay <= uiDiff)
+            m_creature->ForcedDespawn();
+        else
+            m_uiDespawnDelay -= uiDiff;
+
         if (m_uiRangeCheck_Timer < uiDiff)
         {
-            bool bContactPositive = false;
             bool bContact = false;
             Map* pMap = m_creature->GetMap();
             Map::PlayerList const &lPlayers = pMap->GetPlayers();
@@ -1113,42 +1085,19 @@ struct MANGOS_DLL_DECL mob_light_orbAI : public ScriptedAI
                     continue;
                 if (pPlayer->isAlive() && pPlayer->IsWithinDistInMap(m_creature, 2.0f))
                 {
-                    if (pPlayer->HasAura(SPELL_LIGHT_ESSENCE))
-                        bContactPositive = true;
                     bContact = true;
                     break;
                 }
             }
+
             if (bContact)
             {
-                if (!bContactPositive)
-                    m_creature->CastSpell(m_creature, SPELL_UNLEASHED_LIGHT, true);
-
-                for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                {
-                    Player* pPlayer = itr->getSource();
-                    if (!pPlayer)
-                        continue;
-                    if (pPlayer->isAlive() && pPlayer->IsWithinDistInMap(m_creature, 6.0f))
-                    {
-                        if (pPlayer->HasAura(SPELL_LIGHT_ESSENCE))
-                            for(uint8 i=0; i < m_uiIncrease ; i++)
-                                pPlayer->CastSpell(pPlayer, GetPoweringId(currentDifficulty), true);
-                    }
-                }
-                if (!bContactPositive)
-                    m_uiDespawnDelay = 500;
-                else
-                    m_creature->ForcedDespawn();
+                m_creature->CastSpell(m_creature, SPELL_UNLEASHED_LIGHT, true);
+                m_uiDespawnDelay = 500;
             }
             m_uiRangeCheck_Timer = 500;
         }
         else m_uiRangeCheck_Timer -= uiDiff;
-        
-        if(m_uiDespawnDelay <= uiDiff)
-            m_creature->ForcedDespawn();
-        else 
-            m_uiDespawnDelay -= uiDiff;
     }
 
 };
