@@ -156,18 +156,18 @@ struct MANGOS_DLL_DECL boss_varosAI : public ScriptedAI
         }
     }
 
-    void Aggro(Unit* who)
+    void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
         if(m_pInstance)
            m_pInstance->SetData(TYPE_VAROS, IN_PROGRESS);
 
-        if(Creature* Dragon = m_creature->SummonCreature(NPC_AZURE_CAPTAIN, (m_creature->GetPositionX()-45)+rand()%90, (m_creature->GetPositionY()-45)+rand()%90, m_creature->GetPositionZ() + 30.0f, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 100))
+        if(Creature* pDragon = m_creature->SummonCreature(NPC_AZURE_CAPTAIN, (m_creature->GetPositionX()-45)+rand()%90, (m_creature->GetPositionY()-45)+rand()%90, m_creature->GetPositionZ() + 30.0f, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 100))
         {
-           Dragon->SetLevitate(true);
-           Dragon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-           m_uiAzureDrakeGUID = Dragon->GetObjectGuid();
+           pDragon->SetLevitate(true);
+           pDragon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+           m_uiAzureDrakeGUID = pDragon->GetObjectGuid();
         }
     }
 
@@ -181,7 +181,7 @@ struct MANGOS_DLL_DECL boss_varosAI : public ScriptedAI
 
     }
 
-    void JustDied(Unit* killer)
+    void JustDied(Unit* pKiller)
     {
         DoScriptText(SAY_DEATH, m_creature);
 
@@ -407,7 +407,7 @@ struct MANGOS_DLL_DECL npc_varos_orbAI : public ScriptedAI
     {
     }
 
-    void UpdateAI(const uint32 diff)
+    void UpdateAI(const uint32 uiDiff)
     {
     }
 };
@@ -426,11 +426,11 @@ struct MANGOS_DLL_DECL npc_varos_beam_targetAI : public ScriptedAI
         uiDeathTimer = 15000;
     }
 
-    void UpdateAI(const uint32 diff)
+    void UpdateAI(const uint32 uiDiff)
     {
-        if (uiDeathTimer < diff)
+        if (uiDeathTimer < uiDiff)
             m_creature->ForcedDespawn();
-        else uiDeathTimer -= diff;
+        else uiDeathTimer -= uiDiff;
     }
 };
 

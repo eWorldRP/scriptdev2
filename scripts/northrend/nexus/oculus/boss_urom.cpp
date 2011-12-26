@@ -53,20 +53,22 @@ enum
     NPC_PHANTASMAL_MAMMOTH                 = 27642,
     NPC_PHANTASMAL_WOLF                    = 27644,
     NPC_PHANTASMAL_CLOUDSCRAPER            = 27645,
+
     NPC_PHANTASMAL_OGRE                    = 27647,
     NPC_PHANTASMAL_NAGA                    = 27648,
     NPC_PHANTASMAL_MURLOC                  = 27649,
+
     NPC_PHANTASMAL_AIR                     = 27650,
     NPC_PHANTASMAL_FIRE                    = 27651,
     NPC_PHANTASMAL_WATER                   = 27653
 };
-/*
-struct Locations
+
+/*struct Locations
 {
     float x, y, z, o;
     uint32 id;
-};
-*/
+};*/
+
 struct Locations Teleport[]=
 {
     {1177.469f, 937.721f, 527.405f, 2.21f}, //first platform
@@ -76,9 +78,9 @@ struct Locations Teleport[]=
     {1103.659f, 1049.88f, 518.148f, 5.80f}  //oculus center
 };
 
-struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
+struct MANGOS_DLL_DECL boss_uromAI : public ScriptedAI
 {
-    boss_uromAI(Creature *pCreature) : BSWScriptedAI(pCreature)
+    boss_uromAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
@@ -129,19 +131,46 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
         }
     }
 
-    void DoSummon(uint32 Entry01, uint32 Entry02, uint32 Entry03, uint32 Entry04, uint32 Entry05 = 0)
+    void DoSummonAndAttack(Unit* pWho, uint32 Entry01, uint32 Entry02, uint32 Entry03, uint32 Entry04, uint32 Entry05 = 0)
     {
-       m_creature->SummonCreature(Entry01, m_creature->GetPositionX() - (10.0f) * cos(M_PI / 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI / 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
-       m_creature->SummonCreature(Entry02, m_creature->GetPositionX() - (10.0f) * cos(M_PI * 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI * 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
-       m_creature->SummonCreature(Entry03, m_creature->GetPositionX() - (10.0f) * cos(M_PI + M_PI / 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI + M_PI / 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
-       m_creature->SummonCreature(Entry04, m_creature->GetPositionX() - (10.0f) * cos(M_PI), m_creature->GetPositionY() - (10.0f) * sin(M_PI), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
-       if(Entry05 != 0)
-          m_creature->SummonCreature(Entry05, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
+        Creature* pTemp;
+        if (pTemp = m_creature->SummonCreature(Entry01, m_creature->GetPositionX() - (10.0f) * cos(M_PI / 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI / 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 15000))
+        {
+            pTemp->SetInCombatWith(pWho);
+            pTemp->AddThreat(pWho,100.0f);
+        }
+
+        if (pTemp = m_creature->SummonCreature(Entry02, m_creature->GetPositionX() - (10.0f) * cos(M_PI * 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI * 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 15000))
+        {
+            pTemp->SetInCombatWith(pWho);
+            pTemp->AddThreat(pWho,100.0f);
+        }
+
+        if (pTemp = m_creature->SummonCreature(Entry03, m_creature->GetPositionX() - (10.0f) * cos(M_PI + M_PI / 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI + M_PI / 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 15000))
+        {
+            pTemp->SetInCombatWith(pWho);
+            pTemp->AddThreat(pWho,100.0f);
+        }
+
+        if (pTemp = m_creature->SummonCreature(Entry04, m_creature->GetPositionX() - (10.0f) * cos(M_PI), m_creature->GetPositionY() - (10.0f) * sin(M_PI), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 15000))
+        {
+            pTemp->SetInCombatWith(pWho);
+            pTemp->AddThreat(pWho,100.0f);
+        }
+
+        if(Entry05 != 0)
+        {
+            if (pTemp = m_creature->SummonCreature(Entry05, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 15000))
+            {
+                pTemp->SetInCombatWith(pWho);
+                pTemp->AddThreat(pWho,100.0f);
+            }
+        }
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
     {
-        if(pSpell->Id == SPELL_SUMMON_MENAGERIE) //|| pSpell->Id == SPELL_SUMMON_MENAGERIE_2 || pSpell->Id == SPELL_SUMMON_MENAGERIE_3)
+        if(pSpell->Id == SPELL_SUMMON_MENAGERIE)
             m_bIsTalk = false;
         if(pSpell->Id == SPELL_SUMMON_MENAGERIE_2)
             m_bIsTalk = false;
@@ -149,11 +178,11 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
             m_bIsTalk = false;
     }
 
-    void TeleportBoss(float X, float Y, float Z, float O)
+    void TeleportBoss(float fX, float fY, float fZ, float fO)
     {
-        m_creature->GetMap()->CreatureRelocation(m_creature, X, Y, Z, O);
-        m_creature->MonsterMoveWithSpeed(X, Y, Z, 26);
-        m_creature->Relocate(X, Y, Z, O);
+        m_creature->GetMap()->CreatureRelocation(m_creature, fX, fY, fZ, fO);
+        m_creature->MonsterMoveWithSpeed(fX, fY, fZ, 26);
+        m_creature->Relocate(fX, fY, fZ, fO);
     }
 
     void AttackStart(Unit* pWho)
@@ -175,48 +204,45 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
         if (!m_pInstance)
             return;
 
-        if(pWho->GetTypeId() == TYPEID_PLAYER
-           && !((Player*)pWho)->isGameMaster()
-           && m_creature->IsWithinDistInMap(pWho, 30.0f)
-           && !pWho->GetVehicle()
-           && m_pInstance->GetData(TYPE_VAROS) == DONE
-           && !m_bIsTalk)
+        if(pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster()
+           && m_creature->IsWithinDistInMap(pWho, 30.0f) && !pWho->GetVehicle()
+           && m_pInstance->GetData(TYPE_VAROS) == DONE && !m_bIsTalk)
         {
             switch(m_pInstance->GetData(TYPE_UROM_PHASE))
             {
-            case 0:
-                m_bIsTalk = true;
-                SetCombatMovement(false);
-                m_pInstance->SetData(TYPE_UROM, IN_PROGRESS);
-                m_creature->InterruptNonMeleeSpells(false);
-                m_creature->RemoveAurasDueToSpell(53813);
-                DoScriptText(SAY_SUMMON_1, m_creature);
-                DoSummon(NPC_PHANTASMAL_FIRE, NPC_PHANTASMAL_FIRE, NPC_PHANTASMAL_AIR, NPC_PHANTASMAL_WATER);
-                DoCast(m_creature, SPELL_SUMMON_MENAGERIE);
-                m_pInstance->SetData(TYPE_UROM_PHASE, 1);
-                break;
-            case 1:
-                m_bIsTalk = true;
-                DoScriptText(SAY_SUMMON_2, m_creature);
-                DoSummon(NPC_PHANTASMAL_OGRE, NPC_PHANTASMAL_OGRE, NPC_PHANTASMAL_NAGA, NPC_PHANTASMAL_MURLOC);
-                DoCast(m_creature, SPELL_SUMMON_MENAGERIE_2);
-                m_pInstance->SetData(TYPE_UROM_PHASE, 2);
-                break;
-            case 2:
-                m_bIsTalk = true;
-                DoScriptText(SAY_SUMMON_3, m_creature);
-                DoSummon(NPC_PHANTASMAL_MAMMOTH, NPC_PHANTASMAL_WOLF, NPC_PHANTASMAL_WOLF, NPC_PHANTASMAL_CLOUDSCRAPER, NPC_PHANTASMAL_CLOUDSCRAPER);
-                DoCast(m_creature, SPELL_SUMMON_MENAGERIE_3);
-                m_pInstance->SetData(TYPE_UROM_PHASE, 3);
-                break;
-            case 3:
-                m_bIsTalk = true;
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                SetCombatMovement(true);
-                AttackStart(pWho);
-                break;
-            default:
-                break;
+                case 0:
+                    m_bIsTalk = true;
+                    SetCombatMovement(false);
+                    m_pInstance->SetData(TYPE_UROM, IN_PROGRESS);
+                    m_creature->InterruptNonMeleeSpells(false);
+                    m_creature->RemoveAurasDueToSpell(SPELL_ARCANE_BARRIER);
+                    DoScriptText(SAY_SUMMON_1, m_creature);
+                    DoSummonAndAttack(pWho, NPC_PHANTASMAL_FIRE, NPC_PHANTASMAL_FIRE, NPC_PHANTASMAL_AIR, NPC_PHANTASMAL_WATER);
+                    DoCast(m_creature, SPELL_SUMMON_MENAGERIE);
+                    m_pInstance->SetData(TYPE_UROM_PHASE, 1);
+                    break;
+                case 1:
+                    m_bIsTalk = true;
+                    DoScriptText(SAY_SUMMON_2, m_creature);
+                    DoSummonAndAttack(pWho, NPC_PHANTASMAL_OGRE, NPC_PHANTASMAL_OGRE, NPC_PHANTASMAL_NAGA, NPC_PHANTASMAL_MURLOC);
+                    DoCast(m_creature, SPELL_SUMMON_MENAGERIE_2);
+                    m_pInstance->SetData(TYPE_UROM_PHASE, 2);
+                    break;
+                case 2:
+                    m_bIsTalk = true;
+                    DoScriptText(SAY_SUMMON_3, m_creature);
+                    DoSummonAndAttack(pWho, NPC_PHANTASMAL_MAMMOTH, NPC_PHANTASMAL_WOLF, NPC_PHANTASMAL_WOLF, NPC_PHANTASMAL_CLOUDSCRAPER, NPC_PHANTASMAL_CLOUDSCRAPER);
+                    DoCast(m_creature, SPELL_SUMMON_MENAGERIE_3);
+                    m_pInstance->SetData(TYPE_UROM_PHASE, 3);
+                    break;
+                case 3:
+                    m_bIsTalk = true;
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    SetCombatMovement(true);
+                    AttackStart(pWho);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -230,31 +256,20 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
        else DoScriptText(SAY_AGGRO, m_creature);
     }
 
-    void JustSummoned(Creature* summoned)
-    {
-        if(!m_pInstance || !summoned) return;
-
-        if (Unit* pTarget = doSelectRandomPlayerAtRange(100.0f))
-        {
-            summoned->SetInCombatWith(pTarget);
-            summoned->AddThreat(pTarget,100.0f);
-        }
-    }
-
     void EnterEvadeMode()
     {
 
        if (!m_pInstance)
            return;
 
-       if( m_pInstance->GetData(TYPE_UROM_PHASE) < 3)
+       if(m_pInstance->GetData(TYPE_UROM_PHASE) < 3)
        {
            Map::PlayerList const &pList = m_creature->GetMap()->GetPlayers();
            if (!pList.isEmpty())
                return;
        }
        m_pInstance->SetData(TYPE_UROM, FAIL);
-       m_pInstance->SetData(TYPE_UROM_PHASE, 1);
+       m_pInstance->SetData(TYPE_UROM_PHASE, 0);
        ScriptedAI::EnterEvadeMode();
     }
 
@@ -266,10 +281,9 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
             m_pInstance->SetData(TYPE_UROM, DONE);
     }
 
-    void KilledUnit(Unit *victim)
+    void KilledUnit(Unit* pVictim)
     {
-        uint8 uiText = urand(0, 2);
-        switch (uiText)
+        switch (urand(0, 2))
         {
            case 0: DoScriptText(SAY_KILL_1, m_creature); break;
            case 1: DoScriptText(SAY_KILL_2, m_creature); break;
@@ -297,11 +311,11 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
         if(!m_bIsTeleported)
         {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
            if(m_uiFrostBombTimer < uiDiff)
            {
                m_creature->CastSpell(m_creature->getVictim(), SPELL_FROSTBOMB, false);
@@ -351,7 +365,7 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
 
            if(m_uiBackTimer < uiDiff)
            {
-               TeleportBoss((m_creature->getVictim())->GetPositionX(),(m_creature->getVictim())->GetPositionY(),(m_creature->getVictim())->GetPositionZ(),(m_creature->getVictim())->GetOrientation());
+               TeleportBoss(m_creature->getVictim()->GetPositionX(), m_creature->getVictim()->GetPositionY(), m_creature->getVictim()->GetPositionZ(), m_creature->getVictim()->GetOrientation());
                m_creature->SetLevitate(false);
                if(m_creature->getVictim())
                   m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());

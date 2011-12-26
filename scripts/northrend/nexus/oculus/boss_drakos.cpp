@@ -93,7 +93,7 @@ struct MANGOS_DLL_DECL boss_drakosAI : public ScriptedAI
         MagicPull20 = false;
     }
 
-    void Aggro(Unit* who)
+    void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
@@ -101,7 +101,7 @@ struct MANGOS_DLL_DECL boss_drakosAI : public ScriptedAI
             m_pInstance->SetData(TYPE_DRAKOS, IN_PROGRESS);
     }
 
-    void JustDied(Unit* killer)
+    void JustDied(Unit* pKiller)
     {
         DoScriptText(SAY_DEATH, m_creature);
 
@@ -109,7 +109,7 @@ struct MANGOS_DLL_DECL boss_drakosAI : public ScriptedAI
             m_pInstance->SetData(TYPE_DRAKOS, DONE);
     }
 
-    void KilledUnit(Unit *victim)
+    void KilledUnit(Unit* pVictim)
     {
         switch (urand(0, 2))
         {
@@ -119,9 +119,9 @@ struct MANGOS_DLL_DECL boss_drakosAI : public ScriptedAI
         }
     }
 
-    void SpellHitTarget(Unit *pTarget, const SpellEntry *spell)
+    void SpellHitTarget(Unit *pTarget, const SpellEntry *pSpell)
     {
-        if (spell->Id == SPELL_MAGIC_PULL)
+        if (pSpell->Id == SPELL_MAGIC_PULL)
             if (pTarget->GetTypeId() == TYPEID_PLAYER)
                 DoCast(pTarget, SPELL_MAGIC_PULL_EFFECT, true);
     }

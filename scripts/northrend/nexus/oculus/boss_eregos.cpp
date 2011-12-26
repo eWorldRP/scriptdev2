@@ -104,29 +104,25 @@ struct MANGOS_DLL_DECL boss_eregosAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho)
     {
-        if(pWho->GetTypeId() == TYPEID_PLAYER
-           && m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE)
-           && !((Player*)pWho)->isGameMaster()
-           && m_creature->IsWithinDistInMap(pWho, 100.0f)
-           && pWho->GetVehicle()
-           && m_pInstance->GetData(TYPE_UROM) == DONE)
+        if(pWho->GetTypeId() == TYPEID_PLAYER && m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE)
+           && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 100.0f)
+           && pWho->GetVehicle() && m_pInstance->GetData(TYPE_UROM) == DONE)
         {
               m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
         ScriptedAI::MoveInLineOfSight(pWho);
     }
 
-    void Aggro(Unit* who)
+    void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
         if (m_pInstance)
             m_pInstance->SetData(TYPE_EREGOS, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit *victim)
+    void KilledUnit(Unit* pVictim)
     {
-        uint8 uiText = urand(0, 2);
-        switch (uiText)
+        switch (urand(0, 2))
         {
            case 0: DoScriptText(SAY_KILL_1, m_creature); break;
            case 1: DoScriptText(SAY_KILL_2, m_creature); break;
@@ -134,7 +130,7 @@ struct MANGOS_DLL_DECL boss_eregosAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* killer)
+    void JustDied(Unit* pKiller)
     {
         m_creature->GetMap()->CreatureRelocation(m_creature, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ()-100.0f, 0);
         m_creature->MonsterMoveWithSpeed(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ()-100.0f, 26);
@@ -143,10 +139,10 @@ struct MANGOS_DLL_DECL boss_eregosAI : public ScriptedAI
             m_pInstance->SetData(TYPE_EREGOS, DONE);
     }
 
-    void DamageTaken(Unit *done_by, uint32 &damage)
+    void DamageTaken(Unit* pDoneBy, uint32& uiDamage)
     {
         if(m_creature->HasAura(SPELL_PLANAR_SHIFT))
-           damage = 0;
+           uiDamage = 0;
     }
 
     void JustSummoned(Creature* pSummoned)
@@ -167,15 +163,15 @@ struct MANGOS_DLL_DECL boss_eregosAI : public ScriptedAI
         }
     }
 
-    void AttackStart(Unit* who)
+    void AttackStart(Unit* pWho)
     {
-        if (!who)
+        if (!pWho)
             return;
 
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
             return;
 
-        ScriptedAI::AttackStart(who);
+        ScriptedAI::AttackStart(pWho);
     }
 
     void SummonAnomalies()
@@ -192,7 +188,7 @@ struct MANGOS_DLL_DECL boss_eregosAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 diff)
+    void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -228,37 +224,37 @@ struct MANGOS_DLL_DECL boss_eregosAI : public ScriptedAI
            m_creature->StopMoving();
         }
 
-        if(uiArcaneBarrageTimer <= diff)
+        if(uiArcaneBarrageTimer <= uiDiff)
         {
            if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                DoCast(pTarget, m_bIsRegularMode ? SPELL_ARCANE_BARRAGE_N : SPELL_ARCANE_BARRAGE_H);
               uiArcaneBarrageTimer = 3000;
-        } else uiArcaneBarrageTimer -= diff;
+        } else uiArcaneBarrageTimer -= uiDiff;
 
-        if(uiSummonTimer <= diff)
+        if(uiSummonTimer <= uiDiff)
         {
            for(uint8 i = 1; i < 3; i++)
                DoCast(m_creature, SPELL_SUMMON_DRAKE, true);
            uiSummonTimer = 15000;
-        } else uiSummonTimer -= diff;
+        } else uiSummonTimer -= uiDiff;
 
-        if(uiArcaneVolleyTimer <= diff)
+        if(uiArcaneVolleyTimer <= uiDiff)
         {
             DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ARCANE_VOLLEY_N : SPELL_ARCANE_VOLLEY_H);
             uiArcaneVolleyTimer = 17000;
-        } else uiArcaneVolleyTimer -= diff;
+        } else uiArcaneVolleyTimer -= uiDiff;
 
-        if(uiEnragedAssaultTimer <= diff)
+        if(uiEnragedAssaultTimer <= uiDiff)
         {
             DoCast(m_creature, SPELL_ENRAGED_ASSAULT, true);
             uiEnragedAssaultTimer = 44000;
-        } else uiEnragedAssaultTimer -= diff;
+        } else uiEnragedAssaultTimer -= uiDiff;
     }
 };
 
 struct MANGOS_DLL_DECL npc_planar_anomalyAI : public ScriptedAI
 {
-    npc_planar_anomalyAI(Creature *pCreature) : ScriptedAI(pCreature)
+    npc_planar_anomalyAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
        Reset();
     }
@@ -279,18 +275,18 @@ struct MANGOS_DLL_DECL npc_planar_anomalyAI : public ScriptedAI
         uiPulseTimer = 19000;
     }
 
-    void UpdateAI(const uint32 diff)
+    void UpdateAI(const uint32 uiDiff)
     {
-        if (uiPulseTimer < diff)
+        if (uiPulseTimer < uiDiff)
         {
             m_creature->RemoveAurasDueToSpell(SPELL_PLANAR_ANOMALIES_VISUAL);
             m_creature->CastSpell(m_creature, SPELL_PLANAR_ANOMALIES_DMG, true);
             uiPulseTimer = 6000;
-        } else uiPulseTimer -= diff;
+        } else uiPulseTimer -= uiDiff;
 
-        if (uiDeathTimer < diff)
-            m_creature->DealDamage(m_creature, m_creature->GetMaxHealth(),NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-        else uiDeathTimer -= diff;
+        if (uiDeathTimer < uiDiff)
+            m_creature->DealDamage(m_creature, m_creature->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        else uiDeathTimer -= uiDiff;
     }
 };
 

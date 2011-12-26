@@ -39,7 +39,7 @@ enum
 
 struct MANGOS_DLL_DECL instance_oculus : public ScriptedInstance
 {
-    instance_oculus(Map* pMap) : ScriptedInstance(pMap) 
+    instance_oculus(Map* pMap) : ScriptedInstance(pMap)
     {
         m_bIsRegularMode = pMap->IsRegularDifficulty();
         Initialize();
@@ -91,26 +91,26 @@ struct MANGOS_DLL_DECL instance_oculus : public ScriptedInstance
         m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
     }
 
-    void SetData(uint32 type, uint32 data)
+    void SetData(uint32 uiType, uint32 uiData)
     {
-        switch(type)
+        switch(uiType)
         {
             case TYPE_DRAKOS:
             case TYPE_VAROS:
             case TYPE_UROM:
-                m_auiEncounter[type] = data;
+                m_auiEncounter[uiType] = uiData;
                 break;
             case TYPE_EREGOS:
-                m_auiEncounter[type] = data;
-                if (data == DONE)
+                m_auiEncounter[uiType] = uiData;
+                if (uiData == DONE)
                 {
                     DoRespawnGameObject(m_bIsRegularMode ? GO_EREGOS_CACHE : GO_EREGOS_CACHE_H, HOUR);
                     DoRespawnGameObject(GO_SPOTLIGHT, HOUR);
                 }
                 break;
             case TYPE_ROBOTS:
-                m_auiEncounter[type] = m_auiEncounter[type] - data;
-                if(m_auiEncounter[type] == 0)
+                m_auiEncounter[uiType] = m_auiEncounter[uiType] - uiData;
+                if(m_auiEncounter[uiType] == 0)
                 {
                     if(Creature* pVaros = GetSingleCreatureFromStorage(NPC_VAROS))
                     {
@@ -120,15 +120,15 @@ struct MANGOS_DLL_DECL instance_oculus : public ScriptedInstance
                         pVaros->RemoveAurasDueToSpell(50053);
                     }
                 }
-                data = NOT_STARTED;
+                uiData = NOT_STARTED;
                 break;
             case TYPE_UROM_PHASE:
-                m_auiEncounter[type] = data;
-                data = NOT_STARTED;
+                m_auiEncounter[uiType] = uiData;
+                uiData = NOT_STARTED;
                 break;
         }
 
-        if (data == DONE)
+        if (uiData == DONE)
         {
             OUT_SAVE_INST_DATA;
 
@@ -144,9 +144,9 @@ struct MANGOS_DLL_DECL instance_oculus : public ScriptedInstance
         }
     }
 
-    uint32 GetData(uint32 type)
+    uint32 GetData(uint32 uiType)
     {
-        switch(type)
+        switch(uiType)
         {
             case TYPE_DRAKOS:
             case TYPE_VAROS:
@@ -154,7 +154,7 @@ struct MANGOS_DLL_DECL instance_oculus : public ScriptedInstance
             case TYPE_EREGOS:
             case TYPE_ROBOTS:
             case TYPE_UROM_PHASE:
-                return m_auiEncounter[type];
+                return m_auiEncounter[uiType];
             default:
                 return 0;
         }
@@ -206,7 +206,7 @@ bool GOUse_go_oculus_portal(Player* pPlayer, GameObject* pGo)
     switch(pGo->GetEntry()) 
     {
         case GO_ORB_OF_NEXUS: 
-            pPlayer->TeleportTo(571,3876.159912f,6984.439941f,106.32f,6.279f); 
+            pPlayer->TeleportTo(571, 3876.159912f, 6984.439941f, 106.32f, 6.279f);
             return true; 
     } 
     return false; 
