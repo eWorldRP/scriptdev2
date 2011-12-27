@@ -34,7 +34,6 @@ spell 47575
 spell 50706
 spell 45109
 spell 45111
-spell 39246
 spell 52090
 spell 51331
 spell 51332
@@ -247,13 +246,6 @@ enum
     NPC_FREED_GREENGILL_SLAVE           = 25085,
     NPC_DARKSPINE_MYRMIDON              = 25060,
     NPC_DARKSPINE_SIREN                 = 25073,
-
-    // quest "The Big Bone Worm" 10930
-    SPELL_FUMPING                       = 39246,
-    SPELL_SUMMON_HAISHULUD              = 39248, // doesn't work
-    NPC_HAILSHULUDUN                    = 22038,
-    NPC_SAND_GNOME                      = 22483,
-    NPC_MATURE_BONE_SIFTER              = 22482,
 
     // quest 12659, item 38731
     SPELL_AHUNAES_KNIFE                 = 52090,
@@ -678,41 +670,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
 
             pCreatureTarget->CastSpell(pCreatureTarget, SPELL_ENRAGE, true);
 
-            return true;
-        }
-        case SPELL_FUMPING:
-        {
-            if (uiEffIndex == EFFECT_INDEX_2)
-            {
-                switch(urand(0,2))
-                {
-                    case 0:
-                    {
-                        if (Creature* pWorm = pCaster->SummonCreature(NPC_HAILSHULUDUN, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                            pWorm->AI()->AttackStart(pCaster);
-                        break;
-                    }
-                    case 1:
-                    {
-                        for (int i = 0; i<2; ++i)
-                        {
-                            if (Creature* pSandGnome = pCaster->SummonCreature(NPC_SAND_GNOME, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                                pSandGnome->AI()->AttackStart(pCaster);
-                        }
-                        break;
-                    }
-                    case 2:
-                    {
-                        for (int i = 0; i<2; ++i)
-                        {
-                            if (Creature* pMatureBoneSifter = pCaster->SummonCreature(NPC_MATURE_BONE_SIFTER, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                                pMatureBoneSifter->AI()->AttackStart(pCaster);
-                        }
-                        break;
-                    }
-                }
-                pCreatureTarget->ForcedDespawn();
-            }
             return true;
         }
         case SPELL_AHUNAES_KNIFE:
