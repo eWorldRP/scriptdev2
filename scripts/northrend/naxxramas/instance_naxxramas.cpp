@@ -345,6 +345,19 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 DoRespawnGameObject(GO_MILI_PORTAL, 30*MINUTE);
                 DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_CHEST_HORSEMEN_NORM : GO_CHEST_HORSEMEN_HERO, 30*MINUTE);
                 m_uiTauntTimer = 5000;
+
+                Map::PlayerList const& players = instance->GetPlayers();
+
+                if (!players.isEmpty())
+                {
+                    for(Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    {
+                        if (Player* pPlayer = itr->getSource())
+                        {
+                            pPlayer->CastSpell(pPlayer, SPELL_HORSEMEN_CREDIT, true);
+                        }
+                    }
+                }
             }
             break;
         case TYPE_PATCHWERK:
