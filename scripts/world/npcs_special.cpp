@@ -2716,6 +2716,7 @@ enum
     AURA_MISTLETOE          = 26004,
     ITEM_SNOWFLAKES         = 34191,
     ITEM_MISTLETOE          = 21519,
+    ITEM_FRESH_HOLLY        = 21212,
 };
 
 struct MANGOS_DLL_DECL npc_winter_revelerAI : public ScriptedAI
@@ -2726,88 +2727,11 @@ struct MANGOS_DLL_DECL npc_winter_revelerAI : public ScriptedAI
     {
         if (uiEmote == TEXTEMOTE_KISS)
         {
-            // alliance
-            if (pPlayer->GetTeam() == ALLIANCE)
+            if (!pPlayer->HasAura(AURA_MISTLETOE))
             {
-                if (pPlayer->getGender() == 1)
+                switch (urand()%3)
                 {
-                    if (!pPlayer->HasAura(AURA_MISTLETOE))
-                    {
-                        if (rand()%2 == 0)
-                        {
-                            ItemPosCountVec dest;
-                            InventoryResult msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_SNOWFLAKES, 1, NULL);
-                            if (msg == EQUIP_ERR_OK)
-                                pPlayer->StoreNewItem(dest, ITEM_SNOWFLAKES, true);
-                            else
-                                pPlayer->SendEquipError(msg, NULL, NULL);
-                        }
-                        else
-                        {
-                            ItemPosCountVec dest;
-                            InventoryResult msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_MISTLETOE, 1, NULL);
-                            if (msg == EQUIP_ERR_OK)
-                                pPlayer->StoreNewItem(dest, ITEM_MISTLETOE, true);
-                            else
-                                pPlayer->SendEquipError(msg, NULL, NULL);
-                        }
-                        m_creature->CastSpell(pPlayer, AURA_MISTLETOE, false);
-                    }
-                }
-                else if (pPlayer->getGender() == 0)
-                {
-                    if (rand()%2 == 0)
-                    {
-                        ItemPosCountVec dest;
-                        InventoryResult msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_SNOWFLAKES, 1, NULL);
-                        if (msg == EQUIP_ERR_OK)
-                            pPlayer->StoreNewItem(dest, ITEM_SNOWFLAKES, true);
-                        else
-                            pPlayer->SendEquipError(msg,NULL,NULL);
-                    }
-                    else
-                    {
-                        ItemPosCountVec dest;
-                        InventoryResult msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_MISTLETOE, 1, NULL);
-                        if (msg == EQUIP_ERR_OK)
-                            pPlayer->StoreNewItem(dest, ITEM_MISTLETOE, true);
-                        else
-                            pPlayer->SendEquipError(msg,NULL,NULL);
-                    }
-                    m_creature->CastSpell(pPlayer, AURA_MISTLETOE, false);
-                }
-            }
-            // horde
-            else if (pPlayer->GetTeam() == HORDE)
-            {
-                if (pPlayer->getGender() == 1)
-                {
-                    if (!pPlayer->HasAura(AURA_MISTLETOE))
-                    {
-                        if (rand()%2 == 0)
-                        {
-                            ItemPosCountVec dest;
-                            InventoryResult msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_SNOWFLAKES, 1, NULL);
-                            if (msg == EQUIP_ERR_OK)
-                                pPlayer->StoreNewItem(dest, ITEM_SNOWFLAKES, true);
-                            else
-                                pPlayer->SendEquipError(msg,NULL,NULL);
-                        }
-                        else
-                        {
-                            ItemPosCountVec dest;
-                            InventoryResult msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_MISTLETOE, 1, NULL);
-                            if (msg == EQUIP_ERR_OK)
-                                pPlayer->StoreNewItem(dest, ITEM_MISTLETOE, true);
-                            else
-                                pPlayer->SendEquipError(msg, NULL, NULL);
-                        }
-                        m_creature->CastSpell(pPlayer, AURA_MISTLETOE, false);
-                    }
-                }
-                else if (pPlayer->getGender() == 0)
-                {
-                    if (rand()%2 == 0)
+                    case 0:
                     {
                         ItemPosCountVec dest;
                         InventoryResult msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_SNOWFLAKES, 1, NULL);
@@ -2815,8 +2739,9 @@ struct MANGOS_DLL_DECL npc_winter_revelerAI : public ScriptedAI
                             pPlayer->StoreNewItem(dest, ITEM_SNOWFLAKES, true);
                         else
                             pPlayer->SendEquipError(msg, NULL, NULL);
+                        break;
                     }
-                    else
+                    case 1:
                     {
                         ItemPosCountVec dest;
                         InventoryResult msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_MISTLETOE, 1, NULL);
@@ -2824,9 +2749,20 @@ struct MANGOS_DLL_DECL npc_winter_revelerAI : public ScriptedAI
                             pPlayer->StoreNewItem(dest, ITEM_MISTLETOE, true);
                         else
                             pPlayer->SendEquipError(msg, NULL, NULL);
+                        break;
                     }
-                    m_creature->CastSpell(pPlayer, AURA_MISTLETOE, false);
+                    case 2:
+                    {
+                        ItemPosCountVec dest;
+                        InventoryResult msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_FRESH_HOLLY, 1, NULL);
+                        if (msg == EQUIP_ERR_OK)
+                            pPlayer->StoreNewItem(dest, ITEM_FRESH_HOLLY, true);
+                        else
+                            pPlayer->SendEquipError(msg, NULL, NULL);
+                        break;
+                    }
                 }
+                m_creature->CastSpell(pPlayer, AURA_MISTLETOE, false);
             }
         }
     }
