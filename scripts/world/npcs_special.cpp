@@ -2729,7 +2729,7 @@ struct MANGOS_DLL_DECL npc_winter_revelerAI : public ScriptedAI
         {
             if (!pPlayer->HasAura(AURA_MISTLETOE))
             {
-                switch (urand()%3)
+                switch (rand()%3)
                 {
                     case 0:
                     {
