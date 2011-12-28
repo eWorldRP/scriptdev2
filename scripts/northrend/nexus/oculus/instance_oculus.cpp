@@ -104,8 +104,11 @@ struct MANGOS_DLL_DECL instance_oculus : public ScriptedInstance
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == DONE)
                 {
-                    DoRespawnGameObject(m_bIsRegularMode ? GO_EREGOS_CACHE : GO_EREGOS_CACHE_H, HOUR);
-                    DoRespawnGameObject(GO_SPOTLIGHT, HOUR);
+                    GameObject* pTemp;
+                    if (pTemp = GetSingleGameObjectFromStorage(m_bIsRegularMode ? GO_EREGOS_CACHE : GO_EREGOS_CACHE_H))
+                        DoRespawnGameObject(pTemp->GetObjectGuid(), HOUR);
+                    if (pTemp = GetSingleGameObjectFromStorage(GO_SPOTLIGHT))
+                        DoRespawnGameObject(pTemp->GetObjectGuid(), HOUR);
                 }
                 break;
             case TYPE_ROBOTS:
