@@ -155,7 +155,7 @@ struct MANGOS_DLL_DECL boss_thaddiusAI : public ScriptedAI
 
         // Reset
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->CastSpell(m_creature, SPELL_THADIUS_SPAWN, false);
+        m_creature->CastSpell(m_creature, SPELL_THADIUS_SPAWN, true);
 
         // Delay reloading of CreatureAddon until Reached home for proper handling
         // Also note that m_creature->LoadCreatureAddon(); must _not_ be called before m_creature->GetMotionMaster()->MoveTargetedHome();
@@ -209,10 +209,7 @@ struct MANGOS_DLL_DECL boss_thaddiusAI : public ScriptedAI
                     return;
                 // remove Stun and then Cast
                 m_creature->RemoveAurasDueToSpell(SPELL_THADIUS_SPAWN);
-                m_creature->CastSpell(m_creature, SPELL_THADIUS_LIGHTNING_VISUAL, false);
-                break;
-            case SPELL_THADIUS_LIGHTNING_VISUAL:
-                // Make Attackable
+                m_creature->CastSpell(m_creature, SPELL_THADIUS_LIGHTNING_VISUAL, true);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_creature->SetInCombatWithZone();
                 break;
