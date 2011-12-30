@@ -90,202 +90,6 @@ enum
  };
 
 /************
-** boss_thaddius
-************/
-
-// Actually this boss behaves like a NoMovement Boss (SPELL_BALL_LIGHTNING) - but there are some movement packages used, unknown what this means!
-struct MANGOS_DLL_DECL boss_thaddiusAI : public ScriptedAI
-{
-    boss_thaddiusAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-
-        Reset();
-    }
-
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiPolarityShiftTimer;
-    uint32 m_uiChainLightningTimer;
-    uint32 m_uiBallLightningTimer;
-    uint32 m_uiBerserkTimer;
-
-    void Reset()
-    {
-        m_uiPolarityShiftTimer = 15*IN_MILLISECONDS;
-        m_uiChainLightningTimer = 8*IN_MILLISECONDS;
-        m_uiBallLightningTimer = 1*IN_MILLISECONDS;
-        m_uiBerserkTimer = 6*MINUTE*IN_MILLISECONDS;
-
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-    }
-
-    void Aggro(Unit* pWho)
-    {
-        switch (urand(0,2))
-        {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
-        }
-    }
-
-    void JustReachedHome()
-    {
-        if (m_pInstance)
-        {
-            m_pInstance->SetData(TYPE_THADDIUS, FAIL);
-
-            // Respawn Adds:
-            Creature* pFeugen  = m_pInstance->GetSingleCreatureFromStorage(NPC_FEUGEN);
-            Creature* pStalagg = m_pInstance->GetSingleCreatureFromStorage(NPC_STALAGG);
-            if (pFeugen)
-            {
-                if (pFeugen->isDead())
-                    pFeugen->Respawn();
-            }
-            if (pStalagg)
-            {
-                if (pStalagg->isDead())
-                    pStalagg->Respawn();
-            }
-        }
-
-        // Reset
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->CastSpell(m_creature, SPELL_THADIUS_SPAWN, true);
-
-        // Delay reloading of CreatureAddon until Reached home for proper handling
-        // Also note that m_creature->LoadCreatureAddon(); must _not_ be called before m_creature->GetMotionMaster()->MoveTargetedHome();
-        // Done this way, because MoveTargetHome ensures proper positioning (orientation)
-        m_creature->RemoveAllAuras();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-
-        if (m_creature->isAlive())
-            m_creature->GetMotionMaster()->MoveTargetedHome();
-
-        m_creature->SetLootRecipient(NULL);
-
-        Reset();
-    }
-
-    void KilledUnit(Unit* pVictim)
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        DoScriptText(SAY_SLAY, m_creature);
-    }
-
-    void JustDied(Unit* pKiller)
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-        {
-            m_pInstance->SetData(TYPE_THADDIUS, DONE);
-
-            // Force Despawn of Adds
-            Creature* pFeugen  = m_pInstance->GetSingleCreatureFromStorage(NPC_FEUGEN);
-            Creature* pStalagg = m_pInstance->GetSingleCreatureFromStorage(NPC_STALAGG);
-
-            if (pFeugen)
-                pFeugen->ForcedDespawn();
-            if (pStalagg)
-                pStalagg->ForcedDespawn();
-        }
-    }
-
-    void SpellHit(Unit* who, const SpellEntry* pSpell)
-    {
-        switch (pSpell->Id)
-        {
-            case SPELL_SHOCK_OVERLOAD:
-                // Only do something to Thaddius, and on the first hit.
-                if (!m_creature->HasAura(SPELL_THADIUS_SPAWN))
-                    return;
-                // remove Stun and then Cast
-                m_creature->RemoveAurasDueToSpell(SPELL_THADIUS_SPAWN);
-                m_creature->CastSpell(m_creature, SPELL_THADIUS_LIGHTNING_VISUAL, true);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                m_creature->SetInCombatWithZone();
-                break;
-            default:
-                break;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff)
-    {
-        if (!m_pInstance)
-            return;
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Berserk
-        if (m_uiBerserkTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BESERK) == CAST_OK)                  // allow combat movement?
-                m_uiBerserkTimer = 10*MINUTE*IN_MILLISECONDS;
-        }
-        else
-            m_uiBerserkTimer -= uiDiff;
-
-        // Polarity Shift
-        if (m_uiPolarityShiftTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_POLARITY_SHIFT, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-            {
-                DoScriptText(SAY_ELECT, m_creature);
-                DoScriptText(EMOTE_POLARITY_SHIFT, m_creature);
-                m_uiPolarityShiftTimer = 30*IN_MILLISECONDS;
-            }
-        }
-        else
-            m_uiPolarityShiftTimer -= uiDiff;
-
-        // Chain Lightning
-        if (m_uiChainLightningTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-            if (pTarget && DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
-                m_uiChainLightningTimer = 15*IN_MILLISECONDS;
-        }
-        else
-            m_uiChainLightningTimer -= uiDiff;
-
-        // Ball Lightning if target not in melee range
-        // TODO: Verify, likely that the boss should attack any enemy in melee range before starting to cast
-        if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim(), 10.0f))
-        {
-            SetCombatMovement(false);
-            if (m_uiBallLightningTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BALL_LIGHTNING) == CAST_OK)
-                    m_uiBallLightningTimer = 1*IN_MILLISECONDS;
-            }
-            else
-                m_uiBallLightningTimer -= uiDiff;
-        }
-        else
-        {
-            SetCombatMovement(true);
-            DoMeleeAttackIfReady();
-        }
-    }
-};
-
-CreatureAI* GetAI_boss_thaddius(Creature* pCreature)
-{
-    return new boss_thaddiusAI(pCreature);
-}
-
-
-/************
 ** npc_tesla_coil
 ************/
 
@@ -755,6 +559,209 @@ struct MANGOS_DLL_DECL boss_feugenAI : public boss_thaddiusAddsAI
 CreatureAI* GetAI_boss_feugen(Creature* pCreature)
 {
     return new boss_feugenAI(pCreature);
+}
+
+
+/************
+** boss_thaddius
+************/
+
+// Actually this boss behaves like a NoMovement Boss (SPELL_BALL_LIGHTNING) - but there are some movement packages used, unknown what this means!
+struct MANGOS_DLL_DECL boss_thaddiusAI : public ScriptedAI
+{
+    boss_thaddiusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+
+        Reset();
+    }
+
+    instance_naxxramas* m_pInstance;
+    bool m_bIsRegularMode;
+
+    uint32 m_uiPolarityShiftTimer;
+    uint32 m_uiChainLightningTimer;
+    uint32 m_uiBallLightningTimer;
+    uint32 m_uiBerserkTimer;
+
+    void Reset()
+    {
+        m_uiPolarityShiftTimer = 15*IN_MILLISECONDS;
+        m_uiChainLightningTimer = 8*IN_MILLISECONDS;
+        m_uiBallLightningTimer = 1*IN_MILLISECONDS;
+        m_uiBerserkTimer = 6*MINUTE*IN_MILLISECONDS;
+
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    }
+
+    void Aggro(Unit* pWho)
+    {
+        switch (urand(0,2))
+        {
+            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
+            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+        }
+    }
+
+    void JustReachedHome()
+    {
+        if (m_pInstance)
+        {
+            m_pInstance->SetData(TYPE_THADDIUS, FAIL);
+
+            // Respawn Adds:
+            Creature* pFeugen  = m_pInstance->GetSingleCreatureFromStorage(NPC_FEUGEN);
+            Creature* pStalagg = m_pInstance->GetSingleCreatureFromStorage(NPC_STALAGG);
+            boss_thaddiusAddsAI* pAddAI;
+            if (pFeugen)
+            {
+                if (pAddAI = dynamic_cast<boss_thaddiusAddsAI*> (pFeugen->AI()))
+                {
+                    if (pAddAI->m_bFakeDeath)
+                        pAddAI->EnterEvadeMode();
+                }
+            }
+            if (pStalagg)
+            {
+                if (pAddAI = dynamic_cast<boss_thaddiusAddsAI*> (pStalagg->AI()))
+                {
+                    if (pAddAI->m_bFakeDeath)
+                        pAddAI->EnterEvadeMode();
+                }
+            }
+        }
+
+        // Reset
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->CastSpell(m_creature, SPELL_THADIUS_SPAWN, true);
+
+        // Delay reloading of CreatureAddon until Reached home for proper handling
+        // Also note that m_creature->LoadCreatureAddon(); must _not_ be called before m_creature->GetMotionMaster()->MoveTargetedHome();
+        // Done this way, because MoveTargetHome ensures proper positioning (orientation)
+        m_creature->RemoveAllAuras();
+        m_creature->DeleteThreatList();
+        m_creature->CombatStop(true);
+
+        if (m_creature->isAlive())
+            m_creature->GetMotionMaster()->MoveTargetedHome();
+
+        m_creature->SetLootRecipient(NULL);
+
+        Reset();
+    }
+
+    void KilledUnit(Unit* pVictim)
+    {
+        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        DoScriptText(SAY_SLAY, m_creature);
+    }
+
+    void JustDied(Unit* pKiller)
+    {
+        DoScriptText(SAY_DEATH, m_creature);
+
+        if (m_pInstance)
+        {
+            m_pInstance->SetData(TYPE_THADDIUS, DONE);
+
+            // Force Despawn of Adds
+            Creature* pFeugen  = m_pInstance->GetSingleCreatureFromStorage(NPC_FEUGEN);
+            Creature* pStalagg = m_pInstance->GetSingleCreatureFromStorage(NPC_STALAGG);
+
+            if (pFeugen)
+                pFeugen->ForcedDespawn();
+            if (pStalagg)
+                pStalagg->ForcedDespawn();
+        }
+    }
+
+    void SpellHit(Unit* who, const SpellEntry* pSpell)
+    {
+        switch (pSpell->Id)
+        {
+            case SPELL_SHOCK_OVERLOAD:
+                // Only do something to Thaddius, and on the first hit.
+                if (!m_creature->HasAura(SPELL_THADIUS_SPAWN))
+                    return;
+                // remove Stun and then Cast
+                m_creature->RemoveAurasDueToSpell(SPELL_THADIUS_SPAWN);
+                m_creature->CastSpell(m_creature, SPELL_THADIUS_LIGHTNING_VISUAL, true);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetInCombatWithZone();
+                break;
+            default:
+                break;
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_pInstance)
+            return;
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        // Berserk
+        if (m_uiBerserkTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_BESERK) == CAST_OK)                  // allow combat movement?
+                m_uiBerserkTimer = 10*MINUTE*IN_MILLISECONDS;
+        }
+        else
+            m_uiBerserkTimer -= uiDiff;
+
+        // Polarity Shift
+        if (m_uiPolarityShiftTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_POLARITY_SHIFT, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+            {
+                DoScriptText(SAY_ELECT, m_creature);
+                DoScriptText(EMOTE_POLARITY_SHIFT, m_creature);
+                m_uiPolarityShiftTimer = 30*IN_MILLISECONDS;
+            }
+        }
+        else
+            m_uiPolarityShiftTimer -= uiDiff;
+
+        // Chain Lightning
+        if (m_uiChainLightningTimer < uiDiff)
+        {
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+            if (pTarget && DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
+                m_uiChainLightningTimer = 15*IN_MILLISECONDS;
+        }
+        else
+            m_uiChainLightningTimer -= uiDiff;
+
+        // Ball Lightning if target not in melee range
+        // TODO: Verify, likely that the boss should attack any enemy in melee range before starting to cast
+        if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim(), 10.0f))
+        {
+            SetCombatMovement(false);
+            if (m_uiBallLightningTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BALL_LIGHTNING) == CAST_OK)
+                    m_uiBallLightningTimer = 1*IN_MILLISECONDS;
+            }
+            else
+                m_uiBallLightningTimer -= uiDiff;
+        }
+        else
+        {
+            SetCombatMovement(true);
+            DoMeleeAttackIfReady();
+        }
+    }
+};
+
+CreatureAI* GetAI_boss_thaddius(Creature* pCreature)
+{
+    return new boss_thaddiusAI(pCreature);
 }
 
 void AddSC_boss_thaddius()
