@@ -79,8 +79,8 @@ SPELL_SUBMERGE_0       = 53421,
 SPELL_ENRAGE           = 68335,
 SPELL_FROTHING_RAGE    = 66759,
 SPELL_STAGGERED_DAZE   = 66758,
-SPELL_SLIME_POOL_1     = 66881,
-SPELL_SLIME_POOL_2     = 66882,
+SPELL_SLIME_POOL_DMG   = 66881,
+SPELL_SLIME_POOL_AURA  = 66882,
 SPELL_SLIME_POOL_VISUAL  = 63084,
 };
 /*#####
@@ -615,19 +615,17 @@ CreatureAI* GetAI_boss_dreadscale(Creature* pCreature)
 /*#####
 # Slime Pool
 #####*/
-struct MANGOS_DLL_DECL mob_slime_poolAI : public BSWScriptedAI
+struct MANGOS_DLL_DECL mob_slime_poolAI : public Scripted_NoMovementAI
 {
-    mob_slime_poolAI(Creature *pCreature) : BSWScriptedAI(pCreature)
+    mob_slime_poolAI(Creature *pCreature) : Scripted_NoMovementAI(pCreature)
     {
         m_pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
-        currentDifficulty = pCreature->GetMap()->GetDifficulty();
         Reset();
     }
 
     ScriptedInstance *m_pInstance;
     uint32 m_uiDespawnTimer;
     uint32 m_uiSizeTimer;
-    uint32 m_uiPoolTimer;
     float m_fSize;
     bool m_bCloudCasted;
 
@@ -640,7 +638,6 @@ struct MANGOS_DLL_DECL mob_slime_poolAI : public BSWScriptedAI
         SetCombatMovement(false);
         m_uiDespawnTimer = 30000;
         m_bCloudCasted = false;
-        m_uiPoolTimer = 1000;
         m_fSize = m_creature->GetFloatValue(OBJECT_FIELD_SCALE_X);
         m_uiSizeTimer = 500;
     }
@@ -658,15 +655,9 @@ struct MANGOS_DLL_DECL mob_slime_poolAI : public BSWScriptedAI
         if (!m_bCloudCasted)
         {
             DoCast(m_creature, SPELL_SLIME_POOL_VISUAL);
+            DoCast(m_creature, SPELL_SLIME_POOL_AURA);
             m_bCloudCasted = true;
         }
-
-        if (m_uiPoolTimer < uiDiff)
-        {
-            doCast(SPELL_SLIME_POOL_1);
-            m_uiPoolTimer = 1000;
-        }
-        else m_uiPoolTimer -= uiDiff;
 
         if (m_uiSizeTimer < uiDiff)
         {
