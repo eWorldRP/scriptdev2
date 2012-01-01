@@ -704,7 +704,7 @@ struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
                break;
             case 5:
                m_pInstance->SetData(TYPE_PHASE, 4);
-               if (Creature* pMeathook = m_creature->SummonCreature(NPC_MEATHOOK,2272.773f, 1331.824f, 124.171f, 3.12f,TEMPSUMMON_CORPSE_TIMED_DESPAWN,29000))
+               if (Creature* pMeathook = m_creature->SummonCreature(NPC_MEATHOOK, 2224.0225f, 1332.0918f, 127.328f, 3.12f,TEMPSUMMON_CORPSE_TIMED_DESPAWN,29000))
                {
                    DoScriptText(SAY_MEATHOOK_SPAWN, pMeathook);
                }
