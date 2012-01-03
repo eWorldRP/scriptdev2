@@ -526,6 +526,8 @@ struct MANGOS_DLL_DECL mob_frost_sphereAI : public BSWScriptedAI
     }
 
     ScriptedInstance* m_pInstance;
+    uint32 m_uiFakeDeathTimer;
+    uint32 m_uiReviveTimer;
     bool m_bCanCast;
     bool m_bFakeDeath;
     bool m_bRevive;
@@ -538,6 +540,7 @@ struct MANGOS_DLL_DECL mob_frost_sphereAI : public BSWScriptedAI
         m_creature->GetMotionMaster()->MoveRandom();
         m_bCanCast = false;
         m_bFakeDeath = false;
+        m_uiReviveTimer = 500;
         m_bRevive = false;
     }
 
@@ -558,6 +561,7 @@ struct MANGOS_DLL_DECL mob_frost_sphereAI : public BSWScriptedAI
             uiDamage = 0;
             m_creature->GetMotionMaster()->MoveIdle();
             m_bFakeDeath = true;
+            m_uiFakeDeathTimer = 500;
         }
     }
 
@@ -570,27 +574,35 @@ struct MANGOS_DLL_DECL mob_frost_sphereAI : public BSWScriptedAI
         {
             if (m_bCanCast)
             {
-                DoCast(m_creature, SPELL_PERMAFROST_VISUAL);
-                DoCast(m_creature, SPELL_PERMAFROST_N10, true);
-                outstring_log("[SPHERE]: castato il permafrost");
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                m_bCanCast = false;
+                if (m_uiFakeDeathTimer < uiDiff)
+                {
+                    DoCast(m_creature, SPELL_PERMAFROST_VISUAL);
+                    DoCast(m_creature, SPELL_PERMAFROST_N10, true);
+                    outstring_log("[SPHERE]: castato il permafrost");
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    m_bCanCast = false;
+                }
+                else m_uiFakeDeathTimer -= uiDiff;
             }
         }
 
         if (m_bRevive)
         {
-            m_bRevive = false;
-            m_bFakeDeath = false;
-            m_bCanCast = false;
-            m_creature->RemoveAurasDueToSpell(SPELL_PERMAFROST_VISUAL);
-            RemovePermafrostAura(m_creature);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            m_creature->SetHealth(m_creature->GetMaxHealth());
-            m_creature->GetMotionMaster()->MoveRandom();
-            outstring_log("[SPHERE]: riposizionato");
+            if (m_uiReviveTimer < uiDiff)
+            {
+                m_bRevive = false;
+                m_bFakeDeath = false;
+                m_bCanCast = false;
+                m_creature->RemoveAurasDueToSpell(SPELL_PERMAFROST_VISUAL);
+                RemovePermafrostAura(m_creature);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                m_creature->SetHealth(m_creature->GetMaxHealth());
+                m_creature->GetMotionMaster()->MoveRandom();
+                outstring_log("[SPHERE]: riposizionato");
+            }
+            else m_uiReviveTimer -= uiDiff;
         }
 
     }
