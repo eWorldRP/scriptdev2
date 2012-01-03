@@ -578,7 +578,6 @@ struct MANGOS_DLL_DECL mob_frost_sphereAI : public BSWScriptedAI
                 {
                     DoCast(m_creature, SPELL_PERMAFROST_VISUAL);
                     DoCast(m_creature, SPELL_PERMAFROST_N10, true);
-                    outstring_log("[SPHERE]: castato il permafrost");
                     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     m_bCanCast = false;
@@ -600,7 +599,6 @@ struct MANGOS_DLL_DECL mob_frost_sphereAI : public BSWScriptedAI
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 m_creature->SetHealth(m_creature->GetMaxHealth());
                 m_creature->GetMotionMaster()->MoveRandom();
-                outstring_log("[SPHERE]: riposizionato");
             }
             else m_uiReviveTimer -= uiDiff;
         }
