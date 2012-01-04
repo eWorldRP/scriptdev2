@@ -599,6 +599,7 @@ struct MANGOS_DLL_DECL mob_frost_sphereAI : public BSWScriptedAI
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 m_creature->SetHealth(m_creature->GetMaxHealth());
                 m_creature->GetMotionMaster()->MoveRandom();
+                m_uiReviveTimer = 500;
             }
             else m_uiReviveTimer -= uiDiff;
         }
