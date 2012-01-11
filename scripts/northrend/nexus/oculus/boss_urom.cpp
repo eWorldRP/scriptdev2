@@ -262,6 +262,9 @@ struct MANGOS_DLL_DECL boss_uromAI : public ScriptedAI
        if (!m_pInstance)
            return;
 
+       if (m_bIsTeleported)
+           return;
+
        if(m_pInstance->GetData(TYPE_UROM_PHASE) < 3)
        {
            Map::PlayerList const &pList = m_creature->GetMap()->GetPlayers();
