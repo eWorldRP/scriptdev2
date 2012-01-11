@@ -64,6 +64,9 @@ struct MANGOS_DLL_DECL instance_oculus : public ScriptedInstance
         switch(pGo->GetEntry())
         {
             case GO_DRAGON_CAGE_DOOR:
+            case GO_SPOTLIGHT:
+            case GO_EREGOS_CACHE:
+            case GO_EREGOS_CACHE_H:
                 break;
 
            default:
@@ -104,11 +107,12 @@ struct MANGOS_DLL_DECL instance_oculus : public ScriptedInstance
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == DONE)
                 {
-                    GameObject* pTemp;
-                    if (pTemp = GetSingleGameObjectFromStorage(m_bIsRegularMode ? GO_EREGOS_CACHE : GO_EREGOS_CACHE_H))
-                        DoRespawnGameObject(pTemp->GetObjectGuid(), HOUR);
-                    if (pTemp = GetSingleGameObjectFromStorage(GO_SPOTLIGHT))
-                        DoRespawnGameObject(pTemp->GetObjectGuid(), HOUR);
+                    if (GameObject* pTemp = GetSingleGameObjectFromStorage(m_bIsRegularMode ? GO_EREGOS_CACHE : GO_EREGOS_CACHE_H))
+                    {
+                        DoRespawnGameObject(pTemp->GetObjectGuid(), DAY);
+                    }
+                    if (GameObject* pTemp = GetSingleGameObjectFromStorage(GO_SPOTLIGHT))
+                        DoRespawnGameObject(pTemp->GetObjectGuid(), DAY);
                 }
                 break;
             case TYPE_ROBOTS:
