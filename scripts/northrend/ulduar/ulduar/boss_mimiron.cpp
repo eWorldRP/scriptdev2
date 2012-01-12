@@ -1163,7 +1163,12 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
 
         // reset button
         if(GameObject* pButton = m_pInstance->GetSingleGameObjectFromStorage(GO_MIMIRON_BUTTON))
+        {
             pButton->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+
+            if (pButton->GetGoState() == GO_STATE_ACTIVE)
+                pButton->SetGoState(GO_STATE_READY);
+        }
 
         // reset elevator
         if(GameObject* pLift = GetClosestGameObjectWithEntry(m_creature, GO_MIMIRON_ELEVATOR, DEFAULT_VISIBILITY_INSTANCE))
