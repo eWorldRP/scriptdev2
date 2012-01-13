@@ -354,7 +354,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                     {
                         if (Player* pPlayer = itr->getSource())
                         {
-                            pPlayer->CastSpell(pPlayer, SPELL_HORSEMEN_CREDIT, true);
+                            pPlayer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_HORSEMEN_CREDIT);
                         }
                     }
                 }
