@@ -160,6 +160,9 @@ enum Npcs_Go
     // objects
     NPC_BLUE_ORB_TARGET = 25640,
     ORB_BLUE_DRAGONFLIGHT  = 188415,
+
+    // misc
+    MAX_DECEIVERS       = 3,
 };
 
 enum Texts
@@ -181,9 +184,9 @@ enum Texts
     SAY_DARKNESS1                           = -1580074,
     SAY_DARKNESS2                           = -1580075,
     SAY_DARKNESS3                           = -1580076,
-    SAY_PHASE_FOUR	                        = -1580077,
+    SAY_PHASE_FOUR                            = -1580077,
     SAY_PHASE_THREE                         = -1580078,
-    SAY_PHASE_FIVE	                        = -1580079,
+    SAY_PHASE_FIVE                            = -1580079,
 
     // Kalecgos - Anveena speech
     SAY_KALECGOS_INTRO                      = -1580080,
@@ -481,14 +484,14 @@ struct MANGOS_DLL_DECL mob_deceiverAI : public ScriptedAI
 
     void JustDied(Unit* pKiller)
     {
-        if (++m_uiDecieverDead == 3)
+        if (++m_uiDecieverDead == MAX_DECEIVERS)
         {
             if (m_pInstance)
             {
-                if (Unit* pKilJaeden = m_pInstance->GetSingleCreatureFromStorage(NPC_KILJAEDEN))
+                if (Creature* pController = m_pInstance->GetSingleCreatureFromStorage(NPC_KILJAEDEN_CONTROLLER))
                 {
-                    pKilJaeden->setFaction(14);
-                    pKilJaeden->SetVisibility(VISIBILITY_ON);
+                    if (Creature* pKiljaeden = pController->SummonCreature(NPC_KILJAEDEN, pController->GetPositionX(), pController->GetPositionY(), pController->GetPositionZ(), pController->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
+                        pKiljaeden->SetInCombatWithZone();
                 }
             }
         }
@@ -627,29 +630,29 @@ struct MANGOS_DLL_DECL mob_felfire_portalAI : public Scripted_NoMovementAI
 {
     mob_felfire_portalAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
-		m_pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
-		pCreature->setFaction(14);
+        m_pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
+        pCreature->setFaction(14);
         Reset();
     }
 
-	ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_pInstance;
 
     void Reset()
     {
-		DoCast(m_creature, SPELL_SUMMON_FELFIRE_FIEND);
-		m_creature->SetRespawnDelay(DAY);
+        DoCast(m_creature, SPELL_SUMMON_FELFIRE_FIEND);
+        m_creature->SetRespawnDelay(DAY);
     }
 
-	void JustSummoned(Creature* pSummon)
-	{
-		pSummon->SetInCombatWithZone();
-	}
+    void JustSummoned(Creature* pSummon)
+    {
+        pSummon->SetInCombatWithZone();
+    }
 
     void UpdateAI(const uint32 uiDiff)
     {
-		if(m_pInstance->GetData(TYPE_KILJAEDEN) != IN_PROGRESS)
-			m_creature->ForcedDespawn();
-	}
+        if(m_pInstance->GetData(TYPE_KILJAEDEN) != IN_PROGRESS)
+            m_creature->ForcedDespawn();
+    }
 };
 
 CreatureAI* GetAI_mob_felfire_portal(Creature *pCreature)
@@ -664,48 +667,48 @@ struct MANGOS_DLL_DECL mob_felfire_fiendAI : public ScriptedAI
 {
     mob_felfire_fiendAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-	    Reset();
+        Reset();
     }
 
     bool m_bMustDie;
-	uint32 m_uiDieTimer;
+    uint32 m_uiDieTimer;
 
     void Reset()
     {
         m_bMustDie = false;
     }
 
-	void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
-	{
-		if(uiDamage > m_creature->GetHealth())
-		{
-			uiDamage = 0;
-			if(!m_bMustDie)
-			{
-				DoCast(m_creature, SPELL_FELFIRE_FISSION);
-				m_uiDieTimer = 500;
-				m_bMustDie = true;
-			}
-		}
-	}
+    void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
+    {
+        if(uiDamage > m_creature->GetHealth())
+        {
+            uiDamage = 0;
+            if(!m_bMustDie)
+            {
+                DoCast(m_creature, SPELL_FELFIRE_FISSION);
+                m_uiDieTimer = 500;
+                m_bMustDie = true;
+            }
+        }
+    }
 
     void UpdateAI(const uint32 uiDiff)
     {
-		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-			return;
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
 
-		if(m_uiDieTimer < uiDiff && m_bMustDie)
-			m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-		else m_uiDieTimer -= uiDiff;
+        if(m_uiDieTimer < uiDiff && m_bMustDie)
+            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        else m_uiDieTimer -= uiDiff;
 
-		if (m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE) && !m_bMustDie)
-		{
-			DoCast(m_creature, SPELL_FELFIRE_FISSION);
-			m_uiDieTimer = 500;
-			m_bMustDie = true;
-		}
+        if (m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE) && !m_bMustDie)
+        {
+            DoCast(m_creature, SPELL_FELFIRE_FISSION);
+            m_uiDieTimer = 500;
+            m_bMustDie = true;
+        }
 
-		DoMeleeAttackIfReady();
+        DoMeleeAttackIfReady();
     }
 };
 
