@@ -53,6 +53,8 @@ enum
     AREATRIGGER_TWINS           = 4937,
 
     // spells related to kalecgos event
+    SPELL_SPECTRAL_REALM_GO             = 44811,
+    SPELL_SPECTRAL_REALM_RETURN         = 44845,
     SPELL_SPECTRAL_REALM                = 46021,
     SPELL_TELEPORT_NORMAL_REALM         = 46020,
     SPELL_SPECTRAL_EXHAUSTION           = 44867,
@@ -75,7 +77,7 @@ class MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
         void OnCreatureCreate(Creature* pCreature);
 
         void SetData(uint32 uiType, uint32 uiData);
-        void SetData64(uint32 uiType, uint64 uiData);
+        void SetGuid(uint32 uiType, ObjectGuid uiData);
         uint32 GetData(uint32 uiType);
 
         void Update(uint32 uiDiff);

@@ -172,10 +172,7 @@ struct MANGOS_DLL_DECL boss_kalecgosAI : public ScriptedAI
     {
         if (m_pInstance)
         {
-            pTarget->CastSpell(pTarget, SPELL_TELEPORT_SPECTRAL_REALM, true);
-            pTarget->CastSpell(pTarget, SPELL_SPECTRAL_REALM_FORCE_FACTION, true);
-            pTarget->CastSpell(pTarget, SPELL_SPECTRAL_REALM, true);
-
+            pTarget->CastSpell(pTarget, SPELL_SPECTRAL_REALM_GO, true);
             m_pInstance->SetGuid(DATA_PLAYER_SPECTRAL_REALM, pTarget->GetObjectGuid());
         }
     }
@@ -344,7 +341,7 @@ struct MANGOS_DLL_DECL boss_kalecgosAI : public ScriptedAI
         if (m_uiSpectralBlastTimer < uiDiff)
         {
             m_bHasSpectralTarget = false;
-            DoCastSpellIfCan(m_creature, SPELL_SPECTRAL_BLAST_DUMMY);
+            m_creature->CastSpell(m_creature, SPELL_SPECTRAL_BLAST_DUMMY, false);
             m_uiSpectralBlastTimer = 30000;
         }
         else
@@ -571,10 +568,7 @@ bool GOUse_go_spectral_rift(Player* pPlayer, GameObject* pGo)
             return true;
 
         // Make them able to see Sathrovarr (he's invisible for some reason). Also, when this buff wears off, they get teleported back to Normal Realm (this is handled by Instance Script)
-        pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_SPECTRAL_REALM, true);
-        pPlayer->CastSpell(pPlayer, SPELL_SPECTRAL_REALM_FORCE_FACTION, true);
-        pPlayer->CastSpell(pPlayer, SPELL_SPECTRAL_REALM, true);
-
+        pPlayer->CastSpell(pPlayer, SPELL_SPECTRAL_REALM_GO, true);
         pInstance->SetGuid(DATA_PLAYER_SPECTRAL_REALM, pPlayer->GetObjectGuid());
     }
 
