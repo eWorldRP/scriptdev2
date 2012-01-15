@@ -768,15 +768,15 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
             }
 
             case PHASE_4_SOLO:
-            case 5:
-            case 6:
+            case PHASE_5_GRAVITY:
+            case PHASE_6_COMPLETE:
             {
                 //Return since we have no target
                 if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                     return;
 
                 //m_uiFireball_Timer
-                if (!m_bInGravityLapse && !m_bChainPyros && m_uiPhase != 5)
+                if (!m_bInGravityLapse && !m_bChainPyros && m_uiPhase != PHASE_5_GRAVITY)
                 {
                     if (m_uiFireball_Timer < uiDiff)
                     {
@@ -910,7 +910,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                         DoCastSpellIfCan(m_creature, SPELL_EXPLODE);
 
                         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        m_uiPhase = 6;
+                        m_uiPhase = PHASE_6_COMPLETE;
                         AttackStart(m_creature->getVictim());
                     }
                     else
@@ -918,7 +918,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                 }
 
                 //Phase 5
-                if (m_uiPhase == 6)
+                if (m_uiPhase == PHASE_6_COMPLETE)
                 {
 
                     //m_uiGravityLapse_Timer
@@ -992,6 +992,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                                 m_bInGravityLapse = false;
                                 m_uiGravityLapse_Timer = 60000;
                                 m_uiGravityLapse_Phase = 0;
+                                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                                 AttackStart(m_creature->getVictim());
                                 break;
                             }
