@@ -290,11 +290,6 @@ struct MANGOS_DLL_DECL boss_kiljaedenAI : public Scripted_NoMovementAI
         m_uiMaxShieldOrbs         = 1;
 
 // Phase Two
-
-// Kil Jaed resets
-        m_creature->SetVisibility(VISIBILITY_OFF);
-        m_creature->setFaction(35);
-
         if (!m_creature->HasAura(SPELL_SUNWELL_RADIANCE_AURA,  EFFECT_INDEX_0))
              m_creature->CastSpell(m_creature, SPELL_SUNWELL_RADIANCE_AURA, true);
 
@@ -314,7 +309,8 @@ struct MANGOS_DLL_DECL boss_kiljaedenAI : public Scripted_NoMovementAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_KILJAEDEN, NOT_STARTED);
-            m_pInstance->SetData(TYPE_KILJAEDEN_PHASE, PHASE_IDLE);
+
+        m_pInstance->SetData(TYPE_KILJAEDEN_PHASE, PHASE_IDLE);
 
         if (Creature* pAnveena = m_pInstance->GetSingleCreatureFromStorage(NPC_ANVEENA))
         {

@@ -63,7 +63,7 @@ void instance_sunwell_plateau::OnCreatureCreate(Creature* pCreature)
         case NPC_KALECGOS_DRAGON:
         case NPC_KALECGOS_HUMAN:
         case NPC_SATHROVARR:
-        case NPC_MADRIGOSA:    
+        case NPC_MADRIGOSA:
         case NPC_BRUTALLUS:
         case NPC_FELMYST:
         case NPC_ALYTHESS:
