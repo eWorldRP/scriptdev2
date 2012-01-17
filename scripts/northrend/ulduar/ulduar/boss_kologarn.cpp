@@ -170,6 +170,7 @@ struct MANGOS_DLL_DECL boss_left_armAI : public ScriptedAI
             if(Unit* TmpTarget = pKologarn->getVictim())
                 m_creature->SetInCombatWith(TmpTarget);
         }
+        m_creature->SetRespawnDelay(DAY);
     }
 
     void JustRespawned()
@@ -281,6 +282,7 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
             if(Unit* TmpTarget = pKologarn->getVictim())
                 m_creature->SetInCombatWith(TmpTarget);
         }
+        m_creature->SetRespawnDelay(DAY);
     }
 
     void JustRespawned()
