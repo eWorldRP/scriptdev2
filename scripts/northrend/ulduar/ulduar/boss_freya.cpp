@@ -508,7 +508,7 @@ struct MANGOS_DLL_DECL boss_elder_stonebarkAI : public ScriptedAI
     }
 
     void Aggro(Unit* pWho)
-    {    
+    {
         DoScriptText(SAY_STONEBARK_AGGRO, m_creature);
     }
 
@@ -1384,7 +1384,7 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
         m_uiDeathCountdown          = 10000;
         m_uiTidalWave_Timer         = urand(2000,4000);
         m_uiStormbolt_Timer         = 1000;
-        m_uiLightningLash_Timer     = urand(11000,14000);        
+        m_uiLightningLash_Timer     = urand(11000,14000);
         m_uiFlameLash_Timer         = urand(5000,10000);
         m_uiNaturesFury_Timer       = urand(8000,10000);
         m_uiRespawnSpores_Timer     = 5000;
@@ -1411,7 +1411,7 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
             uiDamage        = 0;
             m_bHasExploded  = true;
             m_uiDieTimer  = 500;
-        }        
+        }
     }
 
     void DoSpores(int8 times)
@@ -1419,8 +1419,8 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
         for(int8 i = 0; i < times; ++i)
         {
             for(int8 itr = 0; i < 3; ++i)
-                DoCast(m_creature, SPELL_SPORE_SUMMON_NE + itr);
-            DoCast(m_creature, SPELL_SPORE_SUMMON_NW);
+                DoCast(m_creature, SPELL_SPORE_SUMMON_NE + itr, true);
+            DoCast(m_creature, SPELL_SPORE_SUMMON_NW, true);
         }
     }
 
@@ -1432,9 +1432,9 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
         if (!m_creature->isAlive())
             return;
 
-        // DETONATING LASHERS
         switch (m_creature->GetEntry())
         {
+            // DETONATING LASHERS
             case NPC_DETONATING_LASHER:
                 if(m_uiFlameLash_Timer < uiDiff)
                 {
@@ -1447,6 +1447,7 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
                 else m_uiDieTimer -= uiDiff;
 
                 break;
+            //  ANCIENT CONSERVATOR
             case NPC_ANCIENT_CONSERVATOR:
                 if (m_uiNaturesFury_Timer < uiDiff)
                 {
@@ -1461,6 +1462,7 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
                 } else m_uiRespawnSpores_Timer -= uiDiff;
 
                 break;
+            // WATER SPIRIT
             case NPC_WATER_SPIRIT:
                 if( m_uiTidalWave_Timer < uiDiff)
                 {
@@ -1469,6 +1471,7 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
                 } else m_uiTidalWave_Timer -= uiDiff;
 
                 break;
+            // STORM LASHER
             case NPC_STORM_LASHER:
                 if (m_uiLightningLash_Timer < uiDiff)
                 {
