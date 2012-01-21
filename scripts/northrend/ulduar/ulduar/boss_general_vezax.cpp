@@ -97,7 +97,7 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
     void Reset()
     {
         m_uiEnrageTimer         = 600000; //10 minutes
-        m_uiFlamesTimer         = urand(8000, 10000);
+        m_uiFlamesTimer         = 10000;
         m_uiSaroniteVaporTimer  = 30000;
         m_bIsHardMode           = false;
         m_bActiveHardMode       = false;
@@ -189,6 +189,18 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
         }
     }
 
+
+    //hacky workaround for interrupt searing flames (need core fix)
+    void SpellHit(Unit* who, const SpellEntry* spell)
+    {
+        // don't self interrupt
+        if (!who->IsControlledByPlayer())
+            return;
+
+        if (spell->EffectMechanic[0] == MECHANIC_INTERRUPT || spell->EffectMechanic[1] == MECHANIC_INTERRUPT || spell->EffectMechanic[2] == MECHANIC_INTERRUPT)
+            m_creature->InterruptNonMeleeSpells(false, SPELL_SEARING_FLAMES);
+    }
+
     void ActivateHardMode()
     {
         m_creature->CastStop();
@@ -275,7 +287,7 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
         if(m_uiFlamesTimer < uiDiff && !m_bIsAnimusAlive)
         {
             DoCast(m_creature, SPELL_SEARING_FLAMES);
-            m_uiFlamesTimer = urand(5000, 10000);
+            m_uiFlamesTimer = 11000;
         }
         else m_uiFlamesTimer -= uiDiff; 
 

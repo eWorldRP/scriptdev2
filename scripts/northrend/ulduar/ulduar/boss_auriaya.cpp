@@ -281,7 +281,7 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (m_pInstance && m_pInstance->GetData(TYPE_AURIAYA) != IN_PROGRESS) 
+        if (m_pInstance && m_pInstance->GetData(TYPE_AURIAYA) != IN_PROGRESS)
             m_creature->ForcedDespawn();
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
