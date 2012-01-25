@@ -35,7 +35,9 @@ enum
     NPC_KILJAEDEN_CONTROLLER    = 25608,            // kiljaeden event controller
     NPC_ANVEENA                 = 26046,            // related to kiljaeden event
     NPC_KALECGOS                = 25319,            // related to kiljaeden event
-    NPC_MADRIGOSA               = 25160,            // Alive and flying one 
+    NPC_LIADRIN                 = 26247,            // related to kiljaeden event
+    NPC_VELEN                   = 26246,            // related to kiljaeden event
+    NPC_MADRIGOSA               = 25160,            // Alive and flying one
 
     GO_FORCEFIELD               = 188421,           // kalecgos door + collisions
     GO_BOSS_COLLISION_1         = 188523,
@@ -92,6 +94,7 @@ class MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
         std::string m_strInstData;
 
         // Misc
+        uint32 m_uiKiljaedenPhase;
         uint32 m_uiSpectralRealmTimer;
         GUIDList m_lSpectralRealmList;
 };

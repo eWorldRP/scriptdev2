@@ -43,6 +43,8 @@ instance_sunwell_plateau::instance_sunwell_plateau(Map* pMap) : ScriptedInstance
 void instance_sunwell_plateau::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
+    m_uiKiljaedenPhase = 0;
 }
 
 bool instance_sunwell_plateau::IsEncounterInProgress() const
@@ -74,6 +76,8 @@ void instance_sunwell_plateau::OnCreatureCreate(Creature* pCreature)
         case NPC_KILJAEDEN_CONTROLLER:
         case NPC_ANVEENA:
         case NPC_KALECGOS:
+        case NPC_LIADRIN:
+        case NPC_VELEN:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
@@ -167,6 +171,9 @@ void instance_sunwell_plateau::SetData(uint32 uiType, uint32 uiData)
         case DATA_SET_SPECTRAL_CHECK:
             m_uiSpectralRealmTimer = uiData;
             break;
+        case TYPE_KILJAEDEN_PHASE:
+            m_uiKiljaedenPhase = uiData;
+            break;
     }
 
     if (uiData == DONE)
@@ -192,10 +199,20 @@ void instance_sunwell_plateau::SetGuid(uint32 uiType, ObjectGuid uiData)
 
 uint32 instance_sunwell_plateau::GetData(uint32 uiType)
 {
-    if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
-
-    return 0;
+    switch (uiType)
+    {
+        case TYPE_KALECGOS:
+        case TYPE_BRUTALLUS:
+        case TYPE_FELMYST:
+        case TYPE_EREDAR_TWINS:
+        case TYPE_MURU:
+        case TYPE_KILJAEDEN:
+            return m_auiEncounter[uiType];
+        case TYPE_KILJAEDEN_PHASE:
+            return m_uiKiljaedenPhase;
+        default:
+            return 0;
+    }
 }
 
 void instance_sunwell_plateau::DoEjectSpectralRealmPlayers()
