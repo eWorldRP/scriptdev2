@@ -1699,39 +1699,20 @@ bool GOUse_orb_of_the_blue_flight(Player* pPlayer, GameObject* pGo)
 {
     ScriptedInstance *m_pInstance = (ScriptedInstance*)pPlayer->GetInstanceData();
 
-    outstring_log("[KJ]: using orb of the blue dragon");
     if (m_pInstance && m_pInstance->GetData(TYPE_KILJAEDEN) == IN_PROGRESS)
     {
-        if(!pPlayer->HasAura(AURA_NODRAGON))
+        if(Creature* pDragon = pPlayer->SummonCreature(NPC_BLUE_DRAGON, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ()+1, 0, TEMPSUMMON_CORPSE_DESPAWN, 20000))
         {
-            outstring_log("[KJ]: start summoning blue dragon...");
-            if(Creature* pDragon = pPlayer->SummonCreature(NPC_BLUE_DRAGON, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ()+1, 0, TEMPSUMMON_CORPSE_DESPAWN, 20000))
-            {
-                outstring_log("[KJ]: summoned blue dragon...");
-                pDragon->SetSpeedRate(MOVE_FLIGHT, 1.0f);
-                pDragon->SetSpeedRate(MOVE_WALK, 1.0f);
-                pDragon->SetSpeedRate(MOVE_RUN, 1.0f);
-                pDragon->GetMotionMaster()->MoveFollow(pPlayer, 0.0f, 0.0f);
-                pDragon->DealDamage(pDragon, pDragon->GetHealth()/100, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-            }
-            pPlayer->CastSpell(pPlayer, SPELL_VENGEANCE_OF_THE_BLUE_FLIGHT, true);
+            pDragon->SetSpeedRate(MOVE_FLIGHT, 1.0f);
+            pDragon->SetSpeedRate(MOVE_WALK, 1.0f);
+            pDragon->SetSpeedRate(MOVE_RUN, 1.0f);
+            pDragon->GetMotionMaster()->MoveFollow(pPlayer, 0.0f, 0.0f);
+            pDragon->DealDamage(pDragon, pDragon->GetHealth()/100, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
         }
-        
-        Map *map = pPlayer->GetMap();
-        if (map->IsDungeon())
-        {
-            Map::PlayerList const &PlayerList = map->GetPlayers();
+        pPlayer->CastSpell(pPlayer, SPELL_VENGEANCE_OF_THE_BLUE_FLIGHT, true);
+        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+     }
 
-            if (!PlayerList.isEmpty())
-            {
-                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                {   
-                    if (i->getSource() && !i->getSource()->HasAura(AURA_NODRAGON))
-                        i->getSource()->CastSpell(i->getSource(), AURA_NODRAGON, true);
-                }
-            }
-        }
-    }
     return true;
 }
 
