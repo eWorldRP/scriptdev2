@@ -154,9 +154,13 @@ enum
     SPELL_SWEEP                        = 62316,
     SPELL_SWEEP_H                    = 62417,
     // captains
+    NPC_CAPTAIN_ALY                    = 32908,
+    NPC_CAPTAIN_HORDE                = 32907,
     SPELL_DEVASTATE                    = 62317,
     SPELL_HEROIC_STRIKE                = 62444,
     // mercenary
+    NPC_MERCENARY_ALY                = 32885,
+    NPC_MERCENARY_HORDE                = 32883,
     SPELL_SHOOT                        = 16496,
     SPELL_BARBED_SHOT                = 62318,
     SPELL_WING_CLIP                    = 40652,

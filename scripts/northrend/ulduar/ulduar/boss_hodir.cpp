@@ -80,6 +80,11 @@ enum
     NPC_FLASH_FREEZE        = 32926,
     NPC_FLASH_FREEZE_NPC    = 32938,
 
+    NPC_HELPER_DRUID        = 32941,
+    NPC_HELPER_SHAMAN       = 32950,
+    NPC_HELPER_MAGE         = 32946,
+    NPC_HELPER_PRIEST       = 32948,
+
     SPELL_HODIR_CREDIT      = 64899,
 
     ACHIEV_RARE_CACHE       = 3182,
