@@ -95,7 +95,7 @@ bool GossipHello_npc_toc5_announcer(Player* pPlayer, Creature* pCreature)
     if (_GossipMessage[i].state && m_pInstance->GetData(_GossipMessage[i].encounter) == DONE)
     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, _GossipMessage[i].name, GOSSIP_SENDER_MAIN,_GossipMessage[i].id);
     };
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
 
     return true;
 }
@@ -110,7 +110,7 @@ pPlayer->CLOSE_GOSSIP_MENU();
 switch(uiAction) {
     case GOSSIP_ACTION_INFO_DEF+1: {
     if (m_pInstance->GetData(DATA_TOC5_ANNOUNCER) == 0) {
-               m_pInstance->SetData(DATA_TOC5_ANNOUNCER, pCreature->GetGUID());
+        m_pInstance->SetData(DATA_TOC5_ANNOUNCER, pCreature->GetObjectGuid());
 
            if (m_pInstance->GetData(DATA_TOC5_ANNOUNCER) == m_pInstance->GetData(DATA_ARELAS))
                {

@@ -247,7 +247,7 @@ struct MANGOS_DLL_DECL mob_headAI : public ScriptedAI
     void Reset()
     {
         m_uiPhase = 0;
-        m_uiBodyguid = 0;
+        m_uiBodyguid.Clear();
         m_bDie = false;
         m_bWithBody = true;
         m_uiWait = 1000;

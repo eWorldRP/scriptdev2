@@ -136,222 +136,222 @@ struct MANGOS_DLL_DECL instance_trial_of_the_champion : public ScriptedInstance
         {
             // Champions of the Alliance
             case NPC_JACOB:
-                m_uiJacobGUID = pCreature->GetGUID();
+                m_uiJacobGUID = pCreature->GetObjectGuid().GetCounter();
                 if (m_uiChampion1 == 0)
-                    m_uiChampion1 = pCreature->GetGUID();
+                    m_uiChampion1 = pCreature->GetObjectGuid().GetCounter();
                 else
                     if (m_uiChampion2 == 0)
-                        m_uiChampion2 = pCreature->GetGUID();
+                        m_uiChampion2 = pCreature->GetObjectGuid().GetCounter();
                     else
                         if (m_uiChampion3 == 0)
-                            m_uiChampion3 = pCreature->GetGUID();
+                            m_uiChampion3 = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_AMBROSE:
-                m_uiAmbroseGUID = pCreature->GetGUID();
+                m_uiAmbroseGUID = pCreature->GetObjectGuid().GetCounter();
                 if (m_uiChampion1 == 0)
-                    m_uiChampion1 = pCreature->GetGUID();
+                    m_uiChampion1 = pCreature->GetObjectGuid().GetCounter();
                 else
                     if (m_uiChampion2 == 0)
-                        m_uiChampion2 = pCreature->GetGUID();
+                        m_uiChampion2 = pCreature->GetObjectGuid().GetCounter();
                     else
                         if (m_uiChampion3 == 0)
-                            m_uiChampion3 = pCreature->GetGUID();
+                            m_uiChampion3 = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_COLOSOS:
-                m_uiColososGUID = pCreature->GetGUID();
+                m_uiColososGUID = pCreature->GetObjectGuid().GetCounter();
                 if (m_uiChampion1 == 0)
-                    m_uiChampion1 = pCreature->GetGUID();
+                    m_uiChampion1 = pCreature->GetObjectGuid().GetCounter();
                 else
                     if (m_uiChampion2 == 0)
-                        m_uiChampion2 = pCreature->GetGUID();
+                        m_uiChampion2 = pCreature->GetObjectGuid().GetCounter();
                     else
                         if (m_uiChampion3 == 0)
-                            m_uiChampion3 = pCreature->GetGUID();
+                            m_uiChampion3 = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_JAELYNE:
-                m_uiJaelyneGUID = pCreature->GetGUID();
+                m_uiJaelyneGUID = pCreature->GetObjectGuid().GetCounter();
                 if (m_uiChampion1 == 0)
-                    m_uiChampion1 = pCreature->GetGUID();
+                    m_uiChampion1 = pCreature->GetObjectGuid().GetCounter();
                 else
                     if (m_uiChampion2 == 0)
-                        m_uiChampion2 = pCreature->GetGUID();
+                        m_uiChampion2 = pCreature->GetObjectGuid().GetCounter();
                     else
                         if (m_uiChampion3 == 0)
-                            m_uiChampion3 = pCreature->GetGUID();
+                            m_uiChampion3 = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_LANA:
-                m_uiLanaGUID = pCreature->GetGUID();
+                m_uiLanaGUID = pCreature->GetObjectGuid().GetCounter();
                 if (m_uiChampion1 == 0)
-                    m_uiChampion1 = pCreature->GetGUID();
+                    m_uiChampion1 = pCreature->GetObjectGuid().GetCounter();
                 else
                     if (m_uiChampion2 == 0)
-                        m_uiChampion2 = pCreature->GetGUID();
+                        m_uiChampion2 = pCreature->GetObjectGuid().GetCounter();
                     else
                         if (m_uiChampion3 == 0)
-                            m_uiChampion3 = pCreature->GetGUID();
+                            m_uiChampion3 = pCreature->GetObjectGuid().GetCounter();
                 break;
 
             // Champions of the Horde
             case NPC_MOKRA:
-                m_uiMokraGUID = pCreature->GetGUID();
+                m_uiMokraGUID = pCreature->GetObjectGuid().GetCounter();
                 if (m_uiChampion1 == 0)
-                    m_uiChampion1 = pCreature->GetGUID();
+                    m_uiChampion1 = pCreature->GetObjectGuid().GetCounter();
                 else
                     if (m_uiChampion2 == 0)
-                        m_uiChampion2 = pCreature->GetGUID();
+                        m_uiChampion2 = pCreature->GetObjectGuid().GetCounter();
                     else
                         if (m_uiChampion3 == 0)
-                            m_uiChampion3 = pCreature->GetGUID();
+                            m_uiChampion3 = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_ERESSEA:
-                m_uiEresseaGUID = pCreature->GetGUID();
+                m_uiEresseaGUID = pCreature->GetObjectGuid().GetCounter();
                 if (m_uiChampion1 == 0)
-                    m_uiChampion1 = pCreature->GetGUID();
+                    m_uiChampion1 = pCreature->GetObjectGuid().GetCounter();
                 else
                     if (m_uiChampion2 == 0)
-                        m_uiChampion2 = pCreature->GetGUID();
+                        m_uiChampion2 = pCreature->GetObjectGuid().GetCounter();
                     else
                         if (m_uiChampion3 == 0)
-                            m_uiChampion3 = pCreature->GetGUID();
+                            m_uiChampion3 = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_RUNOK:
-                m_uiRunokGUID = pCreature->GetGUID();
+                m_uiRunokGUID = pCreature->GetObjectGuid().GetCounter();
                 if (m_uiChampion1 == 0)
-                    m_uiChampion1 = pCreature->GetGUID();
+                    m_uiChampion1 = pCreature->GetObjectGuid().GetCounter();
                 else
                     if (m_uiChampion2 == 0)
-                        m_uiChampion2 = pCreature->GetGUID();
+                        m_uiChampion2 = pCreature->GetObjectGuid().GetCounter();
                     else
                         if (m_uiChampion3 == 0)
-                            m_uiChampion3 = pCreature->GetGUID();
+                            m_uiChampion3 = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_ZULTORE:
-                m_uiZultoreGUID = pCreature->GetGUID();
+                m_uiZultoreGUID = pCreature->GetObjectGuid().GetCounter();
                 if (m_uiChampion1 == 0)
-                    m_uiChampion1 = pCreature->GetGUID();
+                    m_uiChampion1 = pCreature->GetObjectGuid().GetCounter();
                 else
                     if (m_uiChampion2 == 0)
-                        m_uiChampion2 = pCreature->GetGUID();
+                        m_uiChampion2 = pCreature->GetObjectGuid().GetCounter();
                     else
                         if (m_uiChampion3 == 0)
-                            m_uiChampion3 = pCreature->GetGUID();
+                            m_uiChampion3 = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_VISCERI:
-                m_uiVisceriGUID = pCreature->GetGUID();
+                m_uiVisceriGUID = pCreature->GetObjectGuid().GetCounter();
                 if (m_uiChampion1 == 0)
-                    m_uiChampion1 = pCreature->GetGUID();
+                    m_uiChampion1 = pCreature->GetObjectGuid().GetCounter();
                 else
                     if (m_uiChampion2 == 0)
-                        m_uiChampion2 = pCreature->GetGUID();
+                        m_uiChampion2 = pCreature->GetObjectGuid().GetCounter();
                     else
                         if (m_uiChampion3 == 0)
-                            m_uiChampion3 = pCreature->GetGUID();
+                            m_uiChampion3 = pCreature->GetObjectGuid().GetCounter();
                 break;
 
             // Argent Challenge
             case NPC_EADRIC:
-                m_uiEadricGUID = pCreature->GetGUID();
-                m_uiArgentChallenger = pCreature->GetGUID();
+                m_uiEadricGUID = pCreature->GetObjectGuid().GetCounter();
+                m_uiArgentChallenger = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_PALETRESS:
-                m_uiPaletressGUID = pCreature->GetGUID();
-                m_uiArgentChallenger = pCreature->GetGUID();
+                m_uiPaletressGUID = pCreature->GetObjectGuid().GetCounter();
+                m_uiArgentChallenger = pCreature->GetObjectGuid().GetCounter();
                 break;
 
             // Black Knight
             case NPC_BLACK_KNIGHT:
-                m_uiBlackKnightGUID = pCreature->GetGUID();
+                m_uiBlackKnightGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_RISEN_JAEREN:
-                m_uiBlackKnightMinionGUID = pCreature->GetGUID();
+                m_uiBlackKnightMinionGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_RISEN_ARELAS:
-                m_uiBlackKnightMinionGUID = pCreature->GetGUID();
+                m_uiBlackKnightMinionGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
 
             // Coliseum Announcers
             case NPC_JAEREN:
-                m_uiJaerenGUID = pCreature->GetGUID();
+                m_uiJaerenGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_ARELAS:
-                m_uiArelasGUID = pCreature->GetGUID();
+                m_uiArelasGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
 
             // memories
             case MEMORY_ALGALON:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_ARCHIMONDE:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_CHROMAGGUS:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_CYANIGOSA:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_DELRISSA:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_ECK:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_ENTROPIUS:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_GRUUL:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_HAKKAR:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_HEIGAN:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_HEROD:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_HOGGER:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_IGNIS:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_ILLIDAN:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_INGVAR:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_KALITHRESH:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_LUCIFRON:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_MALCHEZAAR:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_MUTANUS:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_ONYXIA:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_THUNDERAAN:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_VANCLEEF:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_VASHJ:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_VEKNILASH:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case MEMORY_VEZAX:
-                m_uiMemoryGUID = pCreature->GetGUID();
+                m_uiMemoryGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
         }
     }
@@ -361,22 +361,22 @@ struct MANGOS_DLL_DECL instance_trial_of_the_champion : public ScriptedInstance
         switch(pGo->GetEntry())
         {
             case GO_CHAMPIONS_LOOT:
-                m_uiChampionsLootGUID = pGo->GetGUID();
+                m_uiChampionsLootGUID = pGo->GetObjectGuid().GetCounter();
                 break;
             case GO_EADRIC_LOOT:
-                m_uiEadricLootGUID = pGo->GetGUID();
+                m_uiEadricLootGUID = pGo->GetObjectGuid().GetCounter();
                 break;
             case GO_PALETRESS_LOOT:
-                m_uiPaletressLootGUID = pGo->GetGUID();
+                m_uiPaletressLootGUID = pGo->GetObjectGuid().GetCounter();
                 break;
             case GO_CHAMPIONS_LOOT_H:
-                m_uiChampionsLootGUID = pGo->GetGUID();
+                m_uiChampionsLootGUID = pGo->GetObjectGuid().GetCounter();
                 break;
             case GO_EADRIC_LOOT_H:
-                m_uiEadricLootGUID = pGo->GetGUID();
+                m_uiEadricLootGUID = pGo->GetObjectGuid().GetCounter();
                 break;
             case GO_PALETRESS_LOOT_H:
-                m_uiPaletressLootGUID = pGo->GetGUID();
+                m_uiPaletressLootGUID = pGo->GetObjectGuid().GetCounter();
                 break;
         }
     }
