@@ -88,7 +88,7 @@ struct MANGOS_DLL_DECL boss_galdarahAI : public ScriptedAI
     uint32 m_uiImpalingChargeTimer;
     uint32 m_uiPunctureTimer;
 
-    uint64 m_uiRhinoGUID;
+    ObjectGuid m_uiRhinoGUID;
 
     void Reset()
     {
@@ -103,7 +103,7 @@ struct MANGOS_DLL_DECL boss_galdarahAI : public ScriptedAI
         m_uiImpalingChargeTimer = 7000;
         m_uiPunctureTimer = 10000;
 
-        m_uiRhinoGUID = 0;
+        m_uiRhinoGUID.Clear();
 
         m_creature->SetDisplayId(MODELID_HUMAN);
 
