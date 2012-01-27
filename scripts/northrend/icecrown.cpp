@@ -231,7 +231,7 @@ bool GossipHello_npc_argent_tournament_questgiver(Player* pPlayer, Creature* pCr
         return false; // return not handled message: the NPC will behave like a common questgiver
 
     // else, send empty gossip menu
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
     return true;
 }
 
@@ -245,7 +245,7 @@ bool GossipHello_npc_argent_tournament_requires_EAC(Player* pPlayer, Creature* p
         return false;
 
     // else, send empty gossip menu
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
     return true;
 }
 
@@ -257,7 +257,7 @@ bool GossipHello_npc_rhydalla(Player* pPlayer, Creature* pCreature)
 {
     if (pCreature->isQuestGiver())
     {
-        pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
         QuestMenu &qm = pPlayer->PlayerTalkClass->GetQuestMenu();
         
@@ -302,7 +302,7 @@ bool GossipHello_npc_squire_david(Player* pPlayer, Creature* pCreature)
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUIRE_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
     }
 
-    pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_READYTOBATTLE, pCreature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_READYTOBATTLE, pCreature->GetObjectGuid());
     return true;
 }
 
@@ -315,7 +315,7 @@ bool GossipSelect_npc_squire_david(Player* pPlayer, Creature* pCreature, uint32 
         pCreature->PlayDirectSound(SOUND_EVENTSTART);
     }
     else if (uiAction == GOSSIP_ACTION_INFO_DEF+2)
-        pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_HOWTO, pCreature->GetGUID());
+        pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_HOWTO, pCreature->GetObjectGuid());
 
     return true;
 }

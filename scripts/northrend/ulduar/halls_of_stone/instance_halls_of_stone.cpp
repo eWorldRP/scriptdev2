@@ -110,28 +110,28 @@ struct MANGOS_DLL_DECL instance_halls_of_stone : public ScriptedInstance
         switch(pCreature->GetEntry())
         {
             case NPC_KRYSTALLUS:
-                m_uiKrystallusGUID = pCreature->GetGUID();
+                m_uiKrystallusGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_GRIEF:
-                m_uiGriefGUID = pCreature->GetGUID();
+                m_uiGriefGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_BRANN:
-                m_uiBrannGUID = pCreature->GetGUID();
+                m_uiBrannGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_SJONNIR:
-                m_uiSjonnirGUID = pCreature->GetGUID();
+                m_uiSjonnirGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_KADDRAK:
-                m_uiKaddrakGUID = pCreature->GetGUID();
+                m_uiKaddrakGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_ABEDNEUM:
-                m_uiAbedneumGUID = pCreature->GetGUID();
+                m_uiAbedneumGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_MARNAK:
-                m_uiMarnakGUID = pCreature->GetGUID();
+                m_uiMarnakGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
             case NPC_TRIBUNAL_OF_THE_AGES:
-                m_uiTribunalControllerGUID = pCreature->GetGUID();
+                m_uiTribunalControllerGUID = pCreature->GetObjectGuid().GetCounter();
                 break;
         }
     }
@@ -141,43 +141,43 @@ struct MANGOS_DLL_DECL instance_halls_of_stone : public ScriptedInstance
         switch(pGo->GetEntry())
         {
             case GO_GRIEF_DOOR:
-                m_uiGriefDoorGUID = pGo->GetGUID();
+                m_uiGriefDoorGUID = pGo->GetObjectGuid().GetCounter();
                 if (m_auiEncounter[0] != DONE)
                     CloseDoor(m_uiGriefDoorGUID);
                     else OpenDoor(m_uiGriefDoorGUID);
                 break;
             case GO_BRANN_DOOR:
-                m_uiBrannDoorGUID = pGo->GetGUID();
+                m_uiBrannDoorGUID = pGo->GetObjectGuid().GetCounter();
                 if (m_auiEncounter[1] != DONE)
                     CloseDoor(m_uiBrannDoorGUID);
                     else OpenDoor(m_uiBrannDoorGUID);
                 break;
             case GO_SJONNIR_DOOR:
-                m_uiSjonnirDoorGUID = pGo->GetGUID();
+                m_uiSjonnirDoorGUID = pGo->GetObjectGuid().GetCounter();
                 if (m_auiEncounter[2] != DONE)
                     CloseDoor(m_uiSjonnirDoorGUID);
                     else OpenDoor(m_uiSjonnirDoorGUID);
                 break;
             case GO_TRIBUNAL_CONSOLE:
-                m_uiGoTribunalConsoleGUID = pGo->GetGUID();
+                m_uiGoTribunalConsoleGUID = pGo->GetObjectGuid().GetCounter();
                 break;
             case GO_TRIBUNAL_CHEST:
-                if (Regular) m_uiGoTribunalChestGUID = pGo->GetGUID();
+                if (Regular) m_uiGoTribunalChestGUID = pGo->GetObjectGuid().GetCounter();
                 break;
             case GO_TRIBUNAL_CHEST_H:
-                if (!Regular) m_uiGoTribunalChestGUID = pGo->GetGUID();
+                if (!Regular) m_uiGoTribunalChestGUID = pGo->GetObjectGuid().GetCounter();
                 break;
             case GO_TRIBUNAL_SKY_FLOOR:
-                m_uiGoTribunalSkyFloorGUID = pGo->GetGUID();
+                m_uiGoTribunalSkyFloorGUID = pGo->GetObjectGuid().GetCounter();
                 break;
             case GO_KADDRAK:
-                m_uiGoKaddrakGUID = pGo->GetGUID();
+                m_uiGoKaddrakGUID = pGo->GetObjectGuid().GetCounter();
                 break;
             case GO_ABEDNEUM:
-                m_uiGoAbedneumGUID = pGo->GetGUID();
+                m_uiGoAbedneumGUID = pGo->GetObjectGuid().GetCounter();
                 break;
             case GO_MARNAK:
-                m_uiGoMarnakGUID = pGo->GetGUID();
+                m_uiGoMarnakGUID = pGo->GetObjectGuid().GetCounter();
                 break;
         }
     }

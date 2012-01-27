@@ -155,7 +155,7 @@ struct MANGOS_DLL_DECL npc_driz_tumblequick : public ScriptedAI
             if (pPlayer->HasItemCount(ITEM_PORTABLE_KEG, 1))
             {
                 pPlayer->DestroyItemCount(ITEM_PORTABLE_KEG, 1, true);
-                pPlayer->KilledMonsterCredit(NPC_CREDIT_CREATURE,0);
+                pPlayer->KilledMonsterCredit(NPC_CREDIT_CREATURE);
             }
         }
     }
