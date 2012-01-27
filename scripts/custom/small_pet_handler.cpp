@@ -113,7 +113,7 @@ struct MANGOS_DLL_DECL npc_small_pet_handlerAI : public ScriptedAI
     bool m_bIsInAction;
     uint32 m_uiCheckTimer;
     uint32 m_uiActionTimer;
-    uint64 m_uiPlayerGUID;
+    ObjectGuid m_uiPlayerGUID;
 
     void Reset()
     {
@@ -121,12 +121,12 @@ struct MANGOS_DLL_DECL npc_small_pet_handlerAI : public ScriptedAI
         m_bIsInAction = false;
         m_uiCheckTimer = 5000;
         m_uiActionTimer = urand(10000, 30000);
-        m_uiPlayerGUID = 0;
+        m_uiPlayerGUID.Clear();
 
         if (Unit* pOwner = m_creature->GetCharmerOrOwner())
         {
             m_creature->GetMotionMaster()->MoveFollow(pOwner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-            m_uiPlayerGUID = pOwner->GetGUID();
+            m_uiPlayerGUID = pOwner->GetObjectGuid();
         }
     }
 
