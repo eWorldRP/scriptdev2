@@ -329,7 +329,7 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
         m_uiSummon_Timer        = 10000;
         m_uiEnrageTimer         = 600000;   // 10 MIN
         m_uiPotDmgCount         = 0;
-        m_uiPotTargetGUID       = 0;
+        m_uiPotTargetGUID.Clear();
         m_lIronConstructGUIDList.clear();
 
         m_uiEncounterTimer      = 0;

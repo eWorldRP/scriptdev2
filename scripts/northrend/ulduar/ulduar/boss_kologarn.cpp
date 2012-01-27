@@ -272,7 +272,7 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
         m_uiStone_Grip_Timer = 16000;
         m_uiMaxTargets = m_bIsRegularMode ? 1 : 3;
         for (uint8 i = 0; i < m_uiMaxTargets; ++i)
-            m_uiGripTargetGUID[i] = 0;
+            m_uiGripTargetGUID[i].Clear();
         m_uiFreeDamage = 0;
         m_bStoneGrip = false;
         m_uiMaxDamage = m_bIsRegularMode ? 100000 : 480000;
@@ -360,7 +360,7 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
                         pVictim->ExitVehicle();
                         pVictim->MonsterMoveJump(POS_X, POS_RIGHT_Y, POS_Z, 0, 60.0f, 2.0f);
                     }
-                    m_uiGripTargetGUID[i] = 0;
+                    m_uiGripTargetGUID[i].Clear();
                 }
                 m_bStoneGrip = false;
             }

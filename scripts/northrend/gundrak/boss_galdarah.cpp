@@ -163,7 +163,7 @@ struct MANGOS_DLL_DECL boss_galdarahAI : public ScriptedAI
             Creature* cRhino = m_creature->SummonCreature(NPC_RHINO_SPIRIT, x, y, z, 0, TEMPSUMMON_TIMED_DESPAWN, 1800);
             if (cRhino)
             {
-                m_uiRhinoGUID = cRhino->GetGUID();
+                m_uiRhinoGUID = cRhino->GetObjectGuid();
                 cRhino->CastSpell(pTarget, SPELL_CHARGE, true);
                 cRhino->SetInCombatWith(pTarget);
                 cRhino->AddThreat(pTarget, 1000.0f);

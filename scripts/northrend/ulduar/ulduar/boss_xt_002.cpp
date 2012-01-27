@@ -409,8 +409,8 @@ struct MANGOS_DLL_DECL boss_xt002AI : public ScriptedAI
         m_lBoombotsGUIDList.clear();
         m_lPummelerGUIDList.clear();
 
-        pLightBombTarGUID       = 0;
-        pGravityBombTarGUID     = 0;
+        pLightBombTarGUID.Clear();
+        pGravityBombTarGUID.Clear();
 
         uiEncounterTimer        = 0;
         m_bIsEngineer           = true;

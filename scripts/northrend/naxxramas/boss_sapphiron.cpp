@@ -95,7 +95,7 @@ struct MANGOS_DLL_DECL boss_sapphironAI : public ScriptedAI
         phase = 1;
         Icebolt_Count = 0;
         landoff = false;
-        triggerGuid = 0;
+        triggerGuid.Clear();
         deIce_Timer = 1000;
         deIce = false;
         SetCombatMovement(true);

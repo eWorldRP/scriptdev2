@@ -110,7 +110,7 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
         m_uiCrashTimer          = 10000;
         m_uiSimphonTimer        = 1000;
         m_uiEndSimphonTimer     = 10000;
-        m_uiMarkTargetGUID      = 0;
+        m_uiMarkTargetGUID.Clear();
 
         lVapors.clear();
 

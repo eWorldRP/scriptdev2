@@ -181,7 +181,7 @@ struct MANGOS_DLL_DECL boss_coren_direbrewAI : public ScriptedAI
                 if (Player* pPlayer = i->getSource())
                 {
                     if (pPlayer->GetQuestStatus(113021) == QUEST_STATUS_INCOMPLETE)
-                        pPlayer->KilledMonsterCredit(428569, 0);       
+                        pPlayer->KilledMonsterCredit(428569);       
                 }
             }
         }        

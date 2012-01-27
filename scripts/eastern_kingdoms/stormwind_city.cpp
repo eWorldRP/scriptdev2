@@ -249,7 +249,7 @@ bool GossipHello_npc_thargold_ironwing(Player* pPlayer, Creature* pCreature)
 {
     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_THAR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
 
-    pPlayer->SEND_GOSSIP_MENU(13454, pCreature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(13454, pCreature->GetObjectGuid());
 
     return true;
 }

@@ -41,8 +41,8 @@ struct MANGOS_DLL_DECL instance_eye_of_eternity : public ScriptedInstance
         memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
         m_uiFocusingIrisActualEntry = 0;
-        m_uiGiftActualGuid = 0;
-        m_uiHeartActualGuid = 0;
+        m_uiGiftActualGuid.Clear();
+        m_uiHeartActualGuid.Clear();
     }
 
     void OnCreatureCreate(Creature* pCreature)

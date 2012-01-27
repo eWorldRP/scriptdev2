@@ -229,7 +229,7 @@ struct MANGOS_DLL_DECL mob_iron_rootsAI : public ScriptedAI
 
     void Reset()
     {
-        m_uiVictimGUID = 0;
+        m_uiVictimGUID.Clear();
         m_uiCreatureEntry = m_creature->GetEntry();
     }
 

@@ -95,7 +95,6 @@ enum
 
     ACHIEV_ON_YOUR_SIDE         = 2945,
     ACHIEV_ON_YOUR_SIDE_H       = 2946,
-    SPELL_IRON_BOOT_AURA        = 58501,
 
     ACHIEV_CHOOSE_BRUNDIR       = 2940,
     ACHIEV_CHOOSE_BRUNDIR_H     = 2943,

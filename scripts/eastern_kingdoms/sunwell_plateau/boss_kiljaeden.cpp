@@ -207,7 +207,7 @@ struct MANGOS_DLL_DECL mob_kalecgosAI : public ScriptedAI
         m_uiEmpowerTimer = 0;
 
         for(uint8 i = 0; i < 4; ++i)
-            m_auiOrb[i] = 0;
+            m_auiOrb[i].Clear();
 
         FindOrbs();
 
@@ -1649,7 +1649,7 @@ bool GossipHello_dragon(Player* pPlayer, Creature* pCreature)
     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_5, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
-    pPlayer->PlayerTalkClass->SendGossipMenu(907, pCreature->GetGUID());
+    pPlayer->PlayerTalkClass->SendGossipMenu(907, pCreature->GetObjectGuid());
     return true;
 }
 

@@ -302,7 +302,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
         m_uiVortexDmgCount = 20;
         m_uiSpeedKillTimer = 6*MINUTE*IN_MILLISECONDS;
 
-        m_uiTargetSparkPortalGUID = 0;
+        m_uiTargetSparkPortalGUID.Clear();
         m_uiWP = 0;
         m_uiSpeechCount = 0;
         m_uiSpeechTimer = 15000;
