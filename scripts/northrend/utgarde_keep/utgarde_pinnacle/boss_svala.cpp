@@ -47,9 +47,7 @@ enum
     NPC_ARTHAS_IMAGE            = 29280,
     NPC_SPECTATOR               = 26667,
     NPC_RITUAL_TARGET           = 27327,
-    NPC_FLAME_BRAZIER           = 27273,
     NPC_RITUAL_CHANNELER        = 27281,
-    NPC_SCOURGE_HULK            = 26555,
 
     SPELL_ARTHAS_VISUAL         = 54134,
 
@@ -100,11 +98,11 @@ struct MANGOS_DLL_DECL boss_svalaAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
     bool m_bIsRegularMode;
 
-    uint64 m_uiArthasGUID;
-    uint64 m_uiChanneler1GUID;
-    uint64 m_uiChanneler2GUID;
-    uint64 m_uiChanneler3GUID;
-    uint64 m_uiRitualVictimGUID;
+    ObjectGuid m_uiArthasGUID;
+    ObjectGuid m_uiChanneler1GUID;
+    ObjectGuid m_uiChanneler2GUID;
+    ObjectGuid m_uiChanneler3GUID;
+    ObjectGuid m_uiRitualVictimGUID;
 
     bool m_bIsIntroDone;
     uint32 m_uiIntroTimer;
@@ -116,11 +114,11 @@ struct MANGOS_DLL_DECL boss_svalaAI : public ScriptedAI
 
     void Reset()
     {
-        m_uiArthasGUID = 0;
-        m_uiChanneler1GUID = 0;
-        m_uiChanneler2GUID = 0;
-        m_uiChanneler3GUID = 0;
-        m_uiRitualVictimGUID = 0;
+        m_uiArthasGUID.Clear();
+        m_uiChanneler1GUID.Clear();
+        m_uiChanneler2GUID.Clear();
+        m_uiChanneler3GUID.Clear();
+        m_uiRitualVictimGUID.Clear();
 
         m_uiIntroTimer = 2500;
         m_uiIntroCount = 0;
@@ -196,7 +194,7 @@ struct MANGOS_DLL_DECL boss_svalaAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_ARTHAS_IMAGE)
         {
             pSummoned->CastSpell(pSummoned, SPELL_ARTHAS_VISUAL, true);
-            m_uiArthasGUID = pSummoned->GetGUID();
+            m_uiArthasGUID = pSummoned->GetObjectGuid();
             pSummoned->SetFacingToObject(m_creature);
         }
     }
@@ -204,7 +202,7 @@ struct MANGOS_DLL_DECL boss_svalaAI : public ScriptedAI
     void SummonedCreatureDespawn(Creature* pDespawned)
     {
         if (pDespawned->GetEntry() == NPC_ARTHAS_IMAGE)
-            m_uiArthasGUID = 0;
+            m_uiArthasGUID.Clear();
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
@@ -275,7 +273,7 @@ struct MANGOS_DLL_DECL boss_svalaAI : public ScriptedAI
             if (Unit* pVictim = m_creature->GetMap()->GetUnit(m_uiRitualVictimGUID))
             {
                 pVictim->DealDamage(pVictim, pVictim->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                m_uiRitualVictimGUID = 0;
+                m_uiRitualVictimGUID.Clear();
             }
             if (Creature* pChanneler1 = m_creature->GetMap()->GetCreature(m_uiChanneler1GUID))
                 pChanneler1->ForcedDespawn();
@@ -375,7 +373,7 @@ struct MANGOS_DLL_DECL boss_svalaAI : public ScriptedAI
                 return;
 
             // finally we have our victim..
-            m_uiRitualVictimGUID = pVictim->GetGUID();
+            m_uiRitualVictimGUID = pVictim->GetObjectGuid();
 
             // spawn ritual channelers
             m_creature->CastSpell(m_creature, SPELL_RITUAL_CHANNELER_1, true);
@@ -399,9 +397,9 @@ struct MANGOS_DLL_DECL boss_svalaAI : public ScriptedAI
 
                 switch(++count)
                 {
-                    case 1: m_uiChanneler1GUID = (*itr)->GetGUID(); break;
-                    case 2: m_uiChanneler2GUID = (*itr)->GetGUID(); break;
-                    case 3: m_uiChanneler3GUID = (*itr)->GetGUID(); break;
+                    case 1: m_uiChanneler1GUID = (*itr)->GetObjectGuid(); break;
+                    case 2: m_uiChanneler2GUID = (*itr)->GetObjectGuid(); break;
+                    case 3: m_uiChanneler3GUID = (*itr)->GetObjectGuid(); break;
                 }
             }
 

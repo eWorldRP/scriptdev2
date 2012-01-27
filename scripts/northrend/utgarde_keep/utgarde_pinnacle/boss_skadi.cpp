@@ -66,15 +66,6 @@ enum
     ITEM_HARPOON                    = 37372,
     SPELL_SUMMON_HARPOON            = 56789,
 
-    SPELL_FREEZING_CLOUD            = 60020,
-
-    NPC_YMIRJAR_WARRIOR             = 26690,
-    NPC_YMIRJAR_WITCH_DOCTOR        = 26691,
-    NPC_YMIRJAR_HARPOONER           = 26692,
-    NPC_GRAUF                       = 26893,
-    NPC_SKADI                       = 26693,
-    NPC_FLAME_BREATH_TRIGGER        = 28351,
-
     GO_HARPOON1                     = 192175,
     GO_HARPOON2                     = 192176,
     GO_HARPOON3                     = 192177,
@@ -176,7 +167,7 @@ struct MANGOS_DLL_DECL boss_skadiAI : public ScriptedAI
     uint32 m_uiPoisonedSpearTimer;
     uint32 m_uiWirlwhindTimer;
     bool m_bIsLandPhase;
-
+    
     //Event Phase
     bool m_bIsInHarpoonRange;
     uint32 m_uiIsInHarpoonRangeTimer;
@@ -223,7 +214,7 @@ struct MANGOS_DLL_DECL boss_skadiAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->Unmount();
 
-        if(Creature* pGrauf = GetClosestCreatureWithEntry(m_creature, NPC_GRAUF, 20.f))
+        if(Creature* pGrauf = m_pInstance->GetSingleCreatureFromStorage(NPC_GRAUF))
         {
             pGrauf->Respawn();
             pGrauf->setFaction(14);
@@ -310,6 +301,13 @@ struct MANGOS_DLL_DECL boss_skadiAI : public ScriptedAI
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
+        if (m_pInstance)
+        {
+            if (Creature* pGrauf = m_pInstance->GetSingleCreatureFromStorage(NPC_GRAUF))
+            {
+                m_creature->EnterVehicle(pGrauf->GetVehicleKit(),0);
+            }
+        }
     }
 
     void KilledUnit(Unit* pVictim)
