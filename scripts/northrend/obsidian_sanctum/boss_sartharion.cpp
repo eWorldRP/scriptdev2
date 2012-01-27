@@ -287,7 +287,7 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
                     pShad->AI()->EnterEvadeMode();
                 if (Creature* pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteShadronGUID))//inserito per facilitare il reset dopo il fight, in modo da eliminare l'accolito eventualmente rimasto vivo
                     pAcolyte->DealDamage(pAcolyte, pAcolyte->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                m_uiAcolyteShadronGUID = 0;
+                m_uiAcolyteShadronGUID.Clear();
                 if (pShad->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                     pShad->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
@@ -300,7 +300,7 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
                     pVesp->AI()->EnterEvadeMode();
                 if (Creature* pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteVesperonGUID))//inserito per facilitare il reset dopo il fight, in modo da eliminare l'accolito eventualmente rimasto vivo
                     pAcolyte->DealDamage(pAcolyte, pAcolyte->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                m_uiAcolyteVesperonGUID = 0;
+                m_uiAcolyteVesperonGUID.Clear();
                 if (pVesp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                     pVesp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
@@ -1249,7 +1249,7 @@ struct MANGOS_DLL_DECL mob_shadronAI : public dummy_dragonAI
         m_uiCheckTimer = 2000;
         if (Creature* pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteShadronGUID))//inserito per facilitare il reset dopo il fight, in modo da eliminare l'accolito eventualmente rimasto vivo
                     pAcolyte->DealDamage(pAcolyte, pAcolyte->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-        m_uiAcolyteShadronGUID = 0;
+        m_uiAcolyteShadronGUID.Clear();
     }
 
     void Aggro(Unit* pWho)
@@ -1341,7 +1341,7 @@ struct MANGOS_DLL_DECL mob_vesperonAI : public dummy_dragonAI
         m_uiCheckTimer = 2000;
         if (Creature* pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteVesperonGUID))//inserito per facilitare il reset dopo il fight, in modo da eliminare l'accolito eventualmente rimasto vivo
              pAcolyte->DealDamage(pAcolyte, pAcolyte->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-        m_uiAcolyteVesperonGUID = 0;
+        m_uiAcolyteVesperonGUID.Clear();
     }
 
     void Aggro(Unit* pWho)
@@ -1702,7 +1702,7 @@ struct MANGOS_DLL_DECL mob_flame_tsunamiAI : public ScriptedAI
         m_creature->SetWalk(false);
         m_uiMovementStartTimer = 4000;
         m_uiTickTimer = 1000;
-        m_uiDummyDamagerGUID = 0;
+        m_uiDummyDamagerGUID.Clear();
         if (Creature* pDummyDamager = DoSpawnCreature(31103, 0, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 18000))
         {
             pDummyDamager->SetDisplayId(11686);

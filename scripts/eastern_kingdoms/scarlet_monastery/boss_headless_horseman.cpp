@@ -447,7 +447,7 @@ struct MANGOS_DLL_DECL boss_headless_horsemanAI : public ScriptedAI
         m_uiBurnTimer = 6000;
         m_uiCount = 0;
         m_uiSayTimer = 3000;
-        m_uiPlayerGuid = 0;
+        m_uiPlayerGuid.Clear();
 
         m_bWithhead = true;
         m_bReturned = true;
@@ -463,7 +463,7 @@ struct MANGOS_DLL_DECL boss_headless_horsemanAI : public ScriptedAI
             if (Creature* Head = m_creature->GetMap()->GetCreature(m_uiHeadGuid))
                 Head->ForcedDespawn();
 
-            m_uiHeadGuid = 0;
+            m_uiHeadGuid.Clear();
         }
 
         if (m_pInstance && m_pInstance->GetData(DATA_HORSEMAN_EVENT) == NOT_STARTED)
@@ -968,7 +968,7 @@ struct MANGOS_DLL_DECL mob_pulsing_pumpkinAI : public ScriptedAI
         if(Creature *pDebuff = m_creature->GetMap()->GetCreature(m_uiDebuffGuid))
             pDebuff->SetVisibility(VISIBILITY_OFF);
 
-        m_uiDebuffGuid = 0;
+        m_uiDebuffGuid.Clear();
     }
 
     void JustDied(Unit *killer)

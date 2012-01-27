@@ -135,7 +135,7 @@ struct MANGOS_DLL_DECL npc_expedition_commanderAI : public ScriptedAI
 
     void Reset()
     {
-        m_uiPlayerGUID      = 0;
+        m_uiPlayerGUID.Clear();
         m_uiSpeech_Timer    = 3000;
         m_bIsIntro          = false;
         m_uiIntro_Phase     = 0;
@@ -528,7 +528,7 @@ struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
         m_uiHarpoonsRepaired = 0;
         m_uiMaxHarpoons     = m_bIsRegularMode ? 2 : 4;
         for(int i = 0; i < m_uiMaxHarpoons; i++)
-            m_uiHarpoonsGUID[i] = 0;
+            m_uiHarpoonsGUID[i].Clear();
         m_bAirphase         = false;
         m_bIsGrounded       = false;
         m_bHasBerserk       = false;

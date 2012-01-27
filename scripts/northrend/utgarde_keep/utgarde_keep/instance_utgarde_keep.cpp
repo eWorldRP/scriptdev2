@@ -50,10 +50,10 @@ void instance_utgarde_keep::OnCreatureCreate(Creature* pCreature)
 {
     switch(pCreature->GetEntry())
     {
-        case NPC_KELESETH: m_uiKelesethGUID = pCreature->GetGUID(); break;
-        case NPC_SKARVALD: m_uiSkarvaldGUID = pCreature->GetGUID(); break;
-        case NPC_DALRONN:  m_uiDalronnGUID = pCreature->GetGUID();  break;
-        case NPC_INGVAR:   m_uiIngvarGUID = pCreature->GetGUID();  break;
+        case NPC_KELESETH: m_uiKelesethGUID = pCreature->GetObjectGuid().GetCounter(); break;
+        case NPC_SKARVALD: m_uiSkarvaldGUID = pCreature->GetObjectGuid().GetCounter(); break;
+        case NPC_DALRONN:  m_uiDalronnGUID = pCreature->GetObjectGuid().GetCounter();  break;
+        case NPC_INGVAR:   m_uiIngvarGUID = pCreature->GetObjectGuid().GetCounter();  break;
     }
 }
 
@@ -62,32 +62,32 @@ void instance_utgarde_keep::OnObjectCreate(GameObject* pGo)
     switch(pGo->GetEntry())
     {
         case GO_BELLOW_1:
-            m_uiBellow1GUID = pGo->GetGUID();
+            m_uiBellow1GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_1] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_BELLOW_2:
-            m_uiBellow2GUID = pGo->GetGUID();
+            m_uiBellow2GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_2] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_BELLOW_3:
-            m_uiBellow3GUID = pGo->GetGUID();
+            m_uiBellow3GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_3] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_FORGEFIRE_1:
-            m_uiForgeFire1GUID = pGo->GetGUID();
+            m_uiForgeFire1GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_1] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_FORGEFIRE_2:
-            m_uiForgeFire2GUID = pGo->GetGUID();
+            m_uiForgeFire2GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_2] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_FORGEFIRE_3:
-            m_uiForgeFire3GUID = pGo->GetGUID();
+            m_uiForgeFire3GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_3] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
