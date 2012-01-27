@@ -1,5 +1,5 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2011 MangosR2_ScriptDev2
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
+ * Copyright (C) 2011 - 2012 MangosR2 <http://github.com/mangosR2/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -43,7 +43,7 @@ enum spells // Boss spells
 
 // entropius spells
     SPELL_NEGATIVE_ENERGY_DMG   = 46285,
-    SPELL_SUMMON_DARKNESS		= 46269,
+    SPELL_SUMMON_DARKNESS        = 46269,
 
 //Portals
     SPELL_OPEN_ALL_PORTALS      = 46177,
@@ -96,14 +96,14 @@ float Trash[6][2] =
 // Dark Fiend spawn coordinates
 float DarkFiendSpawn[8][2] =
 {
-	{1825.39f,620.36f},
-	{1827.11f,628.24f},
-	{1821.82f,636.50f},
-	{1812.42f,637.12f},
-	{1805.03f,632.02f},
-	{1804.04f,623.09f},
-	{1809.85f,615.46f},
-	{1818.69f,614.17f},
+    {1825.39f,620.36f},
+    {1827.11f,628.24f},
+    {1821.82f,636.50f},
+    {1812.42f,637.12f},
+    {1805.03f,632.02f},
+    {1804.04f,623.09f},
+    {1809.85f,615.46f},
+    {1818.69f,614.17f},
 };
 float DarkFiendSpawnZ = 69.7f;
 
@@ -137,7 +137,7 @@ struct MANGOS_DLL_DECL boss_muruAI : public ScriptedAI
         m_uiNegativeEnergyTimer  = 2000;
         m_uiSummonTrashTimer     = 10000;
         m_uiDarknessTimer        = 45000;
-        m_uiDarkFiendTimer		 = 50000;
+        m_uiDarkFiendTimer       = 50000;
         m_uiSummonVoidTimer      = 30000;
         m_uiPortalGUID.Clear();
         m_uiPortalDelayTimer     = 60000;
@@ -310,7 +310,7 @@ struct MANGOS_DLL_DECL boss_entropiusAI : public ScriptedAI
 
         if (!m_creature->HasAura(SPELL_SUNWELL_RADIANCE_AURA, EFFECT_INDEX_0))  // moved to DB
             m_creature->CastSpell(m_creature, SPELL_SUNWELL_RADIANCE_AURA, true);
-	}
+    }
 
     void JustReachedHome()
     {

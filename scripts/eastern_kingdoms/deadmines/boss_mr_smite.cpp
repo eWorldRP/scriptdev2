@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -142,14 +142,6 @@ struct MANGOS_DLL_DECL boss_mr_smiteAI : public ScriptedAI
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         m_uiPhase = PHASE_EQUIP_END;
         m_uiEquipTimer = 1000;
-
-        Unit* pVictim = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0);
-
-        if (!pVictim)
-        {
-            EnterEvadeMode();
-            return;
-        }
     }
 
     void PhaseEquipEnd()

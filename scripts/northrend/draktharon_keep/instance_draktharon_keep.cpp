@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -67,6 +67,12 @@ void instance_draktharon_keep::OnCreatureCreate(Creature* pCreature)
             break;
         case NPC_CRYSTAL_CHANNEL_TARGET:
             m_lNovosDummyGuids.push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_WORLD_TRIGGER:
+            if (pCreature->GetPositionZ() > 30.0f)
+                m_vTriggerGuids.push_back(pCreature->GetObjectGuid());
+            else
+                m_trollgoreCornerTriggerGuid = pCreature->GetObjectGuid();
             break;
     }
 }

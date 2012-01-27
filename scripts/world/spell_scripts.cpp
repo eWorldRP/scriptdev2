@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -38,6 +38,7 @@ spell 52090
 spell 51331
 spell 51332
 spell 51366
+spell 43340
 EndContentData */
 
 #include "precompiled.h"
@@ -283,6 +284,15 @@ enum
     SAY_DROSTAN_GOT_LUCKY_2             = -1000649,
     SAY_DROSTAN_HIT_BIRD_1              = -1000650,
     SAY_DROSTAN_HIT_BIRD_2              = -1000651,
+
+    // quest 11314, item 33606
+    SPELL_LURIELLES_PENDANT             = 43340,
+    NPC_CHILL_NYMPH                     = 23678,
+    NPC_LURIELLE                        = 24117,
+    FACTION_FRIENDLY                    = 35,
+    SAY_FREE_1                          = -1000781,
+    SAY_FREE_2                          = -1000782,
+    SAY_FREE_3                          = -1000783,
 };
 
 bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
@@ -794,6 +804,29 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                     DoScriptText(urand(0, 1) ? SAY_DROSTAN_HIT_BIRD_1 : SAY_DROSTAN_HIT_BIRD_2, pDrostan);
 
                 pCreatureTarget->DealDamage(pCreatureTarget, pCreatureTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            }
+            return true;
+        }
+        case SPELL_LURIELLES_PENDANT:
+        {
+            if (uiEffIndex == EFFECT_INDEX_0)
+            {
+                if (pCreatureTarget->GetEntry() != NPC_CHILL_NYMPH || pCaster->GetTypeId() != TYPEID_PLAYER)
+                    return true;
+
+                switch(urand(0, 2))
+                {
+                    case 0: DoScriptText(SAY_FREE_1, pCreatureTarget); break;
+                    case 1: DoScriptText(SAY_FREE_2, pCreatureTarget); break;
+                    case 2: DoScriptText(SAY_FREE_3, pCreatureTarget); break;
+                }
+
+                ((Player*)pCaster)->KilledMonsterCredit(NPC_LURIELLE);
+                pCreatureTarget->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
+                pCreatureTarget->DeleteThreatList();
+                pCreatureTarget->AttackStop(true);
+                pCreatureTarget->GetMotionMaster()->MoveFleeing(pCaster, 7);
+                pCreatureTarget->ForcedDespawn(7*IN_MILLISECONDS);
             }
             return true;
         }

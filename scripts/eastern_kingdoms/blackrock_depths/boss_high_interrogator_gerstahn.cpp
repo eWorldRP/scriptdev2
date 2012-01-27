@@ -1,5 +1,5 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2011 MangosR2
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
+ * Copyright (C) 2011 - 2012 MangosR2 <http://github.com/mangosR2/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -51,9 +51,11 @@ struct MANGOS_DLL_DECL boss_high_interrogator_gerstahnAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
+        //Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
+        //ShadowWordPain_Timer
         if (m_uiShadowWordPain_Timer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
@@ -64,6 +66,7 @@ struct MANGOS_DLL_DECL boss_high_interrogator_gerstahnAI : public ScriptedAI
         else
             m_uiShadowWordPain_Timer -= uiDiff;
 
+        //ManaBurn_Timer
         if (m_uiManaBurn_Timer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
@@ -74,6 +77,7 @@ struct MANGOS_DLL_DECL boss_high_interrogator_gerstahnAI : public ScriptedAI
         else
             m_uiManaBurn_Timer -= uiDiff;
 
+        //PsychicScream_Timer
         if (m_uiPsychicScream_Timer < uiDiff)
         {
             DoCastSpellIfCan(m_creature->getVictim(), SPELL_PSYCHICSCREAM);
@@ -82,6 +86,7 @@ struct MANGOS_DLL_DECL boss_high_interrogator_gerstahnAI : public ScriptedAI
         else
             m_uiPsychicScream_Timer -= uiDiff;
 
+        //ShadowShield_Timer
         if (m_uiShadowShield_Timer < uiDiff)
         {
             DoCastSpellIfCan(m_creature, SPELL_SHADOWSHIELD);

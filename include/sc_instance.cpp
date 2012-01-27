@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -350,7 +350,7 @@ void ScriptedInstance::DestroyItemFromAllPlayers(uint32 uiItemId)
                 if (pPlayer->GetItemCount(uiItemId,true) > 0)
                     pPlayer->DestroyItemCount(uiItemId,pPlayer->GetItemCount(uiItemId),true);
         }
-	}
+    }
     else
         error_log("SD2: DestroyItemFromAllPlayers attempt to remove item: %u but no players in map.", uiItemId);
 }

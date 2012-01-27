@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -47,7 +47,7 @@ EndScriptData */
 #define SPELL_ENRAGE            23537
 #define SPELL_SABER_LASH        43267
 #define SPELL_SABER_LASH_IMM    43690
-#define SPELL_TELEPORT_VISUAL   40869
+#define SPELL_TELEPORT_VISUAL   41001
 #define SPELL_BERSERK           45078
 
 uint32 PrismaticAuras[]=

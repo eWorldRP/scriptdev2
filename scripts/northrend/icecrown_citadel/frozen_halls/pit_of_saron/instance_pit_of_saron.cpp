@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation; either version 2 of the License, or
@@ -29,9 +29,10 @@ instance_pit_of_saron::instance_pit_of_saron(Map* pMap) : ScriptedInstance(pMap)
     Initialize();
 }
 
- void instance_pit_of_saron::Initialize()
+void instance_pit_of_saron::Initialize()
 {
-    memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+        m_auiEncounter[i] = NOT_STARTED;
 }
 
 void instance_pit_of_saron::OnCreatureCreate(Creature* pCreature)
@@ -39,14 +40,19 @@ void instance_pit_of_saron::OnCreatureCreate(Creature* pCreature)
     switch(pCreature->GetEntry())
     {
         case NPC_TYRANNUS_INTRO:
+        case NPC_SLAVE_1:
         case NPC_GARFROST:
         case NPC_KRICK:
+        case NPC_KRICK_EVENT:
         case NPC_ICK:
         case NPC_TYRANNUS:
         case NPC_RIMEFANG:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-            break;
+           break;
+        default:
+           return;
+
     }
+   m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 
 void instance_pit_of_saron::OnObjectCreate(GameObject* pGo)
@@ -59,9 +65,8 @@ void instance_pit_of_saron::OnObjectCreate(GameObject* pGo)
             break;
         case GO_HALLS_OF_REFLECT_PORT:
             break;
-
         default:
-            return;
+           return;
     }
     m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
@@ -73,28 +78,28 @@ void instance_pit_of_saron::SetData(uint32 uiType, uint32 uiData)
         case TYPE_GARFROST:
             if (uiData == DONE && m_auiEncounter[TYPE_KRICK] == DONE)
                 DoUseDoorOrButton(GO_ICEWALL);
-            m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_KRICK:
             if (uiData == DONE && m_auiEncounter[TYPE_GARFROST] == DONE)
                 DoUseDoorOrButton(GO_ICEWALL);
-            m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_TYRANNUS:
-            m_auiEncounter[uiType] = uiData;
+        case TYPE_GAUNTLET:
+        case TYPE_INTRO:
             break;
         default:
             return;
     }
+    m_auiEncounter[uiType] = uiData;
 
     if (uiData == DONE)
     {
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
-        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2];
+        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3] << " " << m_auiEncounter[4];
 
-        m_strInstData = saveStream.str();
+        strInstData = saveStream.str();
 
         SaveToDB();
         OUT_SAVE_INST_DATA_COMPLETE;
@@ -125,22 +130,20 @@ void instance_pit_of_saron::Load(const char* chrIn)
 
 uint32 instance_pit_of_saron::GetData(uint32 uiType)
 {
-    if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
-
-    return 0;
-}
-
-bool AreaTrigger_at_tyrannus(Player* pPlayer, AreaTriggerEntry const* pAt)
-{
-    if (instance_pit_of_saron* pInstance = (instance_pit_of_saron*)pPlayer->GetInstanceData())
+    switch(uiType)
     {
-        if (pInstance->GetData(TYPE_TYRANNUS) == NOT_STARTED)
-            pInstance->SetData(TYPE_TYRANNUS, SPECIAL);
+        case TYPE_GARFROST:
+        case TYPE_KRICK:
+        case TYPE_TYRANNUS:
+        case TYPE_INTRO:
+        case TYPE_GAUNTLET:
+            return m_auiEncounter[uiType];
+            break;
+        default:
+            return 0;
     }
-
-    return false;
 }
+
 
 InstanceData* GetInstanceData_instance_pit_of_saron(Map* pMap)
 {
@@ -155,9 +158,4 @@ void AddSC_instance_pit_of_saron()
     pNewScript->Name = "instance_pit_of_saron";
     pNewScript->GetInstanceData = &GetInstanceData_instance_pit_of_saron;
     pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "at_tyrannus";
-    pNewScript->pAreaTrigger = &AreaTrigger_at_tyrannus;
-    pNewScript->RegisterSelf(false);
 }

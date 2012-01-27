@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -40,9 +40,7 @@ npc_garments_of_quests   80%    NPC's related to all Garments of-quests 5621, 56
 npc_injured_patient     100%    patients for triage-quests (6622 and 6624)
 npc_doctor              100%    Gustaf Vanhowzen and Gregory Victor, quest 6622 and 6624 (Triage)
 npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
-npc_lunaclaw_spirit     100%    Appears at two different locations, quest 6001/6002
 npc_mount_vendor        100%    Regular mount vendors all over the world. Display gossip if player doesn't meet the requirements to buy
-npc_rogue_trainer        80%    Scripted trainers, so they are able to offer item 17126 for class quest 6681
 npc_sayge               100%    Darkmoon event fortune teller, buff player based on answers given
 npc_tabard_vendor        50%    allow recovering quest related tabards, achievement related ones need core support
 npc_locksmith            75%    list of keys needs to be confirmed
@@ -152,7 +150,7 @@ struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
     }
 
     SpawnAssociation* m_pSpawnAssoc;
-    uint64 m_uiSpawnedGUID;
+    ObjectGuid m_uiSpawnedGUID;
 
     void Reset() { }
 
@@ -161,7 +159,7 @@ struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
         Creature* pSummoned = m_creature->SummonCreature(m_pSpawnAssoc->m_uiSpawnedCreatureEntry, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000);
 
         if (pSummoned)
-            m_uiSpawnedGUID = pSummoned->GetGUID();
+            m_uiSpawnedGUID = pSummoned->GetObjectGuid().GetCounter();
         else
         {
             error_db_log("SD2: npc_air_force_bots: wasn't able to spawn creature %u", m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
@@ -536,12 +534,12 @@ struct MANGOS_DLL_DECL npc_injured_patientAI : public ScriptedAI
 {
     npc_injured_patientAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
-    uint64 Doctorguid;
+    ObjectGuid Doctorguid;
     Location* Coord;
 
     void Reset()
     {
-        Doctorguid = 0;
+        Doctorguid.Set(0);
         Coord = NULL;
 
         //no select

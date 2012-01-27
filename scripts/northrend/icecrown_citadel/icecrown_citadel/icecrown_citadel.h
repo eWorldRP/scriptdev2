@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 -2011 by /dev/rsa for ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2010 -2012 by /dev/rsa for ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -9,7 +9,6 @@
 
 enum
 {
-
     TYPE_TELEPORT               = 0,
     TYPE_MARROWGAR              = 1,
     TYPE_DEATHWHISPER           = 2,
@@ -22,12 +21,12 @@ enum
     TYPE_LANATHEL               = 9,
     TYPE_VALITHRIA              = 10,
     TYPE_SINDRAGOSA             = 11,
-    TYPE_KINGS_OF_ICC           = 12,
     TYPE_LICH_KING              = 13,
-    TYPE_ICECROWN_QUESTS        = 14,
-    TYPE_COUNT                  = 15,
     MAX_ENCOUNTERS,
 
+    TYPE_FROSTMOURNE_ROOM,
+    TYPE_KINGS_OF_ICC,
+    TYPE_ICECROWN_QUESTS,
     TYPE_STINKY,
     TYPE_PRECIOUS,
 
@@ -53,7 +52,6 @@ enum
 
     NPC_TIRION                  = 38995,
     NPC_MENETHIL                = 38579,
-    NPC_SPIRIT_WARDEN           = 38579,
 
     NPC_FROSTMOURNE_TRIGGER     = 38584,
     NPC_FROSTMOURNE_HOLDER      = 27880,
@@ -100,10 +98,10 @@ enum
     GO_FROSTWING_DOOR           = 201919,
     GO_GREEN_DRAGON_DOOR_1      = 201375, //1202
     GO_GREEN_DRAGON_DOOR_2      = 201374, //1200
-    GO_VALITHRIA_DOOR_1         = 201380, //1618
+    GO_VALITHRIA_DOOR_1         = 201381, //1618
     GO_VALITHRIA_DOOR_2         = 201382, //1482
     GO_VALITHRIA_DOOR_3         = 201383, //1335
-    GO_VALITHRIA_DOOR_4         = 201381, //1558
+    GO_VALITHRIA_DOOR_4         = 201380, //1558
 
     GO_SINDRAGOSA_DOOR_1        = 201369, //1619
     GO_SINDRAGOSA_DOOR_2        = 201379,
@@ -158,7 +156,7 @@ enum
 
 };
 
-class MANGOS_DLL_DECL instance_icecrown_spire : public BSWScriptedInstance
+class MANGOS_DLL_DECL instance_icecrown_spire : public ScriptedInstance
 {
 public:
     instance_icecrown_spire(Map* pMap);
@@ -169,8 +167,6 @@ public:
     void OnObjectCreate(GameObject* pGo);
     void OnCreatureCreate(Creature* pCreature);
 
-    void OpenAllDoors();
-    void OnPlayerEnter(Player* pPlayer);
     bool IsEncounterInProgress();
 
     void SetData(uint32 uiType, uint32 uiData);
@@ -178,7 +174,6 @@ public:
 
     const char* Save() { return strSaveData.c_str(); }
     void Load(const char* chrIn);
-    bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/, uint32 /*miscvalue1*/);
 
 private:
 
@@ -201,6 +196,59 @@ private:
     uint32 m_uiGunshipArmoryH_ID;
     uint32 m_uiValithriaCache;
     uint32 m_uiSaurfangCache;
+};
+
+struct MANGOS_DLL_DECL base_icc_bossAI : public ScriptedAI
+{
+    base_icc_bossAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_uiMapDifficulty = pCreature->GetMap()->GetDifficulty();
+        m_bIsHeroic = m_uiMapDifficulty > RAID_DIFFICULTY_25MAN_NORMAL;
+        m_bIs25Man = (m_uiMapDifficulty == RAID_DIFFICULTY_25MAN_NORMAL || m_uiMapDifficulty == RAID_DIFFICULTY_25MAN_HEROIC);
+        Reset();
+    }
+
+    ScriptedInstance* m_pInstance;
+    Difficulty m_uiMapDifficulty;
+    bool m_bIsHeroic;
+    bool m_bIs25Man;
+
+    void Reset(){}
+    void UpdateAI(const uint32 uiDiff){}
+
+    Unit* SelectRandomRangedTarget(Unit *pSource)
+    {
+        Unit *pResult = NULL;
+        std::list<Unit*> lTargets;
+        ThreatList const& tList = m_creature->getThreatManager().getThreatList();
+
+        for (ThreatList::const_iterator i = tList.begin();i != tList.end(); ++i)
+        {
+            if (!(*i)->getUnitGuid().IsPlayer())
+                continue;
+
+            if (Unit* pTmp = m_creature->GetMap()->GetUnit((*i)->getUnitGuid()))
+                lTargets.push_back(pTmp);
+        }
+
+        if (!lTargets.empty())
+        {
+            uint8 max = m_bIs25Man ? 8 : 3;
+            std::list<Unit*>::iterator iter;
+
+            lTargets.sort(ObjectDistanceOrderReversed(pSource));
+            iter = lTargets.begin();
+
+            if (max >= lTargets.size())
+                max = lTargets.size() - 1;
+
+            std::advance(iter, urand(0, max));
+            pResult = (*iter);
+        }
+
+        return pResult;
+    }
 };
 
 enum AchievementCriteriaIds

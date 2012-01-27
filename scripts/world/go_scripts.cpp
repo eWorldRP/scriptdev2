@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: GO_Scripts
 SD%Complete: 100
-SDComment: Quest support: 4296, 5088, 5097, 5098, 5381, 6481, 10990, 10991, 10992, 12557, 14092/14076. Field_Repair_Bot->Teaches spell 22704. Barov_journal->Teaches spell 26089
+SDComment: Quest support: 4296, 5088, 5097, 5098, 5381, 6481, 10990, 10991, 10992, 12557, 14092/14076. Barov_journal->Teaches spell 26089
 SDCategory: Game Objects
 EndScriptData */
 
@@ -26,9 +26,7 @@ go_cat_figurine (the "trap" version of GO, two different exist)
 go_barov_journal
 go_ethereum_prison
 go_ethereum_stasis
-go_field_repair_bot_74A
 go_mysterious_snow_mound
-go_orb_of_command
 go_resonite_cask
 go_sacred_fire_of_life
 go_shrine_of_the_birds
@@ -40,6 +38,8 @@ go_andorhal_tower
 go_scourge_enclosure
 go_lab_work_reagents
 go_hand_of_iruxos_crystal
+go_org_portal
+go_sw_portal
 EndContentData */
 
 #include "precompiled.h"
@@ -159,24 +159,6 @@ bool GOUse_go_ethereum_stasis(Player* pPlayer, GameObject* pGo)
 }
 
 /*######
-## go_field_repair_bot_74A
-######*/
-
-enum
-{
-    SPELL_ENGINEER_FIELD_REPAIR_BOT_74A = 22704,
-    SPELL_LEARN_FIELD_REPAIR_BOT_74A    = 22864
-};
-
-bool GOUse_go_field_repair_bot_74A(Player* pPlayer, GameObject* pGo)
-{
-    if (pPlayer->HasSkill(SKILL_ENGINEERING) && pPlayer->GetBaseSkillValue(SKILL_ENGINEERING) >= 300 && !pPlayer->HasSpell(SPELL_ENGINEER_FIELD_REPAIR_BOT_74A))
-        pPlayer->CastSpell(pPlayer, SPELL_LEARN_FIELD_REPAIR_BOT_74A, false);
-
-    return true;
-}
-
-/*######
 ## go_gilded_brazier
 ######*/
 
@@ -241,24 +223,6 @@ bool GOUse_go_mysterious_snow_mound(Player* pPlayer, GameObject* pGo)
     }
 
     pGo->SetLootState(GO_JUST_DEACTIVATED);
-    return true;
-}
-
-/*######
-## go_orb_of_command
-######*/
-
-enum
-{
-    QUEST_BLACKHANDS_COMMAND = 7761,
-    SPELL_TELEPORT_TO_BWL    = 23460
-};
-
-bool GOUse_go_orb_of_command(Player* pPlayer, GameObject* pGo)
-{
-    if (pPlayer->GetQuestRewardStatus(QUEST_BLACKHANDS_COMMAND))
-        pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_TO_BWL, true);
-
     return true;
 }
 
@@ -544,6 +508,30 @@ bool GOUse_go_hand_of_iruxos_crystal(Player* pPlayer, GameObject* pGo)
     return false;
 }
 
+/*######
+## go_org_portal
+######*/
+
+bool GOUse_go_org_portal(Player* pPlayer, GameObject* pGo)
+{
+    if (pPlayer->GetQuestStatus(13189) == QUEST_STATUS_COMPLETE || pPlayer->GetQuestStatus(13189) == QUEST_STATUS_INCOMPLETE)
+         pPlayer->CastSpell(pPlayer, 17609, true);
+
+    return true;
+}
+
+/*######
+## go_sw_portal
+######*/
+
+bool GOUse_go_sw_portal(Player* pPlayer, GameObject* pGo)
+{
+    if (pPlayer->GetQuestStatus(13188) == QUEST_STATUS_COMPLETE || pPlayer->GetQuestStatus(13188) == QUEST_STATUS_INCOMPLETE)
+         pPlayer->CastSpell(pPlayer, 17334, true);
+
+    return true;
+}
+
 void AddSC_go_scripts()
 {
     Script* pNewScript;
@@ -569,11 +557,6 @@ void AddSC_go_scripts()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "go_field_repair_bot_74A";
-    pNewScript->pGOUse =          &GOUse_go_field_repair_bot_74A;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "go_gilded_brazier";
     pNewScript->pGOUse =          &GOUse_go_gilded_brazier;
     pNewScript->RegisterSelf();
@@ -586,11 +569,6 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_mysterious_snow_mound";
     pNewScript->pGOUse =          &GOUse_go_mysterious_snow_mound;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "go_orb_of_command";
-    pNewScript->pGOUse =          &GOUse_go_orb_of_command;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -651,5 +629,15 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_hand_of_iruxos_crystal";
     pNewScript->pGOUse =          &GOUse_go_hand_of_iruxos_crystal;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_org_portal";
+    pNewScript->pGOUse =          &GOUse_go_org_portal;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_sw_portal";
+    pNewScript->pGOUse =          &GOUse_go_sw_portal;
     pNewScript->RegisterSelf();
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,228 +16,760 @@
 
 /* ScriptData
 SDName: boss_deathbringer_saurfang
-SD%Complete: 75%
-SDComment: by /dev/rsa
+SD%Complete: 99%
+SDComment: Events - intro and outro missing for alliance version
 SDCategory: Icecrown Citadel
 EndScriptData */
+
 #include "precompiled.h"
 #include "icecrown_citadel.h"
 
+// talks
 enum
 {
-        //common
-        SPELL_BERSERK                           = 47008,
-        //yells
-        //summons
-        NPC_BLOOD_BEASTS                        = 38508,
-        //Abilities
-        SPELL_BLOOD_LINK                        = 72178,
-        SPELL_BLOOD_POWER                       = 72371,
-        SPELL_MARK                              = 72293,
-        SPELL_MARK_SELF                         = 72256,
-        SPELL_FRENZY                            = 72737,
-        SPELL_BOILING_BLOOD                     = 72385,
-        SPELL_BLOOD_NOVA                        = 72380,
-        SPELL_RUNE_OF_BLOOD                     = 72408,
-        SPELL_CALL_BLOOD_BEAST_1                = 72172,
-        SPELL_CALL_BLOOD_BEAST_2                = 72173,
-        SPELL_CALL_BLOOD_BEAST_3                = 72356,
-        SPELL_CALL_BLOOD_BEAST_4                = 72357,
-        SPELL_CALL_BLOOD_BEAST_5                = 72358,
+    SAY_AGGRO                   = -1631028,
+    SAY_FALLENCHAMPION          = -1631029,
+    SAY_BLOODBEASTS             = -1631030,
+    SAY_SLAY_1                  = -1631031,
+    SAY_SLAY_2                  = -1631032,
+    SAY_BERSERK                 = -1631033,
+    SAY_DEATH                   = -1631034,
+    SAY_INTRO_ALLY_0            = -1631035,
+    SAY_INTRO_ALLY_1            = -1631036,
+    SAY_INTRO_ALLY_2            = -1631037,
+    SAY_INTRO_ALLY_3            = -1631038,
+    SAY_INTRO_ALLY_4            = -1631039,
+    SAY_INTRO_ALLY_5            = -1631040,
+    SAY_INTRO_HORDE_1           = -1631041,
+    SAY_INTRO_HORDE_2           = -1631042,
+    SAY_INTRO_HORDE_3           = -1631043,
+    SAY_INTRO_HORDE_4           = -1631044,
+    SAY_INTRO_HORDE_5           = -1631045,
+    SAY_INTRO_HORDE_6           = -1631046,
+    SAY_INTRO_HORDE_7           = -1631047,
+    SAY_INTRO_HORDE_8           = -1631048,
+    SAY_INTRO_HORDE_9           = -1631049,
+    SAY_OUTRO_ALLY_1            = -1631050,
+    SAY_OUTRO_ALLY_2            = -1631051,
+    SAY_OUTRO_ALLY_3            = -1631052,
+    SAY_OUTRO_ALLY_4            = -1631053,
+    SAY_OUTRO_ALLY_5            = -1631054,
+    SAY_OUTRO_ALLY_6            = -1631055,
+    SAY_OUTRO_ALLY_7            = -1631056,
+    SAY_OUTRO_ALLY_8            = -1631057,
+    SAY_OUTRO_ALLY_9            = -1631058,
+    SAY_OUTRO_ALLY_10           = -1631059,
+    SAY_OUTRO_ALLY_11           = -1631060,
+    SAY_OUTRO_ALLY_12           = -1631061,
+    SAY_OUTRO_ALLY_13           = -1631062,
+    SAY_OUTRO_ALLY_14           = -1631063,
+    SAY_OUTRO_ALLY_15           = -1631064,
+    SAY_OUTRO_ALLY_16           = -1631065,
+    SAY_OUTRO_HORDE_1           = -1631066,
+    SAY_OUTRO_HORDE_2           = -1631067,
+    SAY_OUTRO_HORDE_3           = -1631068,
+    SAY_OUTRO_HORDE_4           = -1631069,
+};
 
-        SPELL_SCENT_OF_BLOOD                    = 72769,
-        SPELL_RESISTANT_SKIN                    = 72723,
-        SPELL_BLOOD_LINK_BEAST                  = 72176,
+enum
+{
+    // Intro
+    SPELL_GRIP_OF_AGONY                     = 70572,
 
-        SPELL_ZERO_REGEN                        = 72242,
+    // Blood Power
+    SPELL_BLOOD_POWER                       = 72371,
+    SPELL_BLOOD_LINK_BEAST                  = 72176, // proc aura for Blood Beasts
+    SPELL_BLOOD_LINK                        = 72202, // cast on Saurfang to give 1 Blood Power
 
+    // Mark of the Fallen Champion
+    SPELL_MARK_OF_FALLEN_CHAMPION           = 72256, // proc on melee hit, dmg to marked targets
+    SPELL_MARK_OF_FALLEN_CHAMPION_DEBUFF    = 72293, // proc on death - heal Saurfang
+    SPELL_REMOVE_MARKS                      = 72257,
+
+    // Rune of Blood
+    SPELL_RUNE_OF_BLOOD                     = 72408, // cast on self on aggro
+    SPELL_RUNE_OF_BLOOD_DEBUFF              = 72410,
+
+    // Blood Nova
+    SPELL_BLOOD_NOVA                        = 72378,
+
+    // Boiling Blood
+    SPELL_BOILING_BLOOD                     = 72385,
+
+    // Blood Beasts
+    SPELL_CALL_BLOOD_BEAST_1                = 72172,
+    SPELL_CALL_BLOOD_BEAST_2                = 72173,
+    SPELL_CALL_BLOOD_BEAST_3                = 72356,
+    SPELL_CALL_BLOOD_BEAST_4                = 72357,
+    SPELL_CALL_BLOOD_BEAST_5                = 72358,
+
+    SPELL_SCENT_OF_BLOOD                    = 72769,
+    SPELL_SCENT_OF_BLOOD_TRIGGERED          = 72771, // doesn't trigger, so cast in script...
+    SPELL_RESISTANT_SKIN                    = 72723,
+
+    // enrage
+    SPELL_BERSERK                           = 26662,
+    SPELL_FRENZY                            = 72737,
+
+    //summons
+    NPC_BLOOD_BEAST                         = 38508
 };
 
 enum Equipment
 {
     EQUIP_MAIN           = 50798,
-    EQUIP_OFFHAND        = 50798,
+    EQUIP_OFFHAND        = EQUIP_NO_CHANGE,
     EQUIP_RANGED         = EQUIP_NO_CHANGE,
     EQUIP_DONE           = EQUIP_NO_CHANGE,
 };
 
-struct MANGOS_DLL_DECL boss_deathbringer_saurfangAI : public BSWScriptedAI
+enum SaurfangEvent
 {
-    boss_deathbringer_saurfangAI(Creature* pCreature) : BSWScriptedAI(pCreature)
+    NPC_OVERLORD_SAURFANG       = 37187,
+    NPC_KORKRON_REAVER          = 37920,
+
+    NPC_MURADIN_BRONZEBEARD     = 37200,
+    NPC_ALLIANCE_MASON          = 37902,
+
+    SPELL_VEHICLE_HARDCODED     = 46598, // Deathbringer enters Overlord
+};
+
+// positions
+float fPositions[12][4] =
+{
+    {-468.05f, 2211.69f, 541.11f, 3.16f}, // Deathbringer teleport point
+    {-491.30f, 2211.35f, 541.11f, 3.16f}, // Deathbringer dest point
+    {-559.82f, 2211.29f, 539.30f, 6.28f}, // main npc summon/despawn point
+    {-561.87f, 2215.94f, 539.30f, 6.28f}, // guard npc1 summon/despawn point
+    {-560.17f, 2214.17f, 539.30f, 6.28f}, // guard npc2 summon/despawn point
+    {-560.17f, 2207.71f, 539.30f, 6.28f}, // guard npc3 summon/despawn point
+    {-561.87f, 2205.68f, 539.30f, 6.28f}, // guard npc4 summon/despawn point
+    {-534.82f, 2211.29f, 539.30f, 6.28f}, // main npc first move
+    {-536.87f, 2215.94f, 539.30f, 6.28f}, // guard npc1 first move
+    {-535.17f, 2214.17f, 539.30f, 6.28f}, // guard npc2 first move
+    {-535.17f, 2207.71f, 539.30f, 6.28f}, // guard npc3 first move
+    {-536.87f, 2205.68f, 539.30f, 6.28f} // guard npc4 first move
+};
+
+// Event handler
+struct MANGOS_DLL_DECL npc_highlord_saurfang_iccAI : public base_icc_bossAI
+{
+    npc_highlord_saurfang_iccAI(Creature* pCreature) : base_icc_bossAI(pCreature)
     {
-        pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_bIsEventStarted = false;
+        m_uiEventStep = 0;
+        m_uiNextEventTimer = 0;
+
+        m_lGuards.clear();
+    }
+
+    uint32 m_uiNextEventTimer;
+    uint32 m_uiEventStep;
+    bool m_bIsEventStarted;
+
+    GUIDList m_lGuards;
+
+    void Reset(){}
+
+    void DamageTaken(Unit *pDealer, uint32 &uiDamage)
+    {
+        uiDamage = 0;
+    }
+
+    Creature* GetSaurfang()
+    {
+        if (m_pInstance)
+            return m_pInstance->GetSingleCreatureFromStorage(NPC_DEATHBRINGER_SAURFANG);
+
+        return NULL;
+    }
+
+    void DoSummonGuards()
+    {
+        // 4 adds
+        if (Creature *pTmp = m_creature->SummonCreature(NPC_KORKRON_REAVER, fPositions[3][0], fPositions[3][1], fPositions[3][2], fPositions[3][3], TEMPSUMMON_MANUAL_DESPAWN, 0))
+            m_lGuards.push_back(pTmp->GetObjectGuid());
+        if (Creature *pTmp = m_creature->SummonCreature(NPC_KORKRON_REAVER, fPositions[4][0], fPositions[4][1], fPositions[4][2], fPositions[4][3], TEMPSUMMON_MANUAL_DESPAWN, 0))
+            m_lGuards.push_back(pTmp->GetObjectGuid());
+        if (Creature *pTmp = m_creature->SummonCreature(NPC_KORKRON_REAVER, fPositions[5][0], fPositions[5][1], fPositions[5][2], fPositions[5][3], TEMPSUMMON_MANUAL_DESPAWN, 0))
+            m_lGuards.push_back(pTmp->GetObjectGuid());
+        if (Creature *pTmp = m_creature->SummonCreature(NPC_KORKRON_REAVER, fPositions[6][0], fPositions[6][1], fPositions[6][2], fPositions[6][3], TEMPSUMMON_MANUAL_DESPAWN, 0))
+            m_lGuards.push_back(pTmp->GetObjectGuid());
+    }
+
+    void DoStartEvent()
+    {
+        m_bIsEventStarted = true;
+        NextStep(0);
+    }
+
+    void DoContinueEvent()
+    {
+        NextStep();
+    }
+
+    void NextStep(uint32 uiTime = 1000)
+    {
+        ++m_uiEventStep;
+        m_uiNextEventTimer = uiTime;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_bIsEventStarted || !m_pInstance)
+            return;
+
+        if (m_uiNextEventTimer <= uiDiff)
+        {
+            switch (m_uiEventStep)
+            {
+                case 0:
+                {
+                    break;
+                }
+                case 1:
+                {
+                    DoSummonGuards();
+                    m_pInstance->DoUseDoorOrButton(GO_SAURFANG_DOOR, 0, false);
+                    if (Creature *pSaurfang = GetSaurfang())
+                        pSaurfang->GetMotionMaster()->MovePoint(0, fPositions[1][0], fPositions[1][1], fPositions[1][2]);
+                    NextStep(1000);
+                    break;
+                }
+                case 2:
+                {
+                    m_pInstance->DoUseDoorOrButton(GO_SAURFANG_DOOR, 0, true);
+                    DoScriptText(SAY_INTRO_HORDE_1, m_creature);
+                    m_creature->GetMotionMaster()->MovePoint(0, fPositions[7][0], fPositions[7][1], fPositions[7][2]);
+
+                    // move guards
+                    int8 n = 8;
+                    for (GUIDList::iterator i = m_lGuards.begin(); i != m_lGuards.end(); ++i)
+                    {
+                        if (Creature *pTmp = m_creature->GetMap()->GetCreature(*i))
+                            pTmp->GetMotionMaster()->MovePoint(0, fPositions[n][0], fPositions[n][1], fPositions[n][2]);
+                        ++n;
+                    }
+                    NextStep(6000);
+                    break;
+                }
+                case 3:
+                {
+                    if (Creature *pSaurfang = GetSaurfang())
+                        DoScriptText(SAY_INTRO_HORDE_2, pSaurfang);
+                    NextStep(13000);
+                    break;
+                }
+                case 4:
+                {
+                    DoScriptText(SAY_INTRO_HORDE_3, m_creature);
+                    NextStep(7000);
+                    break;
+                }
+                case 5:
+                {
+                    if (Creature *pSaurfang = GetSaurfang())
+                        DoScriptText(SAY_INTRO_HORDE_4, pSaurfang);
+                    NextStep(11000);
+                    break;
+                }
+                case 6:
+                {
+                    DoScriptText(SAY_INTRO_HORDE_5, m_creature);
+                    NextStep(16000);
+                    break;
+                }
+                case 7:
+                {
+                    DoScriptText(SAY_INTRO_HORDE_6, m_creature);
+                    NextStep(15000);
+                    break;
+                }
+                case 8:
+                {
+                    DoScriptText(SAY_INTRO_HORDE_7, m_creature);
+                    NextStep(3000);
+                    break;
+                }
+                case 9:
+                {
+                    float x, y, z;
+                    if (Creature *pSaurfang = GetSaurfang())
+                        pSaurfang->GetPosition(x, y, z);
+
+                    DoScriptText(SAY_INTRO_HORDE_8, m_creature);
+                    m_creature->SetWalk(false);
+                    m_creature->GetMotionMaster()->MovePoint(0, x, y, z);
+
+                    // move guards
+                    for (GUIDList::iterator i = m_lGuards.begin(); i != m_lGuards.end(); ++i)
+                    {
+                        if (Creature *pTmp = m_creature->GetMap()->GetCreature(*i))
+                        {
+                            pTmp->SetWalk(false);
+                            pTmp->GetMotionMaster()->MovePoint(0, x, y, z);
+                        }
+                    }
+                    NextStep(2000);
+                    break;
+                }
+                case 10:
+                {
+                    float x, y, z;
+                    // npcs float in air
+                    m_creature->SetWalk(true);
+                    m_creature->SetSpeedRate(MOVE_WALK, 3.0f);
+                    m_creature->SetLevitate(true);
+                    m_creature->GetPosition(x, y, z);
+                    m_creature->GetMotionMaster()->MovePoint(0, x, y, z + frand(5.0f, 7.0f));
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+
+                    // move guards
+                    for (GUIDList::iterator i = m_lGuards.begin(); i != m_lGuards.end(); ++i)
+                    {
+                        if (Creature *pTmp = m_creature->GetMap()->GetCreature(*i))
+                        {
+                            pTmp->SetWalk(true);
+                            pTmp->SetSpeedRate(MOVE_WALK, 3.0f);
+                            pTmp->SetLevitate(true);
+                            pTmp->GetPosition(x, y, z);
+                            pTmp->GetMotionMaster()->MovePoint(0, x, y, z + frand(5.0f, 7.0f));
+                            pTmp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                            pTmp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                        }
+                    }
+                    if (Creature *pSaurfang = GetSaurfang())
+                    {
+                        DoScriptText(SAY_INTRO_HORDE_9, pSaurfang);
+                        // doesnt work :/ can't target creatures, need to check why
+                        pSaurfang->CastSpell(pSaurfang, SPELL_GRIP_OF_AGONY, true);
+                    }
+                    NextStep(10000);
+                    break;
+                }
+                case 11:
+                {
+                    if (Creature *pSaurfang = GetSaurfang())
+                    {
+                        pSaurfang->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        pSaurfang->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        pSaurfang->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                        pSaurfang->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                        pSaurfang->SetInCombatWithZone();
+                    }
+
+                    NextStep();
+                    break;
+                }
+                case 12:
+                {
+                    // fight is in progress
+                    break;
+                }
+                case 13:
+                {
+                    float x, y, z;
+
+                    m_creature->HandleEmote(EMOTE_ONESHOT_NONE);
+                    m_creature->GetPosition(x, y, z);
+                    m_creature->UpdateAllowedPositionZ(x, y, z);
+                    m_creature->GetMotionMaster()->MovePoint(0, x, y, z);
+
+                    // move guards
+                    for (GUIDList::iterator i = m_lGuards.begin(); i != m_lGuards.end(); ++i)
+                    {
+                        if (Creature *pTmp = m_creature->GetMap()->GetCreature(*i))
+                        {
+                            pTmp->GetPosition(x, y, z);
+                            m_creature->UpdateAllowedPositionZ(x, y, z);
+                            pTmp->GetMotionMaster()->MovePoint(0, x, y, z);
+                            pTmp->HandleEmote(EMOTE_ONESHOT_NONE);
+                        }
+                    }
+                    NextStep(1000);
+                    break;
+                }
+                case 14:
+                {
+                    m_creature->SetLevitate(false);
+                    m_creature->SetSpeedRate(MOVE_WALK, 1.0f);
+
+                    for (GUIDList::iterator i = m_lGuards.begin(); i != m_lGuards.end(); ++i)
+                    {
+                        if (Creature *pGuard = m_creature->GetMap()->GetCreature(*i))
+                        {
+                            pGuard->SetLevitate(false);
+                            pGuard->SetSpeedRate(MOVE_WALK, 1.0f);
+                            pGuard->GetMotionMaster()->MoveFollow(m_creature, frand(2.0f, 5.0f), frand(M_PI_F / 2, 1.5f * M_PI_F));
+                        }
+                    }
+
+                    NextStep(1000);
+                    break;
+                }
+                case 15:
+                {
+                    DoScriptText(SAY_OUTRO_HORDE_1, m_creature);
+                    m_creature->HandleEmote(EMOTE_ONESHOT_KNEEL);
+                    NextStep(3000);
+                    break;
+                }
+                case 16:
+                {
+                    if (Creature *pSaurfang = GetSaurfang())
+                    {
+                        float x, y, z;
+                        pSaurfang->GetContactPoint(m_creature, x, y, z, 1.0f);
+                        m_creature->GetMotionMaster()->MovePoint(0, x, y, z);
+                    }
+                    NextStep(0);
+                    break;
+                }
+                case 17:
+                {
+                    if (Creature *pSaurfang = GetSaurfang())
+                    {
+                        // wait until Overlord comes to Deathbringer
+                        if (!m_creature->IsWithinDist(pSaurfang, 2.0f))
+                            return;
+
+                        m_creature->StopMoving();
+                        m_creature->SetFacingToObject(pSaurfang);
+                    }
+                    NextStep(1000);
+                    break;
+                }
+                case 18:
+                {
+                    if (Creature *pSaurfang = GetSaurfang())
+                    {
+                        DoScriptText(SAY_OUTRO_HORDE_2, m_creature);
+                        m_creature->HandleEmote(EMOTE_ONESHOT_KNEEL);
+                        // doesnt work, invalid target (probably related to strangluating aura problem, maybe factions?)
+                        pSaurfang->CastSpell(m_creature, SPELL_VEHICLE_HARDCODED, true);
+                    }
+                    NextStep(3000);
+                    break;
+                }
+                case 19:
+                {
+                    // take deathbringer
+                    DoScriptText(SAY_OUTRO_HORDE_3, m_creature);
+                    NextStep(11000);
+                    break;
+                }
+                case 20:
+                {
+                    DoScriptText(SAY_OUTRO_HORDE_4, m_creature);
+                    m_creature->GetMotionMaster()->MovePoint(0, fPositions[2][0], fPositions[2][1], fPositions[2][2]);
+                    NextStep();
+                    break;
+                }
+                case 21:
+                {
+                    // wait until coming to gunship boarding place
+                    if (!m_creature->IsWithinDist2d(fPositions[2][0], fPositions[2][1], 3.0f))
+                        return;
+
+                    for (GUIDList::iterator i = m_lGuards.begin(); i != m_lGuards.end(); ++i)
+                    {
+                        if (Creature *pGuard = m_creature->GetMap()->GetCreature(*i))
+                            pGuard->ForcedDespawn();
+                    }
+                    m_creature->ForcedDespawn();
+                    return;
+                }
+                default:
+                    break;
+            }
+        }
+        else
+            m_uiNextEventTimer -= uiDiff;
+    }
+};
+
+struct MANGOS_DLL_DECL boss_deathbringer_saurfangAI : public base_icc_bossAI
+{
+    boss_deathbringer_saurfangAI(Creature* pCreature) : base_icc_bossAI(pCreature)
+    {
+        m_powerBloodPower = m_creature->getPowerType(); // don't call this function multiple times in script
+        m_bTeleported = false;
+        m_bIsIntroStarted = false;
+        m_guidEventNpcGuid.Clear();
         Reset();
     }
 
-    ScriptedInstance *pInstance;
-    uint8 beasts;
-    int32 oldPower;
+    uint32 m_uiRuneOfBloodTimer;
+    uint32 m_uiBoilingBloodTimer;
+    uint32 m_uiBloodNovaTimer;
+    uint32 m_uiBloodBeastsTimer;
+    uint32 m_uiScentOfBloodTimer;
+    uint32 m_uiBerserkTimer;
+
+    bool m_bIsFrenzied;
+
+    bool m_bTeleported;
+    bool m_bIsIntroStarted;
+    bool m_bIsAlliance;
+
+    Powers m_powerBloodPower;
+
+    ObjectGuid m_guidEventNpcGuid;
 
     void Reset()
     {
-        if(!pInstance)
-            return;
-        m_creature->SetRespawnDelay(7*DAY);
-        if (m_creature->isAlive())
-            pInstance->SetData(TYPE_SAURFANG, NOT_STARTED);
-        setStage(0);
-        beasts = 0;
-        resetTimers();
-        m_creature->SetPower(m_creature->getPowerType(), 0);
-        doCast(SPELL_ZERO_REGEN);
-        oldPower = 0;
+        m_uiRuneOfBloodTimer    = 20000;
+        m_uiBoilingBloodTimer   = urand(10000, 35000);
+        m_uiBloodNovaTimer      = urand(16000, 35000);
+        m_uiBloodBeastsTimer    = 40000;
+        m_uiScentOfBloodTimer   = 47000; // 5 seconds after beasts engage in combat
+        m_uiBerserkTimer        = (m_bIsHeroic ? 6 : 8) * MINUTE * IN_MILLISECONDS;
+
+        m_bIsFrenzied = false;
+
+        m_creature->SetPower(m_powerBloodPower, 0);
     }
 
-    void MoveInLineOfSight(Unit* pWho)
+    void MoveInLineOfSight(Unit *pWho)
     {
-        if (!pInstance) return;
-
-        if (!pWho || pWho->GetTypeId() != TYPEID_PLAYER) return;
-
-        if (!m_creature->isInCombat() && pWho->IsWithinDistInMap(m_creature, 20.0f))
+        if (!m_bTeleported && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster())
         {
-            m_creature->setFaction(21);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-            AttackStart(pWho);
+            // teleport behind door
+            m_creature->NearTeleportTo(fPositions[0][0], fPositions[0][1], fPositions[0][2], fPositions[0][3]);
+            m_bTeleported = true;
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
+        if (m_bTeleported && !m_bIsIntroStarted && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->GetDistance2d(pWho) < 50.0f)
+        {
+            m_bIsAlliance = false; //((Player*)pWho)->GetTeam() == ALLIANCE;
+            DoSummonEventNpc();
+            m_bIsIntroStarted = true;
+        }
     }
 
-    void Aggro(Unit* pWho)
+    void DoSummonEventNpc()
     {
-        if(!pInstance)
-            return;
+        // main npc: Saurfang or Muradin
+        if (Creature *pTmp = m_creature->SummonCreature(m_bIsAlliance ? NPC_MURADIN_BRONZEBEARD : NPC_OVERLORD_SAURFANG, fPositions[2][0], fPositions[2][1], fPositions[2][2], fPositions[2][3], TEMPSUMMON_MANUAL_DESPAWN, 0))
+        {
+            m_guidEventNpcGuid = pTmp->GetObjectGuid();
+            if (npc_highlord_saurfang_iccAI *pTmpAI = dynamic_cast<npc_highlord_saurfang_iccAI*>(pTmp->AI()))
+                pTmpAI->DoStartEvent();
+        }
+    }
 
-        pInstance->SetData(TYPE_SAURFANG, IN_PROGRESS);
+    void Aggro(Unit *pWho)
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_SAURFANG, IN_PROGRESS);
+
+        DoScriptText(SAY_AGGRO, m_creature);
+
         SetEquipmentSlots(false, EQUIP_MAIN, EQUIP_OFFHAND, EQUIP_RANGED);
-        DoScriptText(-1631100,m_creature);
-        doCast(SPELL_BLOOD_LINK);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+        DoCastSpellIfCan(m_creature, SPELL_BLOOD_POWER, CAST_TRIGGERED);
+        DoCastSpellIfCan(m_creature, SPELL_RUNE_OF_BLOOD, CAST_TRIGGERED);
+        DoCastSpellIfCan(m_creature, SPELL_MARK_OF_FALLEN_CHAMPION, CAST_TRIGGERED);
     }
 
     void JustReachedHome()
     {
-        if (pInstance)
-            pInstance->SetData(TYPE_SAURFANG, FAIL);
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_SAURFANG, FAIL);
+
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
     }
 
-
-    void KilledUnit(Unit* pVictim)
+    // used for unlocking bugged encounter
+    void JustDied(Unit *pKiller)
     {
-        switch (urand(0,1))
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_SAURFANG, DONE);
+
+        DoScriptText(SAY_DEATH, m_creature);
+        DoCastSpellIfCan(m_creature, SPELL_REMOVE_MARKS, CAST_TRIGGERED);
+
+        if (Creature *pTmp = m_creature->GetMap()->GetCreature(m_guidEventNpcGuid))
         {
-            case 0:
-               DoScriptText(-1631103,m_creature,pVictim);
-               break;
-            case 1:
-               DoScriptText(-1631104,m_creature,pVictim);
-               break;
-        };
-    }
-
-    void JustSummoned(Creature* summoned)
-    {
-        if(!pInstance || !summoned)
-            return;
-
-        summoned->SetOwnerGuid(m_creature->GetObjectGuid());
-
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0) )
-        {
-            summoned->AddThreat(pTarget, 100.0f);
-            summoned->GetMotionMaster()->MoveChase(pTarget);
+            if (npc_highlord_saurfang_iccAI *pTmpAI = dynamic_cast<npc_highlord_saurfang_iccAI*>(pTmp->AI()))
+                pTmpAI->DoContinueEvent();
         }
     }
 
-    void JustDied(Unit *killer)
+    void KilledUnit(Unit* pVictim)
     {
-        if(!pInstance)
-            return;
-        pInstance->SetData(TYPE_SAURFANG, DONE);
-        DoScriptText(-1631106,m_creature);
-        doRemoveFromAll(SPELL_MARK);
+        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            DoScriptText(SAY_SLAY_1 - urand(0,1), m_creature, pVictim);
     }
 
-    void UpdateAI(const uint32 diff)
+    void JustSummoned(Creature *pSummoned)
+    {
+        if (pSummoned->GetEntry() == NPC_BLOOD_BEAST)
+        {
+            pSummoned->CastSpell(pSummoned, SPELL_BLOOD_LINK_BEAST, true);
+            pSummoned->CastSpell(pSummoned, SPELL_RESISTANT_SKIN, true);
+            pSummoned->setFaction(m_creature->getFaction());
+        }
+    }
+
+    Player* SelectRandomPlayerForMark()
+    {
+        Player *pResult = NULL;
+        GUIDList lPlayers;
+        ThreatList const &threatlist = m_creature->getThreatManager().getThreatList();
+
+        if (!threatlist.empty())
+        {
+            for (ThreatList::const_iterator itr = threatlist.begin();itr != threatlist.end(); ++itr)
+            {
+                ObjectGuid const &guid = (*itr)->getUnitGuid();
+                if (guid.IsPlayer() && guid != m_creature->getVictim()->GetObjectGuid()) // exclude current target
+                {
+                    // check if player already has the mark
+                    if (Player *pPlayer = m_creature->GetMap()->GetPlayer(guid))
+                    {
+                        if (!pPlayer->HasAura(SPELL_MARK_OF_FALLEN_CHAMPION_DEBUFF))
+                            lPlayers.push_back(guid);
+                    }
+                }
+            }
+        }
+
+        if (!lPlayers.empty())
+        {
+            GUIDList::iterator i = lPlayers.begin();
+            uint32 max = uint32(lPlayers.size() - 1);
+
+            if (max > 0)
+                std::advance(i, urand(0, max));
+
+            pResult = m_creature->GetMap()->GetPlayer(*i);
+        }
+
+        // last option - current target
+        if (!pResult)
+        {
+            Unit *pVictim = m_creature->getVictim();
+            if (pVictim && pVictim->GetTypeId() == TYPEID_PLAYER && !pVictim->HasAura(SPELL_MARK_OF_FALLEN_CHAMPION_DEBUFF))
+                pResult = (Player*)pVictim;
+        }
+
+        return pResult;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (!m_creature->HasAura(SPELL_BLOOD_POWER))
-            doCast(SPELL_BLOOD_POWER);
-
-        if (!m_creature->HasAura(SPELL_BLOOD_LINK))
-            doCast(SPELL_BLOOD_LINK);
-
-        if (!m_creature->HasAura(SPELL_MARK_SELF))
-            doCast(SPELL_MARK_SELF);
-
-        switch(getStage())
+        // Mark of the Fallen Champion
+        if (m_creature->GetPower(m_powerBloodPower) >= 100)
         {
-            case 0:
-                    if (m_creature->GetHealthPercent() <= 30.0f) setStage(1);
-                    break;
-
-            case 1:
-                        doCast(SPELL_FRENZY);
-                        setStage(2);
-                        DoScriptText(-1631101,m_creature);
-                    break;
-
-            case 2:
-                    break;
-
-            default:
-                    break;
+            if (Player *pTarget = SelectRandomPlayerForMark())
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_MARK_OF_FALLEN_CHAMPION_DEBUFF) == CAST_OK)
+                {
+                    m_creature->SetPower(m_powerBloodPower, 0); // reset Blood Power
+                    // decrease the buff
+                    m_creature->RemoveAurasDueToSpell(72371);
+                    int32 power = m_creature->GetPower(m_powerBloodPower);
+                    m_creature->CastCustomSpell(m_creature, 72371, &power, &power, NULL, true);
+                    DoScriptText(SAY_FALLENCHAMPION, m_creature);
+                }
+            }
         }
 
-            if (timedQuery(SPELL_MARK, diff))
+        // Frenzy (soft enrage)
+        if (!m_bIsFrenzied)
+        {
+            if (m_creature->GetHealthPercent() <= 30.0f)
             {
-                if (Unit* pTarget = doSelectRandomPlayer(SPELL_MARK,false,120.0f))
-                    doCast(SPELL_MARK, pTarget);
+                DoCastSpellIfCan(m_creature, SPELL_FRENZY, CAST_TRIGGERED);
+                DoScriptText(SAY_BERSERK, m_creature);
+                m_bIsFrenzied = true;
+            }
+        }
+
+        // Berserk (hard enrage)
+        if (m_uiBerserkTimer <= uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+            {
+                DoScriptText(SAY_BERSERK, m_creature);
+                m_uiBerserkTimer = (m_bIsHeroic ? 6 : 8) * MINUTE * IN_MILLISECONDS;
+            }
+        }
+        else
+            m_uiBerserkTimer -= uiDiff;
+
+        // Rune of Blood
+        if (m_uiRuneOfBloodTimer <= uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RUNE_OF_BLOOD_DEBUFF) == CAST_OK)
+                m_uiRuneOfBloodTimer = 20000;
+        }
+        else
+            m_uiRuneOfBloodTimer -= uiDiff;
+
+        // Boiling Blood
+        if (m_uiBoilingBloodTimer <= uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_BOILING_BLOOD) == CAST_OK)
+                m_uiBoilingBloodTimer = urand(10000, 35000);
+        }
+        else
+            m_uiBoilingBloodTimer -= uiDiff;
+
+        // Boiling Blood
+        if (m_uiBloodNovaTimer <= uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_BLOOD_NOVA) == CAST_OK)
+                m_uiBloodNovaTimer = urand(16000, 35000);
+        }
+        else
+            m_uiBloodNovaTimer -= uiDiff;
+
+        // Call Blood Beasts
+        if (m_uiBloodBeastsTimer <= uiDiff)
+        {
+            m_creature->CastSpell(m_creature, SPELL_CALL_BLOOD_BEAST_1, true);
+            m_creature->CastSpell(m_creature, SPELL_CALL_BLOOD_BEAST_2, true);
+
+            if (m_bIs25Man)
+            {
+                m_creature->CastSpell(m_creature, SPELL_CALL_BLOOD_BEAST_3, true);
+                m_creature->CastSpell(m_creature, SPELL_CALL_BLOOD_BEAST_4, true);
+                m_creature->CastSpell(m_creature, SPELL_CALL_BLOOD_BEAST_5, true);
             }
 
-            timedCast(SPELL_BLOOD_NOVA, diff);
+            m_uiBloodBeastsTimer  = 40000;
 
-            timedCast(SPELL_BOILING_BLOOD, diff);
+            if (m_bIsHeroic)
+                m_uiScentOfBloodTimer = 7000; // 5 seconds after beasts engage in combat
 
-            timedCast(SPELL_RUNE_OF_BLOOD, diff);
+            DoScriptText(SAY_BLOODBEASTS, m_creature);
+        }
+        else
+            m_uiBloodBeastsTimer -= uiDiff;
 
-            if (timedQuery(SPELL_CALL_BLOOD_BEAST_1, diff))
-            {
-                beasts = getSpellData(SPELL_CALL_BLOOD_BEAST_1);
-                DoScriptText(-1631102,m_creature);
-            };
-
-            if (beasts > 0)
-            {
-                CanCastResult res = CAST_FAIL_OTHER;
-                switch (beasts)
-                {
-                    case 1: res = doCast(SPELL_CALL_BLOOD_BEAST_1); break;
-                    case 2: res = doCast(SPELL_CALL_BLOOD_BEAST_2); break;
-                    case 3: res = doCast(SPELL_CALL_BLOOD_BEAST_3); break;
-                    case 4: res = doCast(SPELL_CALL_BLOOD_BEAST_4); break;
-                    case 5: res = doCast(SPELL_CALL_BLOOD_BEAST_5); break;
-                    default: break;
-                };
-
-                if ( res == CAST_OK)
-                {
-                    --beasts;
-                };
-            };
-
-        if (timedQuery(SPELL_BERSERK, diff))
+        // Scent of Blood
+        if (m_bIsHeroic)
         {
-            doCast(SPELL_BERSERK);
-            DoScriptText(-1631108,m_creature);
-        };
+            if (m_uiScentOfBloodTimer <= uiDiff)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_SCENT_OF_BLOOD, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_SCENT_OF_BLOOD_TRIGGERED, CAST_TRIGGERED);
+                m_uiScentOfBloodTimer = 40000;
+                // via DB
+                m_creature->MonsterTextEmote("Deathbringer Saurfang's Blood Beasts gain the scent of blood!", m_creature->getVictim(), true);
+            }
+            else
+                m_uiScentOfBloodTimer -= uiDiff;
+        }
 
         DoMeleeAttackIfReady();
     }
@@ -248,45 +780,57 @@ CreatureAI* GetAI_boss_deathbringer_saurfang(Creature* pCreature)
     return new boss_deathbringer_saurfangAI(pCreature);
 }
 
-struct MANGOS_DLL_DECL  mob_blood_beastAI : public BSWScriptedAI
+CreatureAI* GetAI_npc_highlord_saurfang_icc(Creature* pCreature)
 {
-    mob_blood_beastAI(Creature *pCreature) : BSWScriptedAI(pCreature)
+    return new npc_highlord_saurfang_iccAI(pCreature);
+}
+
+struct MANGOS_DLL_DECL  mob_blood_beastAI : public ScriptedAI
+{
+    mob_blood_beastAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-        pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance *pInstance;
-    Creature* pOwner;
-    bool scentcasted;
+    uint32 m_uiScentOfBloodTimer;
+    uint32 m_uiReadyTimer;
+
+    bool m_bIsReady;
 
     void Reset()
     {
-         pOwner = pInstance->GetSingleCreatureFromStorage(NPC_DEATHBRINGER_SAURFANG);
-         resetTimers();
-         scentcasted = false;
+        m_uiScentOfBloodTimer = 5000;
+
+        m_uiReadyTimer = 2000;
+        m_bIsReady = false;
+
+        SetCombatMovement(false);
+        m_creature->SetWalk(true);
+    }
+
+    void JustReachedHome()
+    {
+        m_creature->ForcedDespawn();
     }
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!pInstance || pInstance->GetData(TYPE_SAURFANG) != IN_PROGRESS)
-              m_creature->ForcedDespawn();
-
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (!m_creature->HasAura(SPELL_BLOOD_LINK_BEAST))
-            doCast(SPELL_BLOOD_LINK_BEAST);
-
-        if (!m_creature->HasAura(SPELL_RESISTANT_SKIN))
-            doCast(SPELL_RESISTANT_SKIN);
-
-        if (!scentcasted && (m_creature->GetHealthPercent() <= 20.0f))
-           {
-               if (urand(0,1))                            //50%
-                   doCast(SPELL_SCENT_OF_BLOOD);
-               scentcasted = true;
-           }
+        if (!m_bIsReady)
+        {
+            if (m_uiReadyTimer <= uiDiff)
+            {
+                m_bIsReady = true;
+                SetCombatMovement(true);
+                m_creature->SetInCombatWithZone();
+                if (m_creature->getVictim())
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            }
+            else
+                m_uiReadyTimer -= uiDiff;
+        }
 
         DoMeleeAttackIfReady();
     }
@@ -303,6 +847,11 @@ void AddSC_boss_deathbringer_saurfang()
     newscript = new Script;
     newscript->Name = "boss_deathbringer_saurfang";
     newscript->GetAI = &GetAI_boss_deathbringer_saurfang;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_highlord_saurfang_icc";
+    newscript->GetAI = &GetAI_npc_highlord_saurfang_icc;
     newscript->RegisterSelf();
 
     newscript = new Script;

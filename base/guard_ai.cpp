@@ -1,5 +1,5 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2011 MangosR2_ScriptDev2
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
+ * Copyright (C) 2011 - 2012 MangosR2 <http://github.com/mangosR2/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,7 +37,7 @@ guardAI::guardAI(Creature* pCreature) : ScriptedAI(pCreature),
 void guardAI::Reset()
 {
     m_uiGlobalCooldown = 0;
-    m_uiBuffTimer = 0; 	//Rebuff as soon as we can
+    m_uiBuffTimer = 0;     //Rebuff as soon as we can
     m_uiZoneAttackMsgTimer = 0;
     m_uiHelp = 5000;
 }
@@ -183,10 +183,10 @@ void guardAI::UpdateAI(const uint32 uiDiff)
        if (m_creature->getFaction() == F_SILVERMOON)
            m_creature->MonsterSay("Silvermoon is under Invasion! Guards!! Help me!",LANG_THALASSIAN);
        m_creature->HandleEmoteCommand(EMOTE_ONESHOT_BATTLEROAR);
-       for(int i = 0; i < 3;i++)
-       {
-            SummonGuardsHelpers();
-       }
+//       for(int i = 0; i < 3;i++)
+//       {
+//            SummonGuardsHelpers();
+//       }
        m_uiHelp = urand(60000, 105000);
     }
 

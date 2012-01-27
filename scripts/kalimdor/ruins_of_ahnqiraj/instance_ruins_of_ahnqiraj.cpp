@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -44,20 +44,11 @@ void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
 {
     switch(pCreature->GetEntry())
     {
+        case NPC_OSSIRIAN_TRIGGER:
+            // Only store static spawned (if this can be checked, else use a bool)
         case NPC_OSSIRIAN:
         case NPC_GENERAL_ANDOROV:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-            break;
-    }
-}
-
-void instance_ruins_of_ahnqiraj::OnObjectCreate(GameObject* pGo)
-{
-    switch(pGo->GetEntry())
-    {
-        case GO_OSSIRIAN_CRYSTAL:
-            // Make them unusable temporarily
-            pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
             break;
     }
 }
