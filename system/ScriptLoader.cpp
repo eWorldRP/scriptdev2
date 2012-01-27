@@ -413,7 +413,7 @@ extern void AddSC_boss_algalon();
 extern void AddSC_boss_auriaya();
 extern void AddSC_boss_leviathan();
 extern void AddSC_boss_freya();
-extern void AddSC_boss_general_vezax();
+extern void AddSC_boss_vezax();
 extern void AddSC_boss_hodir();
 extern void AddSC_boss_ignis();
 extern void AddSC_boss_kologarn();
@@ -954,7 +954,7 @@ void AddScripts()
     AddSC_boss_auriaya();
     AddSC_boss_leviathan();
     AddSC_boss_freya();
-    AddSC_boss_general_vezax();
+    AddSC_boss_vezax();
     AddSC_boss_hodir();
     AddSC_boss_ignis();
     AddSC_boss_kologarn();
