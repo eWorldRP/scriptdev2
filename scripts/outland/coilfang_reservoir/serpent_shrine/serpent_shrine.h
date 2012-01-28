@@ -44,8 +44,8 @@ class MANGOS_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
 
         void SetData(uint32 uiType, uint32 uiData);
         uint32 GetData(uint32 uiType);
-        void SetData64(uint32 uiType, uint64 uiData);
-        uint64 GetData64(uint32 uiData);
+        void SetGuid(uint32 uiType, ObjectGuid uiData);
+        ObjectGuid GetGuid(uint32 uiData);
 
         const char* Save() { return m_strInstData.c_str(); }
         void Load(const char* chrIn);

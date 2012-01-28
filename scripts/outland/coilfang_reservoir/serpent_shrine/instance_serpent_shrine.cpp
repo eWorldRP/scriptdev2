@@ -69,18 +69,18 @@ void instance_serpentshrine_cavern::OnCreatureCreate(Creature* pCreature)
     }
 }
 
-void instance_serpentshrine_cavern::SetData64(uint32 uiType, uint64 uiData)
+void instance_serpentshrine_cavern::SetGuid(uint32 uiType, ObjectGuid uiData)
 {
     if (uiType == DATA_KARATHRESS_STARTER)
-        m_karathressEventStarterGuid = ObjectGuid(uiData);
+        m_karathressEventStarterGuid = uiData;
 }
 
-uint64 instance_serpentshrine_cavern::GetData64(uint32 uiData)
+ObjectGuid instance_serpentshrine_cavern::GetGuid(uint32 uiData)
 {
     if (uiData == DATA_KARATHRESS_STARTER)
-        return m_karathressEventStarterGuid.GetRawValue();
+        return m_karathressEventStarterGuid;
 
-    return 0;
+    return ObjectGuid();
 }
 
 void instance_serpentshrine_cavern::SetData(uint32 uiType, uint32 uiData)
