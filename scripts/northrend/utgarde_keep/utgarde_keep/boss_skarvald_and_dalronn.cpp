@@ -330,7 +330,7 @@ struct MANGOS_DLL_DECL boss_dalronn_the_controllerAI : public ScriptedAI
                 if (Check_Timer <= diff)
                 {
                     Check_Timer = 5000;
-                    Unit* skarvald = mm_pInstance ? m_pInstance->GetSingleCreatureFromStorage(NPC_SKARVALD);
+                    Unit* skarvald = m_pInstance->GetSingleCreatureFromStorage(NPC_SKARVALD);
                     if (skarvald && skarvald->isDead())
                     {
                         Skarvald_isDead = true;

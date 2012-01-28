@@ -359,7 +359,7 @@ struct MANGOS_DLL_DECL mob_annhylde_the_callerAI : public ScriptedAI
     {
         if (type != POINT_MOTION_TYPE)
             return;
-        Unit* ingvar = m_pInstance ? m_pInstance->GetSingleCreatureFromStorage(NPC_INGVAR));
+        Unit* ingvar = m_pInstance->GetSingleCreatureFromStorage(NPC_INGVAR);
         if (ingvar)
         {
             switch (id)
