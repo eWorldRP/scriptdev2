@@ -1155,7 +1155,7 @@ struct MANGOS_DLL_DECL npc_power_sparkAI : public ScriptedAI
         if (m_uiCheckTimer <= uiDiff)
         {
             if (m_pInstance)
-                if (Creature* pMalygos = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_MALYGOS)))
+                if (Creature* pMalygos = m_pInstance->GetSingleCreatureFromStorage(NPC_MALYGOS))
                 {
                     m_creature->GetMotionMaster()->Clear();
                     if (m_pInstance->GetData(TYPE_MALYGOS) != SPECIAL)
