@@ -25,17 +25,7 @@ EndScriptData */
 #include "utgarde_keep.h"
 
 instance_utgarde_keep::instance_utgarde_keep(Map* pMap) : ScriptedInstance(pMap),
-    m_uiKelesethGUID(0),
-    m_uiSkarvaldGUID(0),
-    m_uiDalronnGUID(0),
-	m_uiIngvarGUID(0),
 
-    m_uiBellow1GUID(0),
-    m_uiBellow2GUID(0),
-    m_uiBellow3GUID(0),
-    m_uiForgeFire1GUID(0),
-    m_uiForgeFire2GUID(0),
-    m_uiForgeFire3GUID(0),
     m_bKelesethAchievFailed(false)
 {
     Initialize();
@@ -50,10 +40,12 @@ void instance_utgarde_keep::OnCreatureCreate(Creature* pCreature)
 {
     switch(pCreature->GetEntry())
     {
-        case NPC_KELESETH: m_uiKelesethGUID = pCreature->GetObjectGuid().GetCounter(); break;
-        case NPC_SKARVALD: m_uiSkarvaldGUID = pCreature->GetObjectGuid().GetCounter(); break;
-        case NPC_DALRONN:  m_uiDalronnGUID = pCreature->GetObjectGuid().GetCounter();  break;
-        case NPC_INGVAR:   m_uiIngvarGUID = pCreature->GetObjectGuid().GetCounter();  break;
+        case NPC_KELESETH:
+        case NPC_SKARVALD:
+        case NPC_DALRONN:
+        case NPC_INGVAR:
+            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
     }
 }
 
@@ -62,36 +54,31 @@ void instance_utgarde_keep::OnObjectCreate(GameObject* pGo)
     switch(pGo->GetEntry())
     {
         case GO_BELLOW_1:
-            m_uiBellow1GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_1] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_BELLOW_2:
-            m_uiBellow2GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_2] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_BELLOW_3:
-            m_uiBellow3GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_3] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_FORGEFIRE_1:
-            m_uiForgeFire1GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_1] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_FORGEFIRE_2:
-            m_uiForgeFire2GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_2] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_FORGEFIRE_3:
-            m_uiForgeFire3GUID = pGo->GetObjectGuid().GetCounter();
             if (m_auiEncounter[TYPE_BELLOW_3] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
     }
+    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_utgarde_keep::OnCreatureDeath(Creature* pCreature)
@@ -145,25 +132,6 @@ uint32 instance_utgarde_keep::GetData(uint32 uiType)
         return m_auiEncounter[uiType];
 
     return 0;
-}
-
-uint64 instance_utgarde_keep::GetData64(uint32 uiData)
-{
-    switch(uiData)
-    {
-        case NPC_KELESETH:      return m_uiKelesethGUID;
-        case NPC_SKARVALD:      return m_uiSkarvaldGUID;
-        case NPC_DALRONN:       return m_uiDalronnGUID;
-        case NPC_INGVAR:        return m_uiIngvarGUID;
-        case GO_BELLOW_1:       return m_uiBellow1GUID;
-        case GO_BELLOW_2:       return m_uiBellow2GUID;
-        case GO_BELLOW_3:       return m_uiBellow3GUID;
-        case GO_FORGEFIRE_1:    return m_uiForgeFire1GUID;
-        case GO_FORGEFIRE_2:    return m_uiForgeFire2GUID;
-        case GO_FORGEFIRE_3:    return m_uiForgeFire3GUID;
-        default:
-            return 0;
-    }
 }
 
 void instance_utgarde_keep::Load(const char* chrIn)

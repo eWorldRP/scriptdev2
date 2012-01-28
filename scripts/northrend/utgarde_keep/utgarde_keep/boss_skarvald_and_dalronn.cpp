@@ -87,7 +87,7 @@ struct MANGOS_DLL_DECL boss_skarvald_the_constructorAI : public ScriptedAI
         ghost = (m_creature->GetEntry() == MOB_SKARVALD_GHOST);
         if (!ghost && m_pInstance)
         {
-            Unit* dalronn = m_creature->GetMap()->GetUnit(ObjectGuid(m_pInstance->GetData64(NPC_DALRONN)));
+            Unit* dalronn = m_pInstance->GetSingleCreatureFromStorage(NPC_DALRONN);
             if (dalronn && dalronn->isDead())
                 ((Creature*)dalronn)->Respawn();
 
@@ -101,7 +101,7 @@ struct MANGOS_DLL_DECL boss_skarvald_the_constructorAI : public ScriptedAI
         {
             DoScriptText(YELL_SKARVALD_AGGRO,m_creature);
 
-            Unit* dalronn = m_creature->GetMap()->GetUnit(ObjectGuid(m_pInstance->GetData64(NPC_DALRONN)));
+            Unit* dalronn = m_pInstance->GetSingleCreatureFromStorage(NPC_DALRONN);
             if (dalronn && dalronn->isAlive() && !dalronn->getVictim())
                 dalronn->getThreatManager().addThreat(who,0.0f);
 
@@ -113,17 +113,17 @@ struct MANGOS_DLL_DECL boss_skarvald_the_constructorAI : public ScriptedAI
     {
         if (!ghost && m_pInstance)
         {
-            Unit* dalronn = m_creature->GetMap()->GetUnit(ObjectGuid(m_pInstance->GetData64(NPC_DALRONN)));
+            Unit* dalronn = m_pInstance->GetSingleCreatureFromStorage(NPC_DALRONN);
             if (dalronn)
             {
                 if (dalronn->isDead())
                 {
                     DoScriptText(YELL_SKARVALD_DAL_DIED,m_creature);
 
-					m_pInstance->SetData(TYPE_SKARVALD_DALRONN, DONE);
+                    m_pInstance->SetData(TYPE_SKARVALD_DALRONN, DONE);
 
-					if(pGhost = GetClosestCreatureWithEntry(m_creature, MOB_DALRONN_GHOST, 1000))
-						pGhost->ForcedDespawn();
+                    if(pGhost = GetClosestCreatureWithEntry(m_creature, MOB_DALRONN_GHOST, 1000))
+                        pGhost->ForcedDespawn();
                 }
                 else
                 {
@@ -167,7 +167,7 @@ struct MANGOS_DLL_DECL boss_skarvald_the_constructorAI : public ScriptedAI
                 if (Check_Timer <= diff)
                 {
                     Check_Timer = 5000;
-                    Unit* dalronn = m_creature->GetMap()->GetUnit(ObjectGuid(m_pInstance ? m_pInstance->GetData64(NPC_DALRONN) : 0));
+                    Unit* dalronn = m_pInstance->GetSingleCreatureFromStorage(NPC_DALRONN);
                     if (dalronn && dalronn->isDead())
                     {
                         Dalronn_isDead = true;
@@ -243,7 +243,7 @@ struct MANGOS_DLL_DECL boss_dalronn_the_controllerAI : public ScriptedAI
         ghost = m_creature->GetEntry() == MOB_DALRONN_GHOST;
         if (!ghost && m_pInstance)
         {
-            Unit* skarvald = m_creature->GetMap()->GetUnit(ObjectGuid(m_pInstance->GetData64(NPC_SKARVALD)));
+            Unit* skarvald = m_pInstance->GetSingleCreatureFromStorage(NPC_SKARVALD);
             if (skarvald && skarvald->isDead())
                ((Creature*)skarvald)->Respawn();
 
@@ -255,7 +255,7 @@ struct MANGOS_DLL_DECL boss_dalronn_the_controllerAI : public ScriptedAI
     {
         if (!ghost && m_pInstance)
         {
-            Unit* skarvald = m_creature->GetMap()->GetUnit(ObjectGuid(m_pInstance->GetData64(NPC_SKARVALD)));
+            Unit* skarvald = m_pInstance->GetSingleCreatureFromStorage(NPC_SKARVALD);
             if (skarvald && skarvald->isAlive() && !skarvald->getVictim())
                 skarvald->getThreatManager().addThreat(who,0.0f);
 
@@ -270,16 +270,16 @@ struct MANGOS_DLL_DECL boss_dalronn_the_controllerAI : public ScriptedAI
     {
         if (!ghost && m_pInstance)
         {
-            Unit* skarvald = m_creature->GetMap()->GetUnit(ObjectGuid(m_pInstance->GetData64(NPC_SKARVALD)));
+            Unit* skarvald = m_pInstance->GetSingleCreatureFromStorage(NPC_SKARVALD);
             if (skarvald)
                 if (skarvald->isDead())
                 {
                     DoScriptText(YELL_DALRONN_SKA_DIED,m_creature);
 
                     m_pInstance->SetData(TYPE_SKARVALD_DALRONN, DONE);
-					
-					if(pGhost = GetClosestCreatureWithEntry(m_creature, MOB_SKARVALD_GHOST, 1000))
-						pGhost->ForcedDespawn();
+
+                    if(pGhost = GetClosestCreatureWithEntry(m_creature, MOB_SKARVALD_GHOST, 1000))
+                        pGhost->ForcedDespawn();
                 }
                 else
                 {
@@ -330,7 +330,7 @@ struct MANGOS_DLL_DECL boss_dalronn_the_controllerAI : public ScriptedAI
                 if (Check_Timer <= diff)
                 {
                     Check_Timer = 5000;
-                    Unit* skarvald = m_creature->GetMap()->GetUnit(ObjectGuid(m_pInstance ? m_pInstance->GetData64(NPC_SKARVALD) : 0));
+                    Unit* skarvald = mm_pInstance ? m_pInstance->GetSingleCreatureFromStorage(NPC_SKARVALD);
                     if (skarvald && skarvald->isDead())
                     {
                         Skarvald_isDead = true;
