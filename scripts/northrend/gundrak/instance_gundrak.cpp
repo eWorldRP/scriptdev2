@@ -235,17 +235,6 @@ uint32 instance_gundrak::GetData(uint32 uiType)
     return 0;
 }
 
-uint64 instance_gundrak::GetData64(uint32 uiType)
-{
-    switch(uiType)
-    {
-    case NPC_COLOSSUS: return m_mNpcEntryGuidStore[NPC_COLOSSUS];
-    case NPC_ELEMENTAL: return m_mNpcEntryGuidStore[NPC_ELEMENTAL];
-    }
-
-    return 0;
-}
-
 static bool sortFromEastToWest(Creature* pFirst, Creature* pSecond)
 {
     return pFirst && pSecond && pFirst->GetPositionY() < pSecond->GetPositionY();
