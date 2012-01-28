@@ -259,12 +259,17 @@ struct MANGOS_DLL_DECL boss_paletressAI : public ScriptedAI
             switch(urand(0, 1))
             {
                 case 0:
-                    if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_MEMORY))))
+                {
+                    uint32 uiMemoryId = m_pInstance->GetData(DATA_MEMORY);
+                    if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiMemoryId))
+                    {
                         if (pTemp->isAlive())
                             DoCast(pTemp, m_bIsRegularMode ? SPELL_RENEW : SPELL_RENEW_H);
                         else
                             DoCast(m_creature, m_bIsRegularMode ? SPELL_RENEW : SPELL_RENEW_H);
+                    }
                     break;
+                }
                 case 1:
                     DoCast(m_creature, m_bIsRegularMode ? SPELL_RENEW : SPELL_RENEW_H);
                 break;
@@ -274,8 +279,8 @@ struct MANGOS_DLL_DECL boss_paletressAI : public ScriptedAI
         else
             m_uiRenewTimer -= uiDiff;
 
-	if (((m_creature->GetHealth()*100 / m_creature->GetMaxHealth()) < 35 ) && !m_bIsSummoned )
-	{
+        if (((m_creature->GetHealth()*100 / m_creature->GetMaxHealth()) < 35 ) && !m_bIsSummoned )
+        {
             m_creature->CastStop(m_bIsRegularMode ? SPELL_SMITE : SPELL_SMITE_H);
             m_creature->CastStop(m_bIsRegularMode ? SPELL_HOLY_FIRE : SPELL_HOLY_FIRE_H);
             DoCast(m_creature, SPELL_HOLY_NOVA);
@@ -373,14 +378,16 @@ struct MANGOS_DLL_DECL boss_paletressAI : public ScriptedAI
 
         if (m_uiShieldCheck < uiDiff && m_bIsShielded)
         {
-            if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_MEMORY))))
+            uint32 uiMemoryId = m_pInstance->GetData(DATA_MEMORY);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiMemoryId))
+            {
                 if (!pTemp->isAlive())
                 {
                     m_creature->RemoveAurasDueToSpell(SPELL_SHIELD);
                     m_bIsShielded = false;
                 }
-                else
-                    m_uiShieldCheck = 1*IN_MILLISECONDS;
+            }
+            m_uiShieldCheck = 1*IN_MILLISECONDS;
         }
         else
             m_uiShieldCheck -= uiDiff;

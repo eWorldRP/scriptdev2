@@ -102,13 +102,18 @@ struct MANGOS_DLL_DECL mob_toc5_warriorAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_1))))
+        uint32 uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_2))))
+
+        uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_3))))
+
+        uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
 
@@ -125,13 +130,18 @@ struct MANGOS_DLL_DECL mob_toc5_warriorAI : public ScriptedAI
 
         if (m_pInstance->GetData(DATA_CHAMPIONS_COUNT) < 1)
         {
-              m_pInstance->SetData(TYPE_GRAND_CHAMPIONS, DONE);
-              if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_1))))
-                  pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-              if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_2))))
-                  pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-              if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_3))))
-                  pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            m_pInstance->SetData(TYPE_GRAND_CHAMPIONS, DONE);
+            uint32 uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
+                pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
+                pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
+                pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
         }
     }
 
@@ -233,13 +243,18 @@ struct MANGOS_DLL_DECL mob_toc5_mageAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_1))))
+        uint32 uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_2))))
+
+        uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_3))))
+
+        uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
 
@@ -256,13 +271,18 @@ struct MANGOS_DLL_DECL mob_toc5_mageAI : public ScriptedAI
 
         if (m_pInstance->GetData(DATA_CHAMPIONS_COUNT) < 1)
         {
-              m_pInstance->SetData(TYPE_GRAND_CHAMPIONS, DONE);
-              if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_1))))
-                  pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-              if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_2))))
-                  pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-              if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_3))))
-                  pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            m_pInstance->SetData(TYPE_GRAND_CHAMPIONS, DONE);
+            uint32 uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
+                pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
+                pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
+                pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
         }
     }
 
@@ -271,7 +291,7 @@ struct MANGOS_DLL_DECL mob_toc5_mageAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-	if (m_uiFireballTimer < uiDiff)
+        if (m_uiFireballTimer < uiDiff)
         {
             DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H);
             m_uiFireballTimer = m_bIsRegularMode ? 5*IN_MILLISECONDS : 3*IN_MILLISECONDS;
@@ -279,7 +299,7 @@ struct MANGOS_DLL_DECL mob_toc5_mageAI : public ScriptedAI
         else
             m_uiFireballTimer -= uiDiff;
 
-	if (m_uiBlastWaveTimer < uiDiff)
+        if (m_uiBlastWaveTimer < uiDiff)
         {
             DoCast(m_creature, m_bIsRegularMode ? SPELL_BLAST_WAVE : SPELL_BLAST_WAVE_H);
             m_uiBlastWaveTimer = m_bIsRegularMode ? 20*IN_MILLISECONDS : 12*IN_MILLISECONDS;
@@ -287,7 +307,7 @@ struct MANGOS_DLL_DECL mob_toc5_mageAI : public ScriptedAI
         else
             m_uiBlastWaveTimer -= uiDiff;
 
-	if (m_uiHasteTimer < uiDiff)
+        if (m_uiHasteTimer < uiDiff)
         {
             DoCast(m_creature, SPELL_HASTE);
             m_uiHasteTimer = m_bIsRegularMode ? 10*IN_MILLISECONDS : 8*IN_MILLISECONDS;
@@ -295,7 +315,7 @@ struct MANGOS_DLL_DECL mob_toc5_mageAI : public ScriptedAI
         else
             m_uiHasteTimer -= uiDiff;
 
-	if (m_uiPolymorphTimer < uiDiff)
+        if (m_uiPolymorphTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 DoCast(pTarget, m_bIsRegularMode ? SPELL_POLYMORPH : SPELL_POLYMORPH_H);
@@ -311,8 +331,8 @@ struct MANGOS_DLL_DECL mob_toc5_mageAI : public ScriptedAI
         }
         else  m_uiBerserkTimer -= uiDiff;
 
-		DoMeleeAttackIfReady();
-	}
+        DoMeleeAttackIfReady();
+    }
 };
 
 CreatureAI* GetAI_mob_toc5_mage(Creature* pCreature)
@@ -363,13 +383,18 @@ struct MANGOS_DLL_DECL mob_toc5_shamanAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_1))))
+        uint32 uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_2))))
+
+        uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_3))))
+
+        uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
 
@@ -387,11 +412,16 @@ struct MANGOS_DLL_DECL mob_toc5_shamanAI : public ScriptedAI
         if (m_pInstance->GetData(DATA_CHAMPIONS_COUNT) < 1)
         {
             m_pInstance->SetData(TYPE_GRAND_CHAMPIONS, DONE);
-            if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_1))))
+            uint32 uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                 pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_2))))
+
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                 pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_3))))
+
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                 pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
         }
     }
@@ -419,33 +449,45 @@ struct MANGOS_DLL_DECL mob_toc5_shamanAI : public ScriptedAI
 
         if (m_uiHealingWaveTimer < uiDiff)
         {
-            if (Creature* pTemp = (m_creature->GetMap()->GetCreature( m_pInstance->GetData64(DATA_CHAMPION_1))))
+            uint32 uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                 if (pTemp->isAlive())
                     m_fHealthFirstChampion = pTemp->GetHealth()*100 / pTemp->GetMaxHealth();
                 else
                     m_fHealthFirstChampion = 100;
 
-            if (Creature* pTemp = (m_creature->GetMap()->GetCreature( m_pInstance->GetData64(DATA_CHAMPION_2))))
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                 if (pTemp->isAlive())
                     m_fHealthSecondChampion = pTemp->GetHealth()*100 / pTemp->GetMaxHealth();
                 else
                     m_fHealthSecondChampion = 100;
-
-            if (Creature* pTemp = (m_creature->GetMap()->GetCreature( m_pInstance->GetData64(DATA_CHAMPION_3))))
+            
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                 if (pTemp->isAlive())
                     m_fHealthThirdChampion = pTemp->GetHealth()*100 / pTemp->GetMaxHealth();
                 else
                     m_fHealthThirdChampion = 100;
 
             if (m_fHealthFirstChampion < m_fHealthSecondChampion && m_fHealthFirstChampion < m_fHealthThirdChampion && m_fHealthFirstChampion < 70)
-                if (Creature* pTemp = (m_creature->GetMap()->GetCreature( m_pInstance->GetData64(DATA_CHAMPION_1))))
+            {
+                uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+                if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                     DoCast(pTemp, m_bIsRegularMode ? SPELL_HEALING_WAVE : SPELL_HEALING_WAVE_H);
+            }
             if (m_fHealthFirstChampion > m_fHealthSecondChampion && m_fHealthSecondChampion < m_fHealthThirdChampion && m_fHealthSecondChampion < 70)
-                if (Creature* pTemp = (m_creature->GetMap()->GetCreature( m_pInstance->GetData64(DATA_CHAMPION_2))))
+            {
+                uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+                if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                     DoCast(pTemp, m_bIsRegularMode ? SPELL_HEALING_WAVE : SPELL_HEALING_WAVE_H);
+            }
             if (m_fHealthThirdChampion < m_fHealthSecondChampion && m_fHealthFirstChampion > m_fHealthThirdChampion && m_fHealthThirdChampion < 70)
-                if (Creature* pTemp = (m_creature->GetMap()->GetCreature( m_pInstance->GetData64(DATA_CHAMPION_3))))
+            {
+                uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+                if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                     DoCast(pTemp, m_bIsRegularMode ? SPELL_HEALING_WAVE : SPELL_HEALING_WAVE_H);
+            }
 
             m_uiHealingWaveTimer = m_bIsRegularMode ? 8*IN_MILLISECONDS : 6*IN_MILLISECONDS;
         }
@@ -454,24 +496,28 @@ struct MANGOS_DLL_DECL mob_toc5_shamanAI : public ScriptedAI
 
         if (m_uiEarthShieldTimer < uiDiff)
         {
+            uint32 uiOtherId;
             switch(urand(0, 2))
             {
                 case 0:
-                    if (Creature* pTemp = (m_creature->GetMap()->GetCreature( m_pInstance->GetData64(DATA_CHAMPION_1))))
+                    uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+                    if (Creature* pTemp =  m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                         if (pTemp->isAlive())
                             DoCast(pTemp, SPELL_EARTH_SHIELD);
                         else
                             DoCast(m_creature, SPELL_EARTH_SHIELD);
                     break;
                 case 1:
-                    if (Creature* pTemp = (m_creature->GetMap()->GetCreature( m_pInstance->GetData64(DATA_CHAMPION_2))))
+                    uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+                    if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                         if (pTemp->isAlive())
                             DoCast(pTemp, SPELL_EARTH_SHIELD);
                         else
                             DoCast(m_creature, SPELL_EARTH_SHIELD);
                     break;
                 case 2:
-                    if (Creature* pTemp = (m_creature->GetMap()->GetCreature( m_pInstance->GetData64(DATA_CHAMPION_3))))
+                    uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+                    if (Creature* pTemp =  m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                         if (pTemp->isAlive())
                             DoCast(pTemp, SPELL_EARTH_SHIELD);
                         else
@@ -541,13 +587,18 @@ struct MANGOS_DLL_DECL mob_toc5_hunterAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_1))))
+        uint32 uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_2))))
+
+        uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_3))))
+
+        uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
 
@@ -565,11 +616,16 @@ struct MANGOS_DLL_DECL mob_toc5_hunterAI : public ScriptedAI
         if (m_pInstance->GetData(DATA_CHAMPIONS_COUNT) < 1)
         {
             m_pInstance->SetData(TYPE_GRAND_CHAMPIONS, DONE);
-            if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_1))))
+            uint32 uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                 pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_2))))
+
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                 pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_3))))
+
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
                 pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
         }
     }
@@ -688,13 +744,18 @@ struct MANGOS_DLL_DECL mob_toc5_rogueAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_1))))
+        uint32 uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_2))))
+
+        uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
-        if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_3))))
+
+        uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
             if (pTemp->isAlive())
                 pTemp->SetInCombatWithZone();
 
@@ -711,14 +772,18 @@ struct MANGOS_DLL_DECL mob_toc5_rogueAI : public ScriptedAI
 
         if (m_pInstance->GetData(DATA_CHAMPIONS_COUNT) < 1)
         {
-              m_pInstance->SetData(TYPE_GRAND_CHAMPIONS, DONE);
+            m_pInstance->SetData(TYPE_GRAND_CHAMPIONS, DONE);
+            uint32 uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_1);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
+                pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
 
-              if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_1))))
-                  pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-              if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_2))))
-                  pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-              if (Creature* pTemp = (m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_CHAMPION_3))))
-                  pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_2);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
+                pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+            uiOtherId = m_pInstance->GetData(DATA_CHAMPIONID_3);
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiOtherId))
+                pTemp->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
         }
     }
 
@@ -727,7 +792,7 @@ struct MANGOS_DLL_DECL mob_toc5_rogueAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-	if (m_uiEviscerateTimer < uiDiff)
+        if (m_uiEviscerateTimer < uiDiff)
         {
             DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_EVISCERATE : SPELL_EVISCERATE_H);
             m_uiEviscerateTimer = m_bIsRegularMode ? 15*IN_MILLISECONDS : 10*IN_MILLISECONDS;
@@ -735,7 +800,7 @@ struct MANGOS_DLL_DECL mob_toc5_rogueAI : public ScriptedAI
         else
             m_uiEviscerateTimer -= uiDiff;  
 
-	if (m_uiFanOfKnivesTimer < uiDiff)
+        if (m_uiFanOfKnivesTimer < uiDiff)
         {
             DoCast(m_creature->getVictim(), SPELL_FAN_OF_KNIVES);
             m_uiFanOfKnivesTimer = m_bIsRegularMode ? 12*IN_MILLISECONDS : 7*IN_MILLISECONDS;
@@ -743,7 +808,7 @@ struct MANGOS_DLL_DECL mob_toc5_rogueAI : public ScriptedAI
         else
             m_uiFanOfKnivesTimer -= uiDiff;
 
-	if (m_uiPoisonTimer < uiDiff)
+        if (m_uiPoisonTimer < uiDiff)
         {
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
                 DoCast(m_creature, SPELL_POISON_BOTTLE);

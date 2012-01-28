@@ -80,7 +80,7 @@ struct MANGOS_DLL_DECL mob_toc5_risen_ghoulAI : public ScriptedAI
 
         if (m_uiAttackTimer < uiDiff)
         {
-            if (Creature* pTemp = (m_creature->GetMap()->GetCreature( m_pInstance->GetData64(DATA_BLACK_KNIGHT))))
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_BLACK_KNIGHT))
                 if (pTemp->isAlive())
                     if ((pTemp->GetHealth()*100 / pTemp->GetMaxHealth()) < 25)
                         DoCast(m_creature, m_bIsRegularMode ? SPELL_EXPLODE : SPELL_EXPLODE_H);
@@ -103,7 +103,7 @@ struct MANGOS_DLL_DECL mob_toc5_risen_ghoulAI : public ScriptedAI
 
         if ((m_creature->GetHealth()*100 / m_creature->GetMaxHealth()) < 25)
             DoCast(m_creature, m_bIsRegularMode ? SPELL_EXPLODE : SPELL_EXPLODE_H);
-		
+
         DoMeleeAttackIfReady();
     }
 };
@@ -229,7 +229,7 @@ struct MANGOS_DLL_DECL boss_black_knightAI : public ScriptedAI
 
                 if (m_uiSummonGhoulTimer < uiDiff && !m_bGhoul)
                 {               
-                    if (m_pInstance->GetData(DATA_TOC5_ANNOUNCER) == m_pInstance->GetData(DATA_JAEREN))
+                    if (m_pInstance->GetData(DATA_TOC5_ANNOUNCER) == NPC_JAEREN)
                         m_creature->SummonCreature(NPC_RISEN_JAEREN, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000);
                     else
                         m_creature->SummonCreature(NPC_RISEN_ARELAS, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000);
