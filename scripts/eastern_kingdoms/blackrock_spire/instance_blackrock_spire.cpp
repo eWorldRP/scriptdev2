@@ -110,6 +110,17 @@ void instance_blackrock_spire::OnCreatureCreate(Creature* pCreature)
     }
 }
 
+void instance_blackrock_spire::OnCreatureDeath(Creature* pCreature)
+{
+    switch(pCreature->GetEntry())
+    {
+        case NPC_BLACKHAND_SUMMONER:
+        case NPC_BLACKHAND_VETERAN:
+            SetDataGuid(TYPE_ROOM_EVENT, pCreature->GetObjectGuid());
+            break;
+    }
+}
+
 void instance_blackrock_spire::SetData(uint32 uiType, uint32 uiData)
 {
     switch(uiType)
@@ -161,7 +172,7 @@ void instance_blackrock_spire::SetData(uint32 uiType, uint32 uiData)
     }
 }
 
-void instance_blackrock_spire::SetData64(uint32 uiType, uint64 uiData)
+void instance_blackrock_spire::SetDataGuid(uint32 uiType, ObjectGuid uiData)
 {
     if (uiType == TYPE_ROOM_EVENT && GetData(TYPE_ROOM_EVENT) == IN_PROGRESS)
     {
@@ -170,7 +181,7 @@ void instance_blackrock_spire::SetData64(uint32 uiType, uint64 uiData)
         {
             if (m_aRoomRuneGuid[i])                       // This check is used, to ensure which runes still need processing
             {
-                m_alRoomEventMobGUIDSorted[i].remove(ObjectGuid(uiData));
+                m_alRoomEventMobGUIDSorted[i].remove(uiData);
                 if (m_alRoomEventMobGUIDSorted[i].empty())
                 {
                     DoUseDoorOrButton(m_aRoomRuneGuid[i]);

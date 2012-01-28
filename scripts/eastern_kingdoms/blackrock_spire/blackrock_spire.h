@@ -53,10 +53,11 @@ class MANGOS_DLL_DECL instance_blackrock_spire : public ScriptedInstance
 
         void OnObjectCreate(GameObject* pGo);
         void OnCreatureCreate(Creature* pCreature);
+        void OnCreatureDeath(Creature* pCreature);
 
         void SetData(uint32 uiType, uint32 uiData);
-        void SetData64(uint32 uiType, uint64 uiData);
         uint32 GetData(uint32 uiType);
+        void SetDataGuid(uint32 uiType, ObjectGuid uiData);
 
         const char* Save() { return m_strInstData.c_str(); }
         void Load(const char* chrIn);
