@@ -157,32 +157,12 @@ void instance_uldaman::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-void instance_uldaman::SetData64(uint32 uiData, uint64 uiGuid)
-{
-    switch(uiData)
-    {
-        case DATA_EVENT_STARTER:
-            m_playerGuid = ObjectGuid(uiGuid);
-        break;
-    }
-}
-
 uint32 instance_uldaman::GetData(uint32 uiType)
 {
     switch(uiType)
     {
         case TYPE_ARCHAEDAS:
             return m_auiEncounter[1];
-    }
-    return 0;
-}
-
-uint64 instance_uldaman::GetData64(uint32 uiData)
-{
-    switch(uiData)
-    {
-        case DATA_EVENT_STARTER:
-            return m_playerGuid.GetRawValue();
     }
     return 0;
 }

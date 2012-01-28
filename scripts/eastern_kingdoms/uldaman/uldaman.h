@@ -47,9 +47,7 @@ class MANGOS_DLL_DECL instance_uldaman : public ScriptedInstance
         void Update(uint32 uiDiff);
 
         void SetData(uint32 uiType, uint32 uiData);
-        void SetData64(uint32 uiData, uint64 uiGuid);
         uint32 GetData(uint32 uiType);
-        uint64 GetData64(uint32 uiData);
 
         void StartEvent(uint32 uiEventId, Player* pPlayer);
 
