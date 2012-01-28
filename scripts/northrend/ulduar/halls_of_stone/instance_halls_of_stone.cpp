@@ -43,66 +43,42 @@ struct MANGOS_DLL_DECL instance_halls_of_stone : public ScriptedInstance
     bool Regular;
     std::string strSaveData;
 
-    uint64 m_uiKrystallusGUID;
-    uint64 m_uiGriefGUID;
-    uint64 m_uiBrannGUID;
-    uint64 m_uiSjonnirGUID;
-
-    uint64 m_uiKaddrakGUID;
-    uint64 m_uiAbedneumGUID;
-    uint64 m_uiMarnakGUID;
-
-    uint64 m_uiGriefDoorGUID;
-    uint64 m_uiBrannDoorGUID;
-    uint64 m_uiSjonnirDoorGUID;
-
-    uint64 m_uiGoTribunalConsoleGUID;
-    uint64 m_uiGoTribunalChestGUID;
-    uint64 m_uiGoTribunalSkyFloorGUID;
-    uint64 m_uiGoKaddrakGUID;
-    uint64 m_uiGoAbedneumGUID;
-    uint64 m_uiGoMarnakGUID;
-    uint64 m_uiTribunalControllerGUID;
-
-    void OpenDoor(uint64 guid)
+    void OpenDoor(uint32 entry)
     {
-        if(!guid) return;
-        GameObject* pGo = instance->GetGameObject(guid);
-        if(pGo) pGo->SetGoState(GO_STATE_ACTIVE);
+        if (entry)
+        {
+            ObjectGuid guid = GetSingleGameObjectFromStorage(entry)->GetObjectGuid();
+
+            if(!guid) 
+                return;
+
+            GameObject* pGo = instance->GetGameObject(guid);
+
+            if(pGo)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+        }
     }
 
-    void CloseDoor(uint64 guid)
+    void CloseDoor(uint32 entry)
     {
-        if(!guid) return;
-        GameObject* pGo = instance->GetGameObject(guid);
-        if(pGo) pGo->SetGoState(GO_STATE_READY);
+        if (entry)
+        {
+            ObjectGuid guid = GetSingleGameObjectFromStorage(entry)->GetObjectGuid();
+
+            if(!guid)
+                return;
+
+            GameObject* pGo = instance->GetGameObject(guid);
+
+            if(pGo)
+                pGo->SetGoState(GO_STATE_READY);
+        }
     }
 
     void Initialize()
     {
         for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                    m_auiEncounter[i]=NOT_STARTED;
-
-        m_uiKrystallusGUID       = 0;
-        m_uiGriefGUID            = 0;
-        m_uiBrannGUID            = 0;
-        m_uiSjonnirGUID          = 0;
-
-        m_uiKaddrakGUID          = 0;
-        m_uiAbedneumGUID         = 0;
-        m_uiMarnakGUID           = 0;
-
-        m_uiGriefDoorGUID        = 0;
-        m_uiBrannDoorGUID        = 0;
-        m_uiSjonnirDoorGUID      = 0;
-
-        m_uiGoTribunalConsoleGUID  = 0;
-        m_uiGoTribunalChestGUID    = 0;
-        m_uiGoTribunalSkyFloorGUID = 0;
-        m_uiGoKaddrakGUID          = 0;
-        m_uiGoAbedneumGUID         = 0;
-        m_uiGoMarnakGUID           = 0;
-        m_uiTribunalControllerGUID = 0;
     }
 
     void OnCreatureCreate(Creature* pCreature)
@@ -110,28 +86,14 @@ struct MANGOS_DLL_DECL instance_halls_of_stone : public ScriptedInstance
         switch(pCreature->GetEntry())
         {
             case NPC_KRYSTALLUS:
-                m_uiKrystallusGUID = pCreature->GetObjectGuid().GetCounter();
-                break;
             case NPC_GRIEF:
-                m_uiGriefGUID = pCreature->GetObjectGuid().GetCounter();
-                break;
             case NPC_BRANN:
-                m_uiBrannGUID = pCreature->GetObjectGuid().GetCounter();
-                break;
             case NPC_SJONNIR:
-                m_uiSjonnirGUID = pCreature->GetObjectGuid().GetCounter();
-                break;
             case NPC_KADDRAK:
-                m_uiKaddrakGUID = pCreature->GetObjectGuid().GetCounter();
-                break;
             case NPC_ABEDNEUM:
-                m_uiAbedneumGUID = pCreature->GetObjectGuid().GetCounter();
-                break;
             case NPC_MARNAK:
-                m_uiMarnakGUID = pCreature->GetObjectGuid().GetCounter();
-                break;
             case NPC_TRIBUNAL_OF_THE_AGES:
-                m_uiTribunalControllerGUID = pCreature->GetObjectGuid().GetCounter();
+                m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
         }
     }
@@ -141,58 +103,45 @@ struct MANGOS_DLL_DECL instance_halls_of_stone : public ScriptedInstance
         switch(pGo->GetEntry())
         {
             case GO_GRIEF_DOOR:
-                m_uiGriefDoorGUID = pGo->GetObjectGuid().GetCounter();
                 if (m_auiEncounter[0] != DONE)
-                    CloseDoor(m_uiGriefDoorGUID);
-                    else OpenDoor(m_uiGriefDoorGUID);
+                    CloseDoor(GO_GRIEF_DOOR);
+                else OpenDoor(GO_GRIEF_DOOR);
                 break;
             case GO_BRANN_DOOR:
-                m_uiBrannDoorGUID = pGo->GetObjectGuid().GetCounter();
                 if (m_auiEncounter[1] != DONE)
-                    CloseDoor(m_uiBrannDoorGUID);
-                    else OpenDoor(m_uiBrannDoorGUID);
+                    CloseDoor(GO_BRANN_DOOR);
+                else OpenDoor(GO_BRANN_DOOR);
                 break;
             case GO_SJONNIR_DOOR:
-                m_uiSjonnirDoorGUID = pGo->GetObjectGuid().GetCounter();
                 if (m_auiEncounter[2] != DONE)
-                    CloseDoor(m_uiSjonnirDoorGUID);
-                    else OpenDoor(m_uiSjonnirDoorGUID);
+                    CloseDoor(GO_SJONNIR_DOOR);
+                else OpenDoor(GO_SJONNIR_DOOR);
                 break;
             case GO_TRIBUNAL_CONSOLE:
-                m_uiGoTribunalConsoleGUID = pGo->GetObjectGuid().GetCounter();
-                break;
             case GO_TRIBUNAL_CHEST:
-                if (Regular) m_uiGoTribunalChestGUID = pGo->GetObjectGuid().GetCounter();
-                break;
             case GO_TRIBUNAL_CHEST_H:
-                if (!Regular) m_uiGoTribunalChestGUID = pGo->GetObjectGuid().GetCounter();
-                break;
             case GO_TRIBUNAL_SKY_FLOOR:
-                m_uiGoTribunalSkyFloorGUID = pGo->GetObjectGuid().GetCounter();
-                break;
             case GO_KADDRAK:
-                m_uiGoKaddrakGUID = pGo->GetObjectGuid().GetCounter();
-                break;
             case GO_ABEDNEUM:
-                m_uiGoAbedneumGUID = pGo->GetObjectGuid().GetCounter();
-                break;
             case GO_MARNAK:
-                m_uiGoMarnakGUID = pGo->GetObjectGuid().GetCounter();
                 break;
         }
+        m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
     }
 
     void OnPlayerEnter(Unit* pPlayer)
     {
         if (m_auiEncounter[0] != DONE)
-            CloseDoor(m_uiGriefDoorGUID);
-            else OpenDoor(m_uiGriefDoorGUID);
+            CloseDoor(GO_GRIEF_DOOR);
+        else OpenDoor(GO_GRIEF_DOOR);
+
         if (m_auiEncounter[1] != DONE)
-            CloseDoor(m_uiBrannDoorGUID);
-            else OpenDoor(m_uiBrannDoorGUID);
+            CloseDoor(GO_BRANN_DOOR);
+        else OpenDoor(GO_BRANN_DOOR);
+
         if (m_auiEncounter[2] != DONE)
-            CloseDoor(m_uiSjonnirDoorGUID);
-            else OpenDoor(m_uiSjonnirDoorGUID);
+            CloseDoor(GO_SJONNIR_DOOR);
+        else OpenDoor(GO_SJONNIR_DOOR);
     }
 
     void SetData(uint32 uiType, uint32 uiData)
@@ -201,19 +150,20 @@ struct MANGOS_DLL_DECL instance_halls_of_stone : public ScriptedInstance
         {
             case TYPE_KRYSTALLUS:
                 if (uiData == DONE)
-                OpenDoor(m_uiGriefDoorGUID);
+                OpenDoor(GO_GRIEF_DOOR);
                 m_auiEncounter[0] = uiData;
                 break;
             case TYPE_GRIEF:
                 if (uiData == DONE)
-                OpenDoor(m_uiBrannDoorGUID);
+                OpenDoor(GO_BRANN_DOOR);
                 m_auiEncounter[1] = uiData;
                 break;
             case TYPE_BRANN:
                 if (uiData == DONE)
                 {
-                    OpenDoor(m_uiSjonnirDoorGUID);
-                    DoRespawnGameObject(m_uiGoTribunalChestGUID);
+                    OpenDoor(GO_SJONNIR_DOOR);
+                    ObjectGuid chestGuid = GetSingleGameObjectFromStorage(Regular ? GO_TRIBUNAL_CHEST : GO_TRIBUNAL_CHEST_H)->GetObjectGuid();
+                    DoRespawnGameObject(chestGuid);
                 }
                 m_auiEncounter[2] = uiData;
                 break;
@@ -250,40 +200,6 @@ struct MANGOS_DLL_DECL instance_halls_of_stone : public ScriptedInstance
                 return m_auiEncounter[2];
             case TYPE_SJONNIR:
                 return m_auiEncounter[3];
-        }
-        return 0;
-    }
-
-    uint64 GetData64(uint32 uiData)
-    {
-        switch(uiData)
-        {
-            case DATA_KRYSTALLUS:
-                return m_uiKrystallusGUID;
-            case DATA_GRIEF:
-                return m_uiGriefGUID;
-            case DATA_BRANN:
-                return m_uiBrannGUID;
-            case DATA_SJONNIR:
-                return m_uiSjonnirGUID;
-            case DATA_KADDRAK:
-                return m_uiKaddrakGUID;
-            case DATA_ABEDNEUM:
-                return m_uiAbedneumGUID;
-            case DATA_MARNAK:
-                return m_uiMarnakGUID;
-            case DATA_GO_TRIBUNAL_CONSOLE:
-                return m_uiGoTribunalConsoleGUID;
-            case DATA_GO_SKY_FLOOR:
-                return m_uiGoTribunalSkyFloorGUID;
-            case DATA_GO_KADDRAK:
-                return m_uiGoKaddrakGUID;
-            case DATA_GO_ABEDNEUM:
-                return m_uiGoAbedneumGUID;
-            case DATA_GO_MARNAK:
-                return m_uiGoMarnakGUID;
-            case NPC_TRIBUNAL_OF_THE_AGES:
-                return m_uiTribunalControllerGUID;
         }
         return 0;
     }

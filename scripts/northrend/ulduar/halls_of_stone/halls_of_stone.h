@@ -10,21 +10,6 @@ enum
 {
     MAX_ENCOUNTER           = 4,
 
-    DATA_KRYSTALLUS         = 1,
-    DATA_GRIEF              = 2,
-    DATA_BRANN              = 3,
-    DATA_SJONNIR            = 4,
-
-    DATA_KADDRAK            = 5,
-    DATA_ABEDNEUM           = 6,
-    DATA_MARNAK             = 7,
-
-    DATA_GO_TRIBUNAL_CONSOLE = 8,
-    DATA_GO_SKY_FLOOR       = 9,
-    DATA_GO_KADDRAK         = 10,
-    DATA_GO_ABEDNEUM        = 11,
-    DATA_GO_MARNAK          = 12,
-
     TYPE_KRYSTALLUS         = 20,
     TYPE_GRIEF              = 21,
     TYPE_BRANN              = 22,
