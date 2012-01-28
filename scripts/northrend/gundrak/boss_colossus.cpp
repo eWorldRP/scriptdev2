@@ -94,8 +94,10 @@ struct MANGOS_DLL_DECL boss_colossusAI : public ScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
         if(m_pInstance)
-            if(Creature* pElemental = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_ELEMENTAL)))
+        {
+            if(Creature* pElemental = m_pInstance->GetSingleCreatureFromStorage(NPC_ELEMENTAL))
                 pElemental->ForcedDespawn();
+        }
     }
 
     void Aggro()
@@ -279,7 +281,7 @@ struct MANGOS_DLL_DECL boss_elementalAI : public ScriptedAI
     {
         if (m_pInstance)
         {
-            if (Creature* pColossus = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_COLOSSUS)))
+            if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
             {
                 ((boss_colossusAI*)pColossus->AI())->m_bElementalDead = true;
                 pColossus->DealDamage(pColossus, pColossus->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -291,7 +293,7 @@ struct MANGOS_DLL_DECL boss_elementalAI : public ScriptedAI
     {
         if (pSpell->Id == SPELL_MERGE && pTarget->GetEntry() == NPC_COLOSSUS)
         {
-            if (Creature* pColossus = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_COLOSSUS)))
+            if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
             {
                 ((boss_colossusAI*)pColossus->AI())->Activate();
                 m_creature->ForcedDespawn();
@@ -312,7 +314,7 @@ struct MANGOS_DLL_DECL boss_elementalAI : public ScriptedAI
 
         if (!m_bMerge && m_creature->GetHealthPercent() < 50.0f && m_pInstance)
         {
-            if (Creature* pColossus = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_COLOSSUS)))
+            if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
             {
                 if (pColossus->GetHealthPercent() > 20.0f)
                 {
@@ -384,7 +386,7 @@ struct MANGOS_DLL_DECL npc_living_mojoAI : public ScriptedAI
         m_uiMojoWaveTimer = 2000;
         m_uiMojoPuddleTimer = 7000;
 
-        if (Creature* pColossus = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_COLOSSUS)))
+        if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
         {
             if (m_creature->GetDistance2d(pColossus) < 15.0f)
                 SetCombatMovement(false);
@@ -395,7 +397,7 @@ struct MANGOS_DLL_DECL npc_living_mojoAI : public ScriptedAI
     {
         if (m_pInstance)
         {
-            if (Creature* pColossus = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_COLOSSUS)))
+            if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
             {
                 if (m_creature->GetDistance2d(pColossus) < 15.0f)
                     m_pInstance->SetData(TYPE_COLOSSUS, IN_PROGRESS);
