@@ -14,8 +14,6 @@ enum
     TYPE_DEVOURER_OF_SOULS      = 2,
     TYPE_ACHIEV_PHANTOM_BLAST   = 3,
 
-    DATA_SOULFRAGMENT_REMOVE    = 4,                        // on Death and on Use
-
     NPC_BRONJAHM                = 36497,
     NPC_DEVOURER_OF_SOULS       = 36502,
     NPC_CORRUPTED_SOUL_FRAGMENT = 36535,
@@ -99,10 +97,10 @@ class MANGOS_DLL_DECL instance_forge_of_souls : public ScriptedInstance
         void Initialize();
 
         void OnCreatureCreate(Creature* pCreature);
+        void OnCreatureDeath(Creature* pCreature);
 
         void SetData(uint32 uiType, uint32 uiData);
         uint32 GetData(uint32 uiType);
-        void SetData64(uint32 uiType, uint64 uiData);
 
         void OnPlayerEnter(Player* pPlayer);
         void ProcessEventNpcs(Player* pPlayer, bool bChanged);

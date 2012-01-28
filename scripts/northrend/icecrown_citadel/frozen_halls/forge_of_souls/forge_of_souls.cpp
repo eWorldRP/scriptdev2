@@ -27,25 +27,25 @@ EndScriptData */
 
 enum
 {
-  SAY_JAINA_FS01             = -1632040,
-  SAY_JAINA_FS02             = -1632041,
-  SAY_JAINA_FS03             = -1632042,
-  SAY_JAINA_FS04             = -1632043,
-  SAY_JAINA_FS05             = -1632044,
-  SAY_JAINA_FS06             = -1632045,
-  SAY_JAINA_FS07             = -1632046,
-  SAY_JAINA_FS08             = -1632047,
-  SAY_JAINA_FS09_EXTRO       = -1632029,
+    SAY_JAINA_FS01             = -1632040,
+    SAY_JAINA_FS02             = -1632041,
+    SAY_JAINA_FS03             = -1632042,
+    SAY_JAINA_FS04             = -1632043,
+    SAY_JAINA_FS05             = -1632044,
+    SAY_JAINA_FS06             = -1632045,
+    SAY_JAINA_FS07             = -1632046,
+    SAY_JAINA_FS08             = -1632047,
+    SAY_JAINA_FS09_EXTRO       = -1632029,
 
-  SAY_SYLVANA_FS01           = -1632050,
-  SAY_SYLVANA_FS02           = -1632051,
-  SAY_SYLVANA_FS03           = -1632052,
-  SAY_SYLVANA_FS04           = -1632053,
-  SAY_SYLVANA_FS05           = -1632054,
-  SAY_SYLVANA_FS06           = -1632055,
-  SAY_SYLVANA_FS07_EXTRO     = -1632030,
+    SAY_SYLVANA_FS01           = -1632050,
+    SAY_SYLVANA_FS02           = -1632051,
+    SAY_SYLVANA_FS03           = -1632052,
+    SAY_SYLVANA_FS04           = -1632053,
+    SAY_SYLVANA_FS05           = -1632054,
+    SAY_SYLVANA_FS06           = -1632055,
+    SAY_SYLVANA_FS07_EXTRO     = -1632030,
 
-  GOSSIP_SPEECHINTRO         = 13525,
+    GOSSIP_SPEECHINTRO         = 13525,
 };
 
 struct MANGOS_DLL_DECL npc_jaina_and_sylvana_FSintroAI : public ScriptedAI
@@ -57,159 +57,182 @@ struct MANGOS_DLL_DECL npc_jaina_and_sylvana_FSintroAI : public ScriptedAI
         Reset();
    }
 
-ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_pInstance;
 
-uint32 StepTimer;
-uint32 Step;
-bool StartEvent;
+    uint32 m_uiStepTimer;
+    uint32 m_uiStep;
+    bool m_bStartEvent;
 
     void Reset()
     {
-            if(m_pInstance)
-               if(m_pInstance->GetData(TYPE_DEVOURER_OF_SOULS) == DONE)
-                   m_creature->SetVisibility(VISIBILITY_OFF);
+        if(m_pInstance)
+        {
+            if(m_pInstance->GetData(TYPE_DEVOURER_OF_SOULS) == DONE)
+                m_creature->SetVisibility(VISIBILITY_OFF);
+
             m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            Step = 0;
-            StepTimer = 100;
+            m_uiStep = 0;
+            m_uiStepTimer = 100;
+
             if(m_pInstance->GetData(TYPE_INTRO) == DONE)
             {
               m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-              Step = 8;
+              m_uiStep = 8;
             }
+        }
     }
 
-   void UpdateAI(const uint32 diff)
+   void UpdateAI(const uint32 uiDiff)
     {
          DoMeleeAttackIfReady();
 
-         if(!m_pInstance) return;
+         if(!m_pInstance)
+             return;
 
-         if(StartEvent != true) return;
+         if(m_bStartEvent != true)
+             return;
 
-         if(StepTimer < diff)
-           {
-             switch(Step)
-               {
+         if(m_uiStepTimer < uiDiff)
+         {
+             switch(m_uiStep)
+             {
                 case 0:
                     m_pInstance->SetData(TYPE_INTRO, DONE);
                     m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                     m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
                     if(m_creature->GetEntry() == NPC_JAINA_BEGIN )
-                      {
+                    {
                        DoScriptText(SAY_JAINA_FS01, m_creature);
-                       StepTimer = 7000;
-                      }
+                       m_uiStepTimer = 7000;
+                    }
+
                     if(m_creature->GetEntry() == NPC_SILVANA_BEGIN)
-                       StepTimer = 100;
-                    ++Step;
+                       m_uiStepTimer = 100;
+
+                    ++m_uiStep;
                     break;
                 case 1:
                     if(m_creature->GetEntry() == NPC_JAINA_BEGIN )
-                      {
+                    {
                        DoScriptText(SAY_JAINA_FS02, m_creature);
-                       StepTimer = 9000;
-                      }
+                       m_uiStepTimer = 9000;
+                    }
+
                     if(m_creature->GetEntry() == NPC_SILVANA_BEGIN)
-                      {
+                    {
                        DoScriptText(SAY_SYLVANA_FS01, m_creature);
-                       StepTimer = 12000;
-                      }
-                    ++Step;
+                       m_uiStepTimer = 12000;
+                    }
+
+                    ++m_uiStep;
                     break;
                 case 2:
                     if(m_creature->GetEntry() == NPC_JAINA_BEGIN )
-                      {
+                    {
                        DoScriptText(SAY_JAINA_FS03, m_creature);
-                       StepTimer = 8000;
-                      }
+                       m_uiStepTimer = 8000;
+                    }
                     if(m_creature->GetEntry() == NPC_SILVANA_BEGIN)
-                      {
+                    {
                        DoScriptText(SAY_SYLVANA_FS02, m_creature);
-                       StepTimer = 11000;
-                      }
-                    ++Step;
+                       m_uiStepTimer = 11000;
+                    }
+
+                    ++m_uiStep;
                     break;
                 case 3:
                     if(m_creature->GetEntry() == NPC_JAINA_BEGIN )
-                      {
+                    {
                        DoScriptText(SAY_JAINA_FS04, m_creature);
-                       StepTimer = 10000;
-                      }
+                       m_uiStepTimer = 10000;
+                    }
+
                     if(m_creature->GetEntry() == NPC_SILVANA_BEGIN)
-                      {
+                    {
                        DoScriptText(SAY_SYLVANA_FS03, m_creature);
-                       StepTimer = 11000;
-                      }
-                    ++Step;
+                       m_uiStepTimer = 11000;
+                    }
+
+                    ++m_uiStep;
                     break;
                 case 4:
                     if(m_creature->GetEntry() == NPC_JAINA_BEGIN )
-                      {
+                    {
                        DoScriptText(SAY_JAINA_FS05, m_creature);
-                       StepTimer = 8000;
-                      }
+                       m_uiStepTimer = 8000;
+                    }
+
                     if(m_creature->GetEntry() == NPC_SILVANA_BEGIN)
-                      {
+                    {
                        DoScriptText(SAY_SYLVANA_FS04, m_creature);
-                       StepTimer = 12000;
-                      }
-                    ++Step;
+                       m_uiStepTimer = 12000;
+                    }
+
+                    ++m_uiStep;
                     break;
                 case 5:
                     if(m_creature->GetEntry() == NPC_JAINA_BEGIN )
-                      {
+                    {
                        DoScriptText(SAY_JAINA_FS06, m_creature);
-                       StepTimer = 12000;
-                      }
+                       m_uiStepTimer = 12000;
+                    }
+
                     if(m_creature->GetEntry() == NPC_SILVANA_BEGIN)
-                      {
+                    {
                        DoScriptText(SAY_SYLVANA_FS05, m_creature);
-                       StepTimer = 7000;
-                      }
-                    ++Step;
+                       m_uiStepTimer = 7000;
+                    }
+
+                    ++m_uiStep;
                     break;
                 case 6:
                     if(m_creature->GetEntry() == NPC_JAINA_BEGIN )
-                      {
+                    {
                        DoScriptText(SAY_JAINA_FS07, m_creature);
-                       StepTimer = 7000;
-                      }
+                       m_uiStepTimer = 7000;
+                    }
+
                     if(m_creature->GetEntry() == NPC_SILVANA_BEGIN)
-                      {
+                    {
                        DoScriptText(SAY_SYLVANA_FS06, m_creature);
-                       StepTimer = 4000;
-                      }
-                    ++Step;
+                       m_uiStepTimer = 4000;
+                    }
+
+                    ++m_uiStep;
                     break;
                 case 7:
                     if(m_creature->GetEntry() == NPC_JAINA_BEGIN )
-                      {
+                    {
                        DoScriptText(SAY_JAINA_FS08, m_creature);
-                       StepTimer = 5000;
-                      }
-                    ++Step;
+                       m_uiStepTimer = 5000;
+                    }
+
+                    ++m_uiStep;
                     break;
-               }
-            } else StepTimer -= diff;
+            }
+        }
+        else m_uiStepTimer -= uiDiff;
     }
 };
 
 bool GossipHello_npc_jaina_and_sylvana_FSintro(Player* pPlayer, Creature* pCreature)
 {
-           if (pCreature->isQuestGiver())
-             pPlayer->PrepareQuestMenu( pCreature->GetObjectGuid());
-            switch(pCreature->GetEntry())
-              {
-                case 37597:
-                  if(((npc_jaina_and_sylvana_FSintroAI*)pCreature->AI())->StartEvent != true)
-                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "What would you have of me, My Lady?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-                  break;
-                case 37596:
-                  if(((npc_jaina_and_sylvana_FSintroAI*)pCreature->AI())->StartEvent != true)
-                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "What would you have of me, Banshee Queen?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-                  break;
-               }
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+
+    switch(pCreature->GetEntry())
+    {
+        case 37597:
+            if(((npc_jaina_and_sylvana_FSintroAI*)pCreature->AI())->m_bStartEvent != true)
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "What would you have of me, My Lady?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+            break;
+        case 37596:
+            if(((npc_jaina_and_sylvana_FSintroAI*)pCreature->AI())->m_bStartEvent != true)
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "What would you have of me, Banshee Queen?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+            break;
+    }
 
     pPlayer->PlayerTalkClass->SendGossipMenu(907,pCreature->GetObjectGuid()); //907
     return true;
@@ -218,7 +241,7 @@ bool GossipHello_npc_jaina_and_sylvana_FSintro(Player* pPlayer, Creature* pCreat
 bool GossipSelect_npc_jaina_and_sylvana_FSintro(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
       pPlayer->CLOSE_GOSSIP_MENU();
-      ((npc_jaina_and_sylvana_FSintroAI*)pCreature->AI())->StartEvent = true;
+      ((npc_jaina_and_sylvana_FSintroAI*)pCreature->AI())->m_bStartEvent = true;
 
     return true;
 }
@@ -232,76 +255,76 @@ struct MANGOS_DLL_DECL npc_jaina_and_sylvana_FSextroAI : public ScriptedAI
         Reset();
    }
 
-ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_pInstance;
 
-uint32 StepTimer;
-uint32 Step;
-uint64 m_uiLiderGUID;
-uint32 uiSummon_counter;
+    uint32 m_uiStepTimer;
+    uint32 m_uiStep;
+    uint32 uiSummon_counter;
 
     void Reset()
     {
-            if (m_pInstance)
-               if (m_pInstance->GetData(TYPE_DEVOURER_OF_SOULS) != DONE)
-                  {
-                   m_pInstance->SetData(TYPE_DEVOURER_OF_SOULS, NOT_STARTED);
-                   Step = 0;
-                   m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                   m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                  } else Step = 10;
-            StepTimer = 100;
-            m_creature->SetVisibility(VISIBILITY_OFF);
+        if (m_pInstance)
+        {
+            if (m_pInstance->GetData(TYPE_DEVOURER_OF_SOULS) != DONE)
+            {
+                m_pInstance->SetData(TYPE_DEVOURER_OF_SOULS, NOT_STARTED);
+                m_uiStep = 0;
+                m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            }
+            else m_uiStep = 10;
+        }
+        m_uiStepTimer = 100;
+        m_creature->SetVisibility(VISIBILITY_OFF);
     }
 
-   void UpdateAI(const uint32 diff)
+   void UpdateAI(const uint32 uiDiff)
     {
         DoMeleeAttackIfReady();
 
-        if (!m_pInstance) return;
+        if (!m_pInstance)
+            return;
 
         if (m_pInstance->GetData(TYPE_DEVOURER_OF_SOULS) == DONE)
         {
-
-         if(StepTimer < diff)
-           {
-             switch(Step)
-               {
-                case 0:
-                  m_creature->SetVisibility(VISIBILITY_ON);
-                  m_creature->SetWalk(false);
-                  m_creature->GetMotionMaster()->MovePoint(0, 5653.337f, 2496.407f, 708.829f);
-                  uiSummon_counter = 0;
-                  StepTimer = 400;
-                  ++Step;
-                  break;
-                case 1:
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                  if(m_creature->GetEntry() == NPC_JAINA_END)
-                  {
-                    DoScriptText(SAY_JAINA_FS09_EXTRO, m_creature);
-                    StepTimer = 6000;
-                  }
-                  if(m_creature->GetEntry() == NPC_SILVANA_END)
-                  {
-                    DoScriptText(SAY_SYLVANA_FS07_EXTRO, m_creature);
-                    StepTimer = 3000;
-                  }
-                  ++Step;
-                  break;
-                case 5:
-                  m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                  m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                  ++Step;
-                  break;
-               }
-            } else StepTimer -= diff;
-          }
-        return;
+            if(m_uiStepTimer < uiDiff)
+            {
+                switch(m_uiStep)
+                {
+                    case 0:
+                        m_creature->SetVisibility(VISIBILITY_ON);
+                        m_creature->SetWalk(false);
+                        m_creature->GetMotionMaster()->MovePoint(0, 5653.337f, 2496.407f, 708.829f);
+                        uiSummon_counter = 0;
+                        m_uiStepTimer = 400;
+                        ++m_uiStep;
+                        break;
+                    case 1:
+                    case 2:
+                    case 3:
+                        break;
+                    case 4:
+                        if(m_creature->GetEntry() == NPC_JAINA_END)
+                        {
+                            DoScriptText(SAY_JAINA_FS09_EXTRO, m_creature);
+                            m_uiStepTimer = 6000;
+                        }
+                        if(m_creature->GetEntry() == NPC_SILVANA_END)
+                        {
+                            DoScriptText(SAY_SYLVANA_FS07_EXTRO, m_creature);
+                            m_uiStepTimer = 3000;
+                        }
+                        ++m_uiStep;
+                        break;
+                    case 5:
+                        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        ++m_uiStep;
+                        break;
+                }
+            }
+            else m_uiStepTimer -= uiDiff;
+        }
     }
 };
 

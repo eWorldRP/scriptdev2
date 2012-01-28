@@ -51,6 +51,16 @@ void instance_forge_of_souls::OnCreatureCreate(Creature* pCreature)
     }
 }
 
+void instance_forge_of_souls::OnCreatureDeath(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_CORRUPTED_SOUL_FRAGMENT:
+            m_luiSoulFragmentAliveGUIDs.remove(pCreature->GetObjectGuid());
+            break;
+    }
+}
+
 void instance_forge_of_souls::OnPlayerEnter(Player* pPlayer)
 {
     if (!m_uiTeam)                                          // very first player to enter
@@ -190,12 +200,6 @@ uint32 instance_forge_of_souls::GetData(uint32 uiType)
         default:
             return 0;
     }
-}
-
-void instance_forge_of_souls::SetData64(uint32 uiType, uint64 uiData)
-{
-    if (uiType == DATA_SOULFRAGMENT_REMOVE)
-        m_luiSoulFragmentAliveGUIDs.remove(ObjectGuid(uiData));
 }
 
 InstanceData* GetInstanceData_instance_forge_of_souls(Map* pMap)
