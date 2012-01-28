@@ -189,17 +189,6 @@ uint32 instance_black_temple::GetData(uint32 uiType)
     return 0;
 }
 
-uint64 instance_black_temple::GetData64(uint32 uiData)
-{
-    switch(uiData)
-    {
-        case NPC_AKAMA:              return m_akamaGuid.GetRawValue();
-        case NPC_ILLIDAN_STORMRAGE:  return m_illidanStormrageGuid.GetRawValue();
-        default:
-            return 0;
-    }
-}
-
 void instance_black_temple::Load(const char* chrIn)
 {
     if (!chrIn)
