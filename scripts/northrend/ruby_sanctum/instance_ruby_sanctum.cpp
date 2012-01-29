@@ -46,33 +46,6 @@ struct MANGOS_DLL_DECL instance_ruby_sanctum : public BSWScriptedInstance
     uint32 m_auiOrbNState;
     uint32 m_auiOrbSState;
 
-    uint64 m_uiHalion_pGUID;
-    uint64 m_uiHalion_tGUID;
-    uint64 m_uiHalionControlGUID;
-    uint64 m_uiRagefireGUID;
-    uint64 m_uiZarithrianGUID;
-    uint64 m_uiBaltharusGUID;
-    uint64 m_uiCloneGUID;
-    uint64 m_uiXerestraszaGUID;
-
-    uint64 m_uiOrbNGUID;
-    uint64 m_uiOrbSGUID;
-    uint64 m_uiOrbFocusGUID;
-    uint64 m_uiOrbCarrierGUID;
-
-    //object GUID
-    uint64 m_uiHalionPortal1GUID;
-    uint64 m_uiHalionPortal2GUID;
-    uint64 m_uiHalionPortal3GUID;
-    uint64 m_uiHalionFireWallSGUID;
-    uint64 m_uiHalionFireWallMGUID;
-    uint64 m_uiHalionFireWallLGUID;
-    uint64 m_uiBaltharusTargetGUID;
-
-    uint64 m_uiFireFieldGUID;
-    uint64 m_uiFlameWallsGUID;
-    uint64 m_uiFlameRingGUID;
-
     void Initialize()
     {
         for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
@@ -80,24 +53,6 @@ struct MANGOS_DLL_DECL instance_ruby_sanctum : public BSWScriptedInstance
 
         m_auiEventTimer = 1000;
 
-        m_uiHalion_pGUID = 0;
-        m_uiHalion_tGUID = 0;
-        m_uiRagefireGUID = 0;
-        m_uiZarithrianGUID = 0;
-        m_uiBaltharusGUID = 0;
-        m_uiCloneGUID = 0;
-        m_uiHalionPortal1GUID = 0;
-        m_uiHalionPortal2GUID = 0;
-        m_uiHalionPortal3GUID = 0;
-        m_uiXerestraszaGUID = 0;
-        m_uiHalionFireWallSGUID = 0;
-        m_uiHalionFireWallMGUID = 0;
-        m_uiHalionFireWallLGUID = 0;
-        m_uiBaltharusTargetGUID = 0;
-        m_auiOrbDirection = 0;
-        m_uiOrbNGUID = 0;
-        m_uiOrbSGUID = 0;
-        m_uiOrbFocusGUID = 0;
         m_auiOrbNState = NOT_STARTED;
         m_auiOrbSState = NOT_STARTED;
 
@@ -205,66 +160,89 @@ struct MANGOS_DLL_DECL instance_ruby_sanctum : public BSWScriptedInstance
     {
         switch(uiType)
         {
-            case TYPE_EVENT:        m_auiEncounter[uiType] = uiData; uiData = NOT_STARTED; break;
-            case TYPE_RAGEFIRE:     m_auiEncounter[uiType] = uiData;
-                                        OpenAllDoors();
-                                    break;
-            case TYPE_BALTHARUS:    m_auiEncounter[uiType] = uiData;
-                                        OpenAllDoors();
-                                    break;
-            case TYPE_XERESTRASZA:  m_auiEncounter[uiType] = uiData;
-                                    if (uiData == IN_PROGRESS)
-                                        DoOpenDoor(GO_FIRE_FIELD);
-                                    else if (uiData == NOT_STARTED)
-                                    {
-                                        DoCloseDoor(GO_FIRE_FIELD);
-                                        OpenAllDoors();
-                                    }
-                                    else if (uiData == DONE)
-                                    {
-                                        OpenAllDoors();
-                                        if (m_auiEncounter[TYPE_ZARITHRIAN] == DONE)
-                                        {
-                                            m_auiEncounter[TYPE_EVENT] = 200;
-                                            m_auiEventTimer = 30000;
-                                        };
-                                    }
-                                    break;
-            case TYPE_ZARITHRIAN:   m_auiEncounter[uiType] = uiData;
-                                    if (uiData == DONE)
-                                    {
-                                        DoOpenDoor(GO_FLAME_WALLS);
-                                        m_auiEncounter[TYPE_EVENT] = 200;
-                                        m_auiEventTimer = 30000;
-                                    }
-                                    else if (uiData == IN_PROGRESS)
-                                        DoCloseDoor(GO_FLAME_WALLS);
-                                    else if (uiData == FAIL)
-                                        DoOpenDoor(GO_FLAME_WALLS);
-                                    break;
-            case TYPE_HALION:       m_auiEncounter[uiType] = uiData;
-                                    if (uiData == IN_PROGRESS)
-                                        DoCloseDoor(GO_FLAME_RING);
-                                    else
-                                        DoOpenDoor(GO_FLAME_RING);
-                                    break;
-            case TYPE_HALION_EVENT: m_auiHalionEvent  = uiData; uiData = NOT_STARTED; break;
-            case TYPE_EVENT_TIMER:  m_auiEventTimer = uiData; uiData = NOT_STARTED; break;
+            case TYPE_EVENT:
+                m_auiEncounter[uiType] = uiData;
+                uiData = NOT_STARTED;
+                break;
+            case TYPE_RAGEFIRE:
+                m_auiEncounter[uiType] = uiData;
+                OpenAllDoors();
+                break;
+            case TYPE_BALTHARUS:
+                m_auiEncounter[uiType] = uiData;
+                OpenAllDoors();
+                break;
+            case TYPE_XERESTRASZA:
+                m_auiEncounter[uiType] = uiData;
+                if (uiData == IN_PROGRESS)
+                    DoOpenDoor(GO_FIRE_FIELD);
+                else if (uiData == NOT_STARTED)
+                {
+                    DoCloseDoor(GO_FIRE_FIELD);
+                    OpenAllDoors();
+                }
+                else if (uiData == DONE)
+                {
+                    OpenAllDoors();
+                    if (m_auiEncounter[TYPE_ZARITHRIAN] == DONE)
+                    {
+                        m_auiEncounter[TYPE_EVENT] = 200;
+                        m_auiEventTimer = 30000;
+                    }
+                }
+                break;
+            case TYPE_ZARITHRIAN:
+                m_auiEncounter[uiType] = uiData;
+                if (uiData == DONE)
+                {
+                    DoOpenDoor(GO_FLAME_WALLS);
+                    m_auiEncounter[TYPE_EVENT] = 200;
+                    m_auiEventTimer = 30000;
+                }
+                else if (uiData == IN_PROGRESS)
+                    DoCloseDoor(GO_FLAME_WALLS);
+                else if (uiData == FAIL)
+                    DoOpenDoor(GO_FLAME_WALLS);
+                    break;
+            case TYPE_HALION:
+                m_auiEncounter[uiType] = uiData;
+                if (uiData == IN_PROGRESS)
+                    DoCloseDoor(GO_FLAME_RING);
+                else
+                    DoOpenDoor(GO_FLAME_RING);
+                break;
+            case TYPE_HALION_EVENT:
+                m_auiHalionEvent  = uiData;
+                uiData = NOT_STARTED;
+                break;
+            case TYPE_EVENT_TIMER:
+                m_auiEventTimer = uiData;
+                uiData = NOT_STARTED;
+                break;
 
-            case DATA_ORB_DIRECTION:        m_auiOrbDirection = uiData; uiData = NOT_STARTED; break;
-            case DATA_ORB_N:                m_auiOrbNState = uiData; uiData = NOT_STARTED; break;
-            case DATA_ORB_S:                m_auiOrbSState = uiData; uiData = NOT_STARTED; break;
+            case DATA_ORB_DIRECTION:
+                m_auiOrbDirection = uiData;
+                uiData = NOT_STARTED;
+                break;
+            case DATA_ORB_N:
+                m_auiOrbNState = uiData;
+                uiData = NOT_STARTED;
+                break;
+            case DATA_ORB_S:
+                m_auiOrbSState = uiData;
+                uiData = NOT_STARTED;
+                break;
             case TYPE_COUNTER:
-                                    if (uiData == COUNTER_OFF)
-                                    {
-                                        UpdateWorldState(false,0);
-                                    }
-                                    else
-                                    {
-                                        UpdateWorldState(true,uiData);
-                                    }
-                                    uiData = NOT_STARTED;
-                                    break;
+                if (uiData == COUNTER_OFF)
+                {
+                    UpdateWorldState(false,0);
+                }
+                else
+                {
+                    UpdateWorldState(true,uiData);
+                }
+                uiData = NOT_STARTED;
+                break;
         }
 
         if (uiData == DONE)
@@ -303,28 +281,27 @@ struct MANGOS_DLL_DECL instance_ruby_sanctum : public BSWScriptedInstance
             case TYPE_HALION_EVENT:  return m_auiHalionEvent;
 
             case TYPE_EVENT_TIMER:   return m_auiEventTimer;
-            case TYPE_EVENT_NPC:     switch (m_auiEncounter[TYPE_EVENT])
-                                     {
-                                          case 10:
-                                          case 20:
-                                          case 30:
-                                          case 40:
-                                          case 50:
-                                          case 60:
-                                          case 70:
-                                          case 80:
-                                          case 90:
-                                          case 100:
-                                          case 110:
-                                          case 200:
-                                          case 210:
-                                                 return NPC_XERESTRASZA;
-                                                 break;
-                                          default:
-                                                 break;
-                                     };
-                                     return 0;
-
+            case TYPE_EVENT_NPC:
+                switch (m_auiEncounter[TYPE_EVENT])
+                {
+                    case 10:
+                    case 20:
+                    case 30:
+                    case 40:
+                    case 50:
+                    case 60:
+                    case 70:
+                    case 80:
+                    case 90:
+                    case 100:
+                    case 110:
+                    case 200:
+                    case 210:
+                        return NPC_XERESTRASZA;
+                    default:
+                        break;
+                }
+                return 0;
             case DATA_ORB_DIRECTION:        return m_auiOrbDirection;
             case DATA_ORB_N:                return m_auiOrbNState;
             case DATA_ORB_S:                return m_auiOrbSState;

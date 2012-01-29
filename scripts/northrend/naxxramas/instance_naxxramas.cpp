@@ -469,10 +469,10 @@ uint32 instance_naxxramas::GetData(uint32 uiType)
     switch(uiType)
     {
         // Number of Heigan traps per area
-        case TYPE_MAX_HEIGAN_TRAPS_1:   return m_avuiHeiganTraps[0].size();
-        case TYPE_MAX_HEIGAN_TRAPS_2:   return m_avuiHeiganTraps[1].size();
-        case TYPE_MAX_HEIGAN_TRAPS_3:   return m_avuiHeiganTraps[2].size();
-        case TYPE_MAX_HEIGAN_TRAPS_4:   return m_avuiHeiganTraps[3].size();
+        case TYPE_MAX_HEIGAN_TRAPS_1:   return m_alHeiganTrapGuids[0].size();
+        case TYPE_MAX_HEIGAN_TRAPS_2:   return m_alHeiganTrapGuids[1].size();
+        case TYPE_MAX_HEIGAN_TRAPS_3:   return m_alHeiganTrapGuids[2].size();
+        case TYPE_MAX_HEIGAN_TRAPS_4:   return m_alHeiganTrapGuids[3].size();
     }
     return 0;
 }

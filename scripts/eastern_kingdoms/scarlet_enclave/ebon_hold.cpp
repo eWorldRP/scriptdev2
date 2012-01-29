@@ -3597,7 +3597,7 @@ struct MANGOS_DLL_DECL npc_scourge_gryphonAI : public npc_escortAI
 
 enum
 {
-    SPELL_REVIVE	=	51918,
+    SPELL_REVIVE    =   51918,
 };
 
 #define REVIVE_WHISPER "It is not yet your time, champion. Rise! Rise and fight once more!"
@@ -3651,7 +3651,7 @@ struct MANGOS_DLL_DECL npc_valkyr_battle_maidenAI : ScriptedAI
                     m_uiPhase++;
                     break;
                 case 1:
-                    m_creature->SetUInt64Value(UNIT_FIELD_TARGET, pPlayer->GetObjectGuid().GetCounter());
+                    m_creature->SetUInt64Value(UNIT_FIELD_TARGET, pPlayer->GetObjectGuid().GetRawValue());
                     m_uiPhase++;
                     break;
                 case 2:

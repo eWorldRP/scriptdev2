@@ -231,9 +231,6 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         void GetGothSummonPointCreatures(std::list<Creature*> &lList, bool bRightSide);
         bool IsInRightSideGothArea(Unit* pUnit);
 
-        // Heigan
-        uint64 GetHeiganTrapData64(uint8 uiAreaIndex, uint32 uiIndex);
-
         // thaddius
         void GetThadTeslaCreatures(GUIDList &lList){ lList = m_lThadTeslaCoilList; };
 
@@ -252,8 +249,6 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
 
         UNORDERED_MAP<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GUIDList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
-
-        std::vector<uint64> m_avuiHeiganTraps[MAX_HEIGAN_TRAP_AREAS];
 
         float m_fChamberCenterX;
         float m_fChamberCenterY;

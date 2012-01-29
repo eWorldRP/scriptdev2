@@ -75,7 +75,7 @@ enum
 
 };
 
-uint64 goHarpoons[3] =
+uint32 goHarpoons[3] =
 {
     GO_HARPOON1,
     GO_HARPOON2,

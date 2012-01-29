@@ -726,7 +726,7 @@ struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
         if (m_uiGround_Cast < uiDiff && m_bIsGrounded)
         {
             if (Creature* pCommander = m_pInstance->GetSingleCreatureFromStorage(NPC_COMMANDER))
-                m_creature->SetUInt64Value(UNIT_FIELD_TARGET, pCommander->GetObjectGuid());
+                m_creature->SetUInt64Value(UNIT_FIELD_TARGET, pCommander->GetObjectGuid().GetRawValue());
             m_creature->RemoveAurasDueToSpell(SPELL_STUN);
             DoScriptText(EMOTE_DEEP_BREATH, m_creature);
             DoCast(m_creature, m_bIsRegularMode ? SPELL_FLAME_BREATH : SPELL_FLAME_BREATH_H);
