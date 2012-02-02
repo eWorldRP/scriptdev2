@@ -189,6 +189,16 @@ uint32 instance_black_temple::GetData(uint32 uiType)
     return 0;
 }
 
+ObjectGuid instance_black_temple::GetGuid(uint32 uiData)
+{
+    switch(uiData)
+    {
+        case NPC_AKAMA:              return m_akamaGuid;
+        case NPC_ILLIDAN_STORMRAGE:  return m_illidanStormrageGuid;
+        default:                     return ObjectGuid();
+    }
+}
+
 void instance_black_temple::Load(const char* chrIn)
 {
     if (!chrIn)

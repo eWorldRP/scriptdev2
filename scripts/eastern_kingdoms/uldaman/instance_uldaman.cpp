@@ -135,6 +135,27 @@ void instance_uldaman::SetData(uint32 uiType, uint32 uiData)
     }
 }
 
+void instance_uldaman::SetGuid(uint32 uiData, ObjectGuid uiGuid)
+{
+    switch(uiData)
+
+    {
+        case DATA_EVENT_STARTER:
+            m_playerGuid = uiGuid;
+        break;
+    }
+}
+
+ObjectGuid instance_uldaman::GetGuid(uint32 uiData)
+{
+    switch(uiData)
+    {
+        case DATA_EVENT_STARTER:
+            return m_playerGuid;
+    }
+    return ObjectGuid();
+}
+
 void instance_uldaman::Load(const char* chrIn)
 {
     if (!chrIn)

@@ -140,11 +140,11 @@ struct MANGOS_DLL_DECL boss_halion_realAI : public BSWScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
         if (GameObject* pGoPortal = pInstance->GetSingleGameObjectFromStorage(GO_HALION_PORTAL_1))
-               pGoPortal->Delete();
+            pGoPortal->Delete();
         if (GameObject* pGoPortal = pInstance->GetSingleGameObjectFromStorage(GO_HALION_PORTAL_2))
-               pGoPortal->Delete();
+            pGoPortal->Delete();
         if (GameObject* pGoPortal = pInstance->GetSingleGameObjectFromStorage(GO_HALION_PORTAL_3))
-               pGoPortal->Delete();
+            pGoPortal->Delete();
     }
 
     void MoveInLineOfSight(Unit* pWho)
